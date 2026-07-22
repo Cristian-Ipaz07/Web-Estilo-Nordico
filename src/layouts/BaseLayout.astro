@@ -1,0 +1,83 @@
+---
+/**
+ * BaseLayout.astro — Layout principal de Estilo Nórdico
+ * 
+ * Contiene: head con SEO, Meta Pixel, Navbar, Footer, WhatsApp flotante.
+ * Todas las páginas heredan de este layout.
+ */
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+import PromoBar from '../components/PromoBar.astro';
+import { STORE_CONFIG } from '../config/store';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { 
+  title, 
+  description = STORE_CONFIG.description 
+} = Astro.props;
+
+const fullTitle = `${title}${STORE_CONFIG.seo.titleSuffix}`;
+const pixelId = STORE_CONFIG.metaPixel.id;
+const pixelEnabled = STORE_CONFIG.metaPixel.enabled;
+---
+
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <meta name="author" content={STORE_CONFIG.name} />
+    
+    <!-- SEO -->
+    <title>{fullTitle}</title>
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content={STORE_CONFIG.seo.locale} />
+    <meta property="og:site_name" content={STORE_CONFIG.seo.siteName} />
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="generator" content={Astro.generator} />
+    
+    <!-- Meta Pixel Code -->
+    {pixelEnabled && (
+      <script is:inline define:vars={{ pixelId }}>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', pixelId);
+        fbq('track', 'PageView');
+      </script>
+    )}
+    {pixelEnabled && (
+      <noscript>
+        <img height="1" width="1" style="display:none"
+             src={`https://www.facebook.com/tr?id=${pixelId}&ev=PageView&noscript=1`} />
+      </noscript>
+    )}
+  </head>
+  <body class="min-h-screen flex flex-col">
+    <PromoBar />
+    <Navbar />
+    
+    <main class="flex-1">
+      <slot />
+    </main>
+    
+    <Footer />
+    <WhatsAppFloat />
+  </body>
+</html>

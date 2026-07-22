@@ -1,0 +1,38 @@
+---
+/**
+ * CategoryBanner.astro — Banner de categoría para la home
+ * Muestra preview de cada categoría con link y conteo de productos
+ */
+interface Props {
+  title: string;
+  subtitle: string;
+  href: string;
+  productCount: number;
+  icon: string;
+  gradient: string;
+}
+
+const { title, subtitle, href, productCount, icon, gradient } = Astro.props;
+---
+
+<a href={href} class="group block" id={`category-${title.toLowerCase()}`}>
+  <div class={`relative overflow-hidden rounded-2xl p-6 sm:p-8 ${gradient} text-white transition-all duration-300 group-hover:shadow-xl group-hover:scale-[1.02]`}>
+    <!-- Background decoration -->
+    <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
+    <div class="absolute bottom-0 left-0 w-24 h-24 bg-white/5 rounded-full translate-y-1/2 -translate-x-1/2"></div>
+    
+    <div class="relative">
+      <span class="text-3xl sm:text-4xl mb-3 block">{icon}</span>
+      <h3 class="text-xl sm:text-2xl font-extrabold mb-1">{title}</h3>
+      <p class="text-sm text-white/70 mb-4">{subtitle}</p>
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-semibold bg-white/20 backdrop-blur-sm rounded-full px-3 py-1">
+          {productCount} productos
+        </span>
+        <span class="text-sm font-bold group-hover:translate-x-1 transition-transform duration-200">
+          Ver catálogo →
+        </span>
+      </div>
+    </div>
+  </div>
+</a>

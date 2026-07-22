@@ -1,0 +1,70 @@
+---
+/**
+ * chaquetas.astro — Catálogo de chaquetas
+ * Producto estrella de Estilo Nórdico
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProductCard from '../components/ProductCard.astro';
+import { chaquetas } from '../data/products';
+import { STORE_CONFIG } from '../config/store';
+---
+
+<BaseLayout title="Chaquetas Impermeables" description="Chaquetas impermeables, cortavientos y bombers con envío gratis en Pasto. Pago contraentrega. Pide por WhatsApp.">
+  
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-primary to-primary-light text-white py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-block text-4xl mb-3">🧥</span>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Chaquetas</h1>
+      <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
+        Impermeables, cortavientos y bombers. Protección y estilo para el clima de Pasto.
+      </p>
+      <div class="flex flex-wrap gap-3 justify-center mt-6">
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          🚚 Envío gratis en Pasto
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          💰 Pago contraentrega
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Products Grid -->
+  <section class="py-12 sm:py-16 lg:py-20">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+        {chaquetas.map((product, index) => (
+          <div class={`fade-in fade-in-delay-${(index % 4) + 1}`}>
+            <ProductCard
+              id={product.id}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              description={product.description}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Cross-sell Banner -->
+  <section class="py-12 sm:py-16 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">¿Y si le sumas un perfume? 🧴</h2>
+      <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
+        Combo chaqueta + perfume Yanbal original desde <strong>$130.000 COP</strong> con envío gratis en Pasto.
+      </p>
+      <a
+        href="/perfumes"
+        class="inline-flex items-center gap-2 bg-white text-[#8B5CF6] font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm"
+      >
+        Ver perfumes →
+      </a>
+    </div>
+  </section>
+
+</BaseLayout>
