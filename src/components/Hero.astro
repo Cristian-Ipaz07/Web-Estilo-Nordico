@@ -3,10 +3,15 @@
  * Hero.astro — Sección hero de la página principal
  * Destaca el producto gancho (chaqueta impermeable) con CTA directo a WhatsApp
  */
-import { hookProduct, formatPrice, getDiscount } from '../data/products';
+import { formatPrice, getDiscount } from '../data/products';
 import { STORE_CONFIG } from '../config/store';
+import type { Product } from '../data/products';
 
-const product = hookProduct!;
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
 const discount = getDiscount(product.price, product.anchorPrice);
 ---
 

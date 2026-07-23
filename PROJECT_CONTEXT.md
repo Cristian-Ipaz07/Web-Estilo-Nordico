@@ -24,24 +24,41 @@
 - Combo chaqueta + perfume Yanbal: $130.000 COP con envío gratis en Pasto
 
 ### Categorías
-1. **Chaquetas** — Producto estrella (impermeables, cortavientos, bombers)
-2. **Perfumes** — Cross-selling (catálogo Ésika, Yanbal, Avon)
-3. **Relojes** — Multiplicador de ticket
+1. **Chaquetas** — Producto estrella (impermeables, cortavientos, bombers). Inventario gestionado desde **Notion**
+2. **Perfumes** — Cross-selling (catálogo Ésika, Yanbal, Avon, Cyzone, Natura). Datos estáticos en `products.ts`
+3. **Relojes** — Multiplicador de ticket (~5 modelos). Datos estáticos en `products.ts`
+
+## Ecosistema de Proyectos Existentes
+
+| Proyecto | Ubicación | Rol |
+|---|---|---|
+| **Web-Estilo-Nordico** | `/proyectos/Web-Estilo-Nordico` | Tienda e-commerce (Astro + Tailwind) — **ESTE PROYECTO** |
+| **nordic-style-catalog** | `/Legion-OS/proyectos/estilo-nordico/nordic-style-catalog` | Catálogo interno de chaquetas (TanStack + React + Notion) |
+| **estilo-nordico-app** | `/proyectos/estilo-nordico-app` | POS interno (FastAPI + React + PostgreSQL) |
+
+### Conexión con Notion
+- **Base de datos**: "Inventario de Chaquetas" (ID: `396bbb90-088e-815d-bc1f-c6894f88bf9f`)
+- **Propiedades**: Código/Referencia, Color (8 colores), Talla (M/L/XL/XXL), Stock Disponible (fórmula), Estado (fórmula)
+- **32 referencias**, ~21 disponibles
+- **Token de Notion**: Configurar en `.env` como `NOTION_TOKEN`
+- El propietario actualiza inventario desde Notion (celular/web)
 
 ## Stack Técnico (Fase 1)
 
 | Tecnología | Versión | Rol |
 |---|---|---|
-| Astro | 5.x | Framework SSG (Static Site Generator) |
+| Astro | 5.x / 7.x | Framework SSG (Static Site Generator) |
 | Tailwind CSS | 4.x | Utilidades de estilo |
 | TypeScript | 5.x | Tipado de datos y componentes |
+| Notion API | v2022-06-28 | Fuente de datos para chaquetas (build-time) |
 | Vercel/Netlify | - | Hosting gratuito (deploy futuro) |
 
 ## Configuración Clave
 
 - **WhatsApp**: `573218888046` (sin +, sin espacios)
 - **Píxel de Meta**: `TU_PIXEL_ID_REAL` (placeholder — actualizar cuando se obtenga)
-- **Dominio**: Por definir (deploy en Vercel/Netlify)
+- **Notion Token**: En `.env` (no commitear)
+- **Notion DB ID**: En `.env`
 
 ## Reglas de Desarrollo
 
@@ -49,8 +66,10 @@
 2. **Mobile-first**: Los usuarios de Pasto acceden desde datos móviles
 3. **Español colombiano**: Todo el contenido en español, jerga natural de Pasto/Colombia
 4. **Sin JS innecesario**: Aprovechar la arquitectura de islas de Astro
-5. **Datos estáticos**: Los productos se definen en `src/data/products.ts`
-6. **Configuración centralizada**: Todo en `src/config/store.ts`
+5. **Chaquetas desde Notion**: Se consultan en build-time, se generan como HTML estático
+6. **Perfumes y relojes estáticos**: Se definen en `src/data/products.ts`
+7. **Configuración centralizada**: Todo en `src/config/store.ts`
+8. **Product pages**: Los productos publicitados deben tener página individual con URL propia
 
 ## Archivos de Contexto
 
@@ -62,8 +81,6 @@
 
 ## Imágenes de Productos
 
-Las imágenes actuales son **generadas por IA** como placeholders. El propietario tiene PNGs reales en fondo blanco (de su tienda anterior en Shopify). Para reemplazarlas:
-
-1. Colocar las imágenes en `public/assets/products/`
-2. Actualizar las rutas en `src/data/products.ts`
-3. Rebuild: `npm run build`
+- **Chaquetas**: Fotos reales por color (azul, beige, gris claro, gris ratón, negro, rojo, verde) — migrar desde `nordic-style-catalog/public/`
+- **Perfumes y Relojes**: Imágenes generadas por IA como placeholder. El propietario tiene PNGs reales en fondo blanco
+- Para reemplazar: colocar en `public/assets/products/`, actualizar rutas en `products.ts`, rebuild

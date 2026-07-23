@@ -1,0 +1,54 @@
+---
+/**
+ * /relojes/[slug].astro — Product page individual de reloj
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductPage from '../../components/ProductPage.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { relojes } from '../../data/products';
+
+export function getStaticPaths() {
+  return relojes.map(product => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+const { product } = Astro.props;
+
+// Related: other watches, max 3
+const related = relojes
+  .filter(p => p.id !== product.id)
+  .slice(0, 3);
+---
+
+<BaseLayout title={product.name} description={product.description}>
+  <ProductPage 
+    product={product} 
+    categoryLabel="Relojes" 
+    categoryHref="/relojes" 
+  />
+
+  {related.length > 0 && (
+    <section class="py-12 sm:py-16 bg-bg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-xl sm:text-2xl font-black text-text-main mb-6 text-center">Otros Relojes</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
+          {related.map((p) => (
+            <ProductCard
+              id={p.id}
+              slug={p.slug}
+              name={p.name}
+              brand={p.brand}
+              price={p.price}
+              anchorPrice={p.anchorPrice}
+              image={p.image}
+              description={p.description}
+              category="relojes"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

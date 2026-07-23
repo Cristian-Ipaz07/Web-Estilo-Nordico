@@ -1,0 +1,60 @@
+---
+/**
+ * /chaquetas/[slug].astro — Product page individual de chaqueta
+ * Genera una página estática por cada color de chaqueta desde Notion.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductPage from '../../components/ProductPage.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { fetchJacketsFromNotion } from '../../lib/notion';
+
+export async function getStaticPaths() {
+  const jackets = await fetchJacketsFromNotion();
+  return jackets.map(jacket => ({
+    params: { slug: jacket.slug },
+    props: { jacket, allJackets: jackets },
+  }));
+}
+
+const { jacket, allJackets } = Astro.props;
+
+// Related products (other colors, max 3)
+const related = allJackets
+  .filter((j: any) => j.id !== jacket.id && j.status === 'disponible')
+  .slice(0, 3);
+---
+
+<BaseLayout title={jacket.name} description={jacket.description}>
+  <ProductPage 
+    product={jacket} 
+    categoryLabel="Chaquetas" 
+    categoryHref="/chaquetas" 
+  />
+
+  {/* Related Products */}
+  {related.length > 0 && (
+    <section class="py-12 sm:py-16 bg-bg">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 class="text-xl sm:text-2xl font-black text-text-main mb-6 text-center">Otros Colores Disponibles</h2>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
+          {related.map((product: any) => (
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              description={product.description}
+              category="chaquetas"
+              stock={product.stock}
+              status={product.status}
+              colorHex={product.colorHex}
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+</BaseLayout>

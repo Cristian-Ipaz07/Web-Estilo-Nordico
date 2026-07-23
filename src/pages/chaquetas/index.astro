@@ -1,0 +1,192 @@
+---
+/**
+ * /chaquetas/index.astro — Catálogo de chaquetas desde Notion
+ * 
+ * Carga inventario real desde Notion en build-time.
+ * Muestra filtros por color y talla con filtrado client-side.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { fetchJacketsFromNotion } from '../../lib/notion';
+import { getUniqueColors, getUniqueSizes } from '../../data/products';
+
+const jackets = await fetchJacketsFromNotion();
+const colors = getUniqueColors(jackets);
+const sizes = getUniqueSizes(jackets);
+const availableCount = jackets.filter(j => j.status === 'disponible').length;
+---
+
+<BaseLayout title="Chaquetas Impermeables" description="Chaquetas impermeables con stock real. Filtros por color y talla. Envío gratis en Pasto, pago contraentrega. Pide por WhatsApp.">
+  
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-primary to-primary-light text-white py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-block text-4xl mb-3">🧥</span>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Chaquetas</h1>
+      <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
+        Impermeables premium con stock real. {jackets.length} modelos, {availableCount} disponibles.
+      </p>
+      <div class="flex flex-wrap gap-3 justify-center mt-6">
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          🚚 Envío gratis en Pasto
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          💰 Pago contraentrega
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          📦 Inventario en tiempo real
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Filters + Products -->
+  <section class="py-8 sm:py-12 lg:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Filter Bar -->
+      <div class="mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-border-light shadow-sm" id="filter-bar">
+        <div class="flex flex-wrap gap-4 items-end">
+          <!-- Color filter -->
+          <div class="flex-1 min-w-[140px]">
+            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Color</label>
+            <select id="filter-color" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
+              <option value="all">Todos los colores</option>
+              {colors.map(color => (
+                <option value={color}>{color}</option>
+              ))}
+            </select>
+          </div>
+          <!-- Size filter -->
+          <div class="flex-1 min-w-[120px]">
+            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Talla</label>
+            <select id="filter-size" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
+              <option value="all">Todas</option>
+              {sizes.map(size => (
+                <option value={size}>{size}</option>
+              ))}
+            </select>
+          </div>
+          <!-- Status filter -->
+          <div class="flex-1 min-w-[130px]">
+            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Estado</label>
+            <select id="filter-status" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
+              <option value="all">Todos</option>
+              <option value="disponible" selected>Disponibles</option>
+              <option value="agotado">Agotados</option>
+            </select>
+          </div>
+          <!-- Reset -->
+          <button id="filter-reset" class="px-4 py-2.5 rounded-xl text-xs font-bold text-primary border-2 border-primary hover:bg-primary hover:text-white transition-all">
+            Limpiar
+          </button>
+        </div>
+        <p class="mt-3 text-xs text-text-muted" id="filter-count">{jackets.length} productos</p>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="products-grid">
+        {jackets.map((product) => (
+          <div 
+            class="product-item"
+            data-colors={product.variants?.map(v => v.color).join(',')}
+            data-sizes={product.variants?.map(v => v.talla).join(',')}
+            data-status={product.status}
+            data-available-sizes={product.variants?.filter(v => v.status === 'disponible').map(v => v.talla).join(',')}
+          >
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              description={product.description}
+              category="chaquetas"
+              stock={product.stock}
+              status={product.status}
+              colorHex={product.colorHex}
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden text-center py-16">
+        <span class="text-4xl mb-4 block">🔍</span>
+        <p class="text-lg font-bold text-text-main">No hay productos con estos filtros</p>
+        <p class="text-sm text-text-muted mt-1">Intenta cambiar los filtros de búsqueda</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cross-sell Banner -->
+  <section class="py-12 sm:py-16 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">¿Y si le sumas un perfume? 🧴</h2>
+      <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
+        Combo chaqueta + perfume original desde <strong>$130.000 COP</strong> con envío gratis en Pasto.
+      </p>
+      <a href="/perfumes" class="inline-flex items-center gap-2 bg-white text-[#8B5CF6] font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm">
+        Ver perfumes →
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const filterColor = document.getElementById('filter-color') as HTMLSelectElement;
+  const filterSize = document.getElementById('filter-size') as HTMLSelectElement;
+  const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
+  const filterReset = document.getElementById('filter-reset');
+  const filterCount = document.getElementById('filter-count');
+  const emptyState = document.getElementById('empty-state');
+  const items = document.querySelectorAll('.product-item');
+
+  function applyFilters() {
+    const color = filterColor.value;
+    const size = filterSize.value;
+    const status = filterStatus.value;
+    let visible = 0;
+
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const colors = el.dataset.colors?.split(',') || [];
+      const sizes = el.dataset.sizes?.split(',') || [];
+      const availableSizes = el.dataset.availableSizes?.split(',') || [];
+      const itemStatus = el.dataset.status || '';
+
+      let show = true;
+
+      if (color !== 'all' && !colors.includes(color)) show = false;
+      if (size !== 'all') {
+        if (status === 'disponible') {
+          if (!availableSizes.includes(size)) show = false;
+        } else {
+          if (!sizes.includes(size)) show = false;
+        }
+      }
+      if (status !== 'all' && itemStatus !== status) show = false;
+
+      el.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (filterCount) filterCount.textContent = `${visible} producto${visible !== 1 ? 's' : ''}`;
+    if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+  }
+
+  filterColor?.addEventListener('change', applyFilters);
+  filterSize?.addEventListener('change', applyFilters);
+  filterStatus?.addEventListener('change', applyFilters);
+  filterReset?.addEventListener('click', () => {
+    filterColor.value = 'all';
+    filterSize.value = 'all';
+    filterStatus.value = 'all';
+    applyFilters();
+  });
+
+  // Initial filter
+  applyFilters();
+</script>

@@ -14,14 +14,27 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProductCard from '../components/ProductCard.astro';
 import CategoryBanner from '../components/CategoryBanner.astro';
-import { featuredProducts, chaquetas, perfumes, relojes, formatPrice } from '../data/products';
+import { fetchJacketsFromNotion } from '../lib/notion';
+import { perfumes, relojes, formatPrice } from '../data/products';
 import { STORE_CONFIG } from '../config/store';
+
+// Fetch dynamic jackets from Notion
+const jackets = await fetchJacketsFromNotion();
+
+// Filter featured products
+const featuredJackets = jackets.filter(j => j.featured);
+const featuredPerfumes = perfumes.filter(p => p.featured);
+const featuredRelojes = relojes.filter(r => r.featured);
+const featuredProducts = [...featuredJackets, ...featuredPerfumes, ...featuredRelojes];
+
+// Find the hook jacket
+const hookProduct = jackets.find(j => j.hook) || jackets[0];
 ---
 
 <BaseLayout title="Tienda de Moda Urbana en Pasto" description="Chaquetas impermeables, perfumes originales y relojes con envío gratis en Pasto y pago contraentrega. Pide por WhatsApp.">
   
   <!-- Hero Section -->
-  <Hero />
+  <Hero product={hookProduct} />
 
   <!-- Trust Signals -->
   <section class="py-8 sm:py-12 bg-white border-b border-border-light" id="trust-signals">
@@ -73,12 +86,17 @@ import { STORE_CONFIG } from '../config/store';
           <div class={`fade-in fade-in-delay-${(index % 4) + 1}`}>
             <ProductCard
               id={product.id}
+              slug={product.slug}
               name={product.name}
               brand={product.brand}
               price={product.price}
               anchorPrice={product.anchorPrice}
               image={product.image}
               description={product.description}
+              category={product.category}
+              stock={product.stock}
+              status={product.status}
+              colorHex={product.colorHex}
             />
           </div>
         ))}
@@ -122,7 +140,7 @@ import { STORE_CONFIG } from '../config/store';
         <!-- Combo visual -->
         <div class="flex items-center gap-4">
           <div class="w-36 sm:w-44 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm p-2">
-            <img src="/assets/products/chaqueta-impermeable.png" alt="Chaqueta Impermeable" class="rounded-xl" />
+            <img src="/assets/products/jacket-azul.jpeg" alt="Chaqueta Impermeable" class="rounded-xl" />
             <p class="text-center text-xs font-bold mt-2">Chaqueta</p>
           </div>
           <span class="text-3xl font-black text-gold">+</span>
@@ -149,7 +167,7 @@ import { STORE_CONFIG } from '../config/store';
           title="Chaquetas"
           subtitle="Impermeables, cortavientos y bombers"
           href="/chaquetas"
-          productCount={chaquetas.length}
+          productCount={jackets.length}
           icon="🧥"
           gradient="bg-gradient-to-br from-primary to-primary-light"
         />

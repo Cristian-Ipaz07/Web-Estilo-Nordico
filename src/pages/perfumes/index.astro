@@ -1,0 +1,158 @@
+---
+/**
+ * /perfumes/index.astro — Catálogo de perfumes con filtros por marca
+ * 
+ * Secciones: Más vendidos (featured) + Catálogo completo con filtros por marca.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { perfumes, getUniqueBrands } from '../../data/products';
+
+const brands = getUniqueBrands(perfumes);
+const featured = perfumes.filter(p => p.featured);
+---
+
+<BaseLayout title="Perfumes Originales" description="Perfumes originales Yanbal, Ésika, Avon y más. Filtra por marca. Envío gratis en Pasto, pago contraentrega.">
+  
+  <!-- Page Header -->
+  <section class="bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] text-white py-12 sm:py-16">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <span class="inline-block text-4xl mb-3">🧴</span>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Perfumes Originales</h1>
+      <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
+        Fragancias 100% originales de catálogo. {perfumes.length} perfumes de {brands.length} marcas.
+      </p>
+      <div class="flex flex-wrap gap-3 justify-center mt-6">
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          ✅ 100% Originales
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          💰 Pago contraentrega
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured / Más vendidos -->
+  {featured.length > 0 && (
+    <section class="py-10 sm:py-14 bg-white" id="mas-vendidos">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-8">
+          <span class="inline-block bg-gold/10 text-gold text-xs font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">⭐ Top ventas</span>
+          <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Los Más Vendidos</h2>
+        </div>
+        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+          {featured.map((product) => (
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              description={product.description}
+              category="perfumes"
+            />
+          ))}
+        </div>
+      </div>
+    </section>
+  )}
+
+  <!-- Full Catalog with Brand Filters -->
+  <section class="py-10 sm:py-14" id="catalogo-completo">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="text-center mb-8">
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Catálogo Completo</h2>
+        <p class="text-sm text-text-muted mt-1">Filtra por marca para encontrar tu fragancia ideal</p>
+      </div>
+
+      <!-- Brand filters -->
+      <div class="flex flex-wrap gap-2 justify-center mb-8" id="brand-filters">
+        <button class="brand-btn active-brand px-4 py-2 rounded-full text-sm font-semibold border-2 border-primary bg-primary text-white transition-all" data-brand="all">
+          Todas ({perfumes.length})
+        </button>
+        {brands.map(brand => {
+          const count = perfumes.filter(p => p.brand === brand).length;
+          return (
+            <button 
+              class="brand-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all"
+              data-brand={brand}
+            >
+              {brand} ({count})
+            </button>
+          );
+        })}
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="perfumes-grid">
+        {perfumes.map((product) => (
+          <div class="perfume-item" data-brand={product.brand}>
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              description={product.description}
+              category="perfumes"
+            />
+          </div>
+        ))}
+      </div>
+
+      <div id="perfumes-empty" class="hidden text-center py-12">
+        <span class="text-4xl mb-4 block">🔍</span>
+        <p class="text-lg font-bold text-text-main">No hay perfumes de esta marca</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cross-sell Banner -->
+  <section class="py-12 sm:py-16 bg-gradient-to-r from-primary to-primary-light text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">Completa tu estilo con una chaqueta 🧥</h2>
+      <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
+        Combo perfume + chaqueta impermeable desde <strong>$130.000 COP</strong> con envío gratis.
+      </p>
+      <a href="/chaquetas" class="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm">
+        Ver chaquetas →
+      </a>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const brandButtons = document.querySelectorAll('.brand-btn');
+  const perfumeItems = document.querySelectorAll('.perfume-item');
+  const emptyState = document.getElementById('perfumes-empty');
+
+  brandButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const brand = btn.getAttribute('data-brand') || 'all';
+      
+      // Update active state
+      brandButtons.forEach(b => {
+        b.classList.remove('active-brand', 'border-primary', 'bg-primary', 'text-white');
+        b.classList.add('border-border', 'text-text-main');
+      });
+      btn.classList.add('active-brand', 'border-primary', 'bg-primary', 'text-white');
+      btn.classList.remove('border-border', 'text-text-main');
+
+      let visible = 0;
+      perfumeItems.forEach(item => {
+        const el = item as HTMLElement;
+        const itemBrand = el.dataset.brand || '';
+        const show = brand === 'all' || itemBrand === brand;
+        el.style.display = show ? '' : 'none';
+        if (show) visible++;
+      });
+
+      if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+    });
+  });
+</script>
