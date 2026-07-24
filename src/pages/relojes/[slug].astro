@@ -22,7 +22,7 @@ const related = relojes
   .slice(0, 3);
 ---
 
-<BaseLayout title={product.name} description={product.description}>
+<BaseLayout title={`${product.name} — ${product.brand}`} description={product.description}>
   <ProductPage 
     product={product} 
     categoryLabel="Relojes" 
