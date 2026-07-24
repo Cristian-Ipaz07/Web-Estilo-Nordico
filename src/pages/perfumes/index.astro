@@ -1,95 +1,143 @@
 ---
 /**
- * /perfumes/index.astro — Catálogo de perfumes con filtros por marca
+ * /perfumes/index.astro — Catálogo de perfumes con filtros por marca y género
  * 
- * Secciones: Más vendidos (featured) + Catálogo completo con filtros por marca.
+ * Secciones:
+ * - Los Más Vendidos: Slide infinito y lento.
+ * - Catálogo Completo: Filtros duales (marca + género), limitación inicial de 8 items con botón "Ver más".
+ * - Distribuidor Directo Callout Banner.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { perfumes, getUniqueBrands } from '../../data/products';
 
 const brands = getUniqueBrands(perfumes);
+// Best sellers specified by user: Ohm, Pulso, Nitro Clásica, Dancing Night, Winner Sport, Dorsay, Prints, Soft Musk
 const featured = perfumes.filter(p => p.featured);
 ---
 
-<BaseLayout title="Perfumes Originales" description="Perfumes originales Yanbal, Ésika, Avon y más. Filtra por marca. Envío gratis en Pasto, pago contraentrega.">
+<BaseLayout title="Perfumes y Lociones" description="Encuentra perfumes de catálogo Yanbal, Ésika, Cyzone, Avon y L'Bel en Pasto. Paga al recibir en Pasto y envíos nacionales rápidos.">
   
   <!-- Page Header -->
-  <section class="bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA] text-white py-12 sm:py-16">
+  <section class="bg-gradient-to-br from-primary to-primary-light text-white py-12 sm:py-16">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
       <span class="inline-block text-4xl mb-3">🧴</span>
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Perfumes Originales</h1>
+      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Perfumes y Lociones</h1>
       <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
-        Fragancias 100% originales de catálogo. {perfumes.length} perfumes de {brands.length} marcas.
+        Fragancias 100% directas de distribuidor de fábrica. {perfumes.length} referencias en inventario.
       </p>
       <div class="flex flex-wrap gap-3 justify-center mt-6">
         <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          ✅ 100% Originales
+          🏠 Paga al Recibir en Pasto
         </span>
         <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          💰 Pago contraentrega
+          🇨🇴 Envíos a todo el país (3-5 días)
+        </span>
+        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
+          ✨ 100% Sellados de Fábrica
         </span>
       </div>
     </div>
   </section>
 
-  <!-- Featured / Más vendidos -->
+  <!-- 1. Featured / Más vendidos: Infinite Slow Slider (Marquee style) -->
   {featured.length > 0 && (
-    <section class="py-10 sm:py-14 bg-white" id="mas-vendidos">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-8">
-          <span class="inline-block bg-gold/10 text-gold text-xs font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">⭐ Top ventas</span>
-          <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Los Más Vendidos</h2>
-        </div>
-        <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-4xl mx-auto">
+    <section class="py-10 sm:py-14 bg-white overflow-hidden" id="mas-vendidos">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-6 text-center">
+        <span class="inline-block bg-gold/10 text-gold text-xs font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">⭐ Top ventas</span>
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Los Más Vendidos</h2>
+        <p class="text-xs sm:text-sm text-text-muted">Desliza o pon el cursor encima para detener la rotación</p>
+      </div>
+
+      <!-- Horizontal Marquee Container -->
+      <div class="relative w-full overflow-hidden py-4 bg-gradient-to-r from-bg via-white to-bg">
+        <div class="animate-marquee flex gap-6 w-max px-6">
+          <!-- First set of cards -->
           {featured.map((product) => (
-            <ProductCard
-              id={product.id}
-              slug={product.slug}
-              name={product.name}
-              brand={product.brand}
-              price={product.price}
-              anchorPrice={product.anchorPrice}
-              image={product.image}
-              description={product.description}
-              category="perfumes"
-            />
+            <div class="flex-shrink-0 w-48 sm:w-56">
+              <ProductCard
+                id={product.id}
+                slug={product.slug}
+                name={product.name}
+                brand={product.brand}
+                price={product.price}
+                anchorPrice={product.anchorPrice}
+                image={product.image}
+                description={product.description}
+                category="perfumes"
+              />
+            </div>
+          ))}
+          <!-- Second set of cards for seamless infinite loop -->
+          {featured.map((product) => (
+            <div class="flex-shrink-0 w-48 sm:w-56" aria-hidden="true">
+              <ProductCard
+                id={product.id}
+                slug={product.slug}
+                name={product.name}
+                brand={product.brand}
+                price={product.price}
+                anchorPrice={product.anchorPrice}
+                image={product.image}
+                description={product.description}
+                category="perfumes"
+              />
+            </div>
           ))}
         </div>
       </div>
     </section>
   )}
 
-  <!-- Full Catalog with Brand Filters -->
+  <!-- 2. Full Catalog with Filters -->
   <section class="py-10 sm:py-14" id="catalogo-completo">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-8">
-        <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Catálogo Completo</h2>
-        <p class="text-sm text-text-muted mt-1">Filtra por marca para encontrar tu fragancia ideal</p>
+        <h2 class="text-xl sm:text-2xl lg:text-3xl font-black text-text-main">Encuentra Tu Fragancia</h2>
+        <p class="text-sm text-text-muted mt-1">Filtra por marca y por género para una búsqueda rápida</p>
       </div>
 
-      <!-- Brand filters -->
-      <div class="flex flex-wrap gap-2 justify-center mb-8" id="brand-filters">
-        <button class="brand-btn active-brand px-4 py-2 rounded-full text-sm font-semibold border-2 border-primary bg-primary text-white transition-all" data-brand="all">
-          Todas ({perfumes.length})
-        </button>
-        {brands.map(brand => {
-          const count = perfumes.filter(p => p.brand === brand).length;
-          return (
-            <button 
-              class="brand-btn px-4 py-2 rounded-full text-sm font-semibold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all"
-              data-brand={brand}
-            >
-              {brand} ({count})
-            </button>
-          );
-        })}
+      <!-- Filters Wrapper -->
+      <div class="space-y-4 max-w-4xl mx-auto mb-10">
+        <!-- Gender Filters -->
+        <div class="flex flex-wrap gap-2 justify-center" id="gender-filters">
+          <button class="gender-btn active-filter px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-primary bg-primary text-white transition-all cursor-pointer" data-gender="all">
+            👥 Todos
+          </button>
+          <button class="gender-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all cursor-pointer" data-gender="hombre">
+            🧔 Hombre
+          </button>
+          <button class="gender-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all cursor-pointer" data-gender="mujer">
+            👩 Dama
+          </button>
+          <button class="gender-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all cursor-pointer" data-gender="unisex">
+            🌱 Unisex
+          </button>
+        </div>
+
+        <!-- Brand Filters -->
+        <div class="flex flex-wrap gap-2 justify-center" id="brand-filters">
+          <button class="brand-btn active-filter px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-primary bg-primary text-white transition-all cursor-pointer" data-brand="all">
+            Todas las Marcas ({perfumes.length})
+          </button>
+          {brands.map(brand => {
+            const count = perfumes.filter(p => p.brand === brand).length;
+            return (
+              <button 
+                class="brand-btn px-4 py-2 rounded-full text-xs sm:text-sm font-bold border-2 border-border text-text-main hover:border-primary hover:text-primary transition-all cursor-pointer"
+                data-brand={brand}
+              >
+                {brand} ({count})
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       <!-- Products Grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="perfumes-grid">
         {perfumes.map((product) => (
-          <div class="perfume-item" data-brand={product.brand}>
+          <div class="perfume-item" data-brand={product.brand} data-gender={product.gender}>
             <ProductCard
               id={product.id}
               slug={product.slug}
@@ -105,9 +153,36 @@ const featured = perfumes.filter(p => p.featured);
         ))}
       </div>
 
+      <!-- Ver Más Button Container -->
+      <div class="text-center mt-10" id="ver-mas-container">
+        <button id="btn-ver-mas" class="bg-primary text-white font-black px-8 py-3.5 rounded-2xl shadow-md transition-all hover:scale-105 hover:bg-primary-dark cursor-pointer text-sm">
+          Ver Más Perfumes
+        </button>
+      </div>
+
+      <!-- Empty State -->
       <div id="perfumes-empty" class="hidden text-center py-12">
         <span class="text-4xl mb-4 block">🔍</span>
-        <p class="text-lg font-bold text-text-main">No hay perfumes de esta marca</p>
+        <p class="text-lg font-bold text-text-main">No hay perfumes con esta combinación de filtros</p>
+      </div>
+
+      <!-- Callout Call: Direct Distributor Authorized Note -->
+      <div class="max-w-3xl mx-auto mt-14 p-5 bg-purple-50 border border-purple-200 rounded-3xl flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left shadow-sm">
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">💬</span>
+          <div>
+            <h3 class="text-sm font-black text-purple-900 uppercase">¿No encuentras tu loción favorita?</h3>
+            <p class="text-xs text-purple-700 mt-0.5">Trabajamos directo con distribuidor de fábrica. Te conseguimos cualquier loción de catálogo.</p>
+          </div>
+        </div>
+        <a 
+          href={`https://api.whatsapp.com/send?phone=573218888046&text=${encodeURIComponent('Hola, estoy buscando una loción de catálogo que no veo en la web. ¿Me ayudan a conseguirla?')}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="bg-purple-600 hover:bg-purple-700 text-white font-black text-xs px-5 py-3 rounded-2xl transition-all flex items-center justify-center gap-2 whitespace-nowrap"
+        >
+          Consultar por WhatsApp
+        </a>
       </div>
     </div>
   </section>
@@ -117,7 +192,7 @@ const featured = perfumes.filter(p => p.featured);
     <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
       <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">Completa tu estilo con una chaqueta 🧥</h2>
       <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
-        Combo perfume + chaqueta impermeable desde <strong>$130.000 COP</strong> con envío gratis.
+        Combo perfume + chaqueta de Confección Premium Colombiana con envío inmediato.
       </p>
       <a href="/chaquetas" class="inline-flex items-center gap-2 bg-white text-primary font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm">
         Ver chaquetas →
@@ -126,33 +201,124 @@ const featured = perfumes.filter(p => p.featured);
   </section>
 </BaseLayout>
 
+<style>
+  /* Endless slow scrolling marquee */
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+</style>
+
 <script>
   const brandButtons = document.querySelectorAll('.brand-btn');
+  const genderButtons = document.querySelectorAll('.gender-btn');
   const perfumeItems = document.querySelectorAll('.perfume-item');
   const emptyState = document.getElementById('perfumes-empty');
+  const btnVerMas = document.getElementById('btn-ver-mas');
+  const verMasContainer = document.getElementById('ver-mas-container');
 
+  let activeBrand = 'all';
+  let activeGender = 'all';
+  let limitApplied = true;
+
+  // Initialize display: show only first 8 items on load
+  filterItems();
+
+  // Brand click listener
   brandButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      const brand = btn.getAttribute('data-brand') || 'all';
+      activeBrand = btn.getAttribute('data-brand') || 'all';
       
-      // Update active state
       brandButtons.forEach(b => {
-        b.classList.remove('active-brand', 'border-primary', 'bg-primary', 'text-white');
+        b.classList.remove('border-primary', 'bg-primary', 'text-white');
         b.classList.add('border-border', 'text-text-main');
       });
-      btn.classList.add('active-brand', 'border-primary', 'bg-primary', 'text-white');
+      btn.classList.add('border-primary', 'bg-primary', 'text-white');
       btn.classList.remove('border-border', 'text-text-main');
 
-      let visible = 0;
-      perfumeItems.forEach(item => {
-        const el = item as HTMLElement;
-        const itemBrand = el.dataset.brand || '';
-        const show = brand === 'all' || itemBrand === brand;
-        el.style.display = show ? '' : 'none';
-        if (show) visible++;
-      });
-
-      if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+      // Automatically drop limit when filtering specific items
+      if (activeBrand !== 'all') {
+        limitApplied = false;
+      }
+      
+      filterItems();
     });
   });
+
+  // Gender click listener
+  genderButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      activeGender = btn.getAttribute('data-gender') || 'all';
+      
+      genderButtons.forEach(b => {
+        b.classList.remove('border-primary', 'bg-primary', 'text-white');
+        b.classList.add('border-border', 'text-text-main');
+      });
+      btn.classList.add('border-primary', 'bg-primary', 'text-white');
+      btn.classList.remove('border-border', 'text-text-main');
+
+      // Automatically drop limit when filtering specific items
+      if (activeGender !== 'all') {
+        limitApplied = false;
+      }
+      
+      filterItems();
+    });
+  });
+
+  // "Ver Más" click listener
+  btnVerMas?.addEventListener('click', () => {
+    limitApplied = false;
+    filterItems();
+  });
+
+  function filterItems() {
+    let visibleCount = 0;
+    let matchCount = 0;
+
+    perfumeItems.forEach(item => {
+      const el = item as HTMLElement;
+      const itemBrand = el.dataset.brand || '';
+      const itemGender = el.dataset.gender || '';
+      
+      const brandMatch = activeBrand === 'all' || itemBrand === activeBrand;
+      const genderMatch = activeGender === 'all' || itemGender === activeGender;
+      const isMatch = brandMatch && genderMatch;
+
+      if (isMatch) {
+        matchCount++;
+        // Apply 8-item limit only on "Todas" + "Todos" mode when limitApplied is active
+        if (limitApplied && activeBrand === 'all' && activeGender === 'all') {
+          if (visibleCount < 8) {
+            el.style.display = '';
+            visibleCount++;
+          } else {
+            el.style.display = 'none';
+          }
+        } else {
+          el.style.display = '';
+          visibleCount++;
+        }
+      } else {
+        el.style.display = 'none';
+      }
+    });
+
+    // Toggle Empty State
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', visibleCount > 0);
+    }
+
+    // Toggle "Ver Más" button visibility
+    if (verMasContainer) {
+      const shouldShowVerMas = limitApplied && activeBrand === 'all' && activeGender === 'all' && matchCount > 8;
+      verMasContainer.classList.toggle('hidden', !shouldShowVerMas);
+    }
+  }
 </script>

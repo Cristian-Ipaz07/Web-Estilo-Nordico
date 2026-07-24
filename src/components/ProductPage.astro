@@ -422,7 +422,11 @@ const faqs = product.category === 'perfumes'
         <!-- Social Proof Widget -->
         <div class="p-3 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2 text-center shadow-sm">
           <span class="text-lg">📦</span>
-          <span class="text-xs font-black text-green-800">Más de 500 chaquetas entregadas en Nariño</span>
+          <span class="text-xs font-black text-green-800">
+            {product.category === 'chaquetas' && 'Más de 500 chaquetas entregadas en Nariño'}
+            {product.category === 'perfumes' && 'Más de 800 lociones entregadas en Nariño'}
+            {product.category === 'relojes' && 'Más de 300 relojes entregados en Nariño'}
+          </span>
         </div>
 
         <!-- Trust seals AliExpress style -->
@@ -438,11 +442,39 @@ const faqs = product.category === 'perfumes'
             <span class="text-[9px] text-text-muted">Llega de 3 a 5 días</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">🧥</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Premium</span>
-            <span class="text-[9px] text-text-muted">Confección nacional</span>
+            <span class="text-xl mb-1">
+              {product.category === 'chaquetas' && '🧥'}
+              {product.category === 'perfumes' && '🧴'}
+              {product.category === 'relojes' && '⌚'}
+            </span>
+            <span class="text-[10px] font-black text-text-main uppercase">
+              {product.category === 'chaquetas' && 'Premium'}
+              {product.category === 'perfumes' && 'Original'}
+              {product.category === 'relojes' && 'Nórdico'}
+            </span>
+            <span class="text-[9px] text-text-muted">
+              {product.category === 'chaquetas' && 'Confección nacional'}
+              {product.category === 'perfumes' && 'Distribuidor oficial'}
+              {product.category === 'relojes' && 'Garantía de máquina'}
+            </span>
           </div>
         </div>
+
+        <!-- Callout Banner for Direct Distributor request (for Perfumes/Watches only) -->
+        {product.category !== 'chaquetas' && (
+          <div class="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-center shadow-sm mt-4">
+            <p class="text-[11px] font-black text-purple-900 uppercase">✨ ¿No encuentras tu loción favorita?</p>
+            <p class="text-[10px] text-purple-700 mt-0.5 leading-tight">Trabajamos directo con distribuidor de fábrica. Te conseguimos cualquier loción de catálogo.</p>
+            <a 
+              href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(`Hola, estoy buscando un perfume de catálogo que no veo en la web. ¿Me ayudan a conseguirlo?`)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-block mt-2 text-[10px] font-black text-white bg-purple-600 px-4 py-2 rounded-xl hover:bg-purple-700 transition-all cursor-pointer"
+            >
+              Preguntar por WhatsApp
+            </a>
+          </div>
+        )}
       </div>
     </div>
   </div>
