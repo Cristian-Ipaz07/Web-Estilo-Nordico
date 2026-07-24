@@ -32,53 +32,145 @@ const colorVariants = product.category === 'chaquetas'
   ? allProducts.filter(p => p.category === 'chaquetas')
   : [];
 
-// Standard testimonials customized for Pasto and Nariño
-const reviews = [
-  {
-    name: "Cristian I.",
-    rating: 5,
-    date: "Hace 1 día",
-    text: "Excelente calidad, la tela es impermeable y es forrada por dentro súper calientica. El gorro se puede quitar y poner fácil. Talla L me quedó excelente. Me la entregaron a domicilio hoy mismo en Pasto y pagué al recibir.",
-    verified: true,
-    avatar: "👨"
-  },
-  {
-    name: "Marta P.",
-    rating: 5,
-    date: "Hace 3 días",
-    text: "Pedí el Pack 2 (Duo Estilo) para mi esposo y para mí. Nos ahorramos 20 mil pesos y el material es excelente. Súper abrigadas para el frío de Pasto.",
-    verified: true,
-    avatar: "👩"
-  },
-  {
-    name: "Carlos E.",
-    rating: 5,
-    date: "Hace 1 semana",
-    text: "Tenía dudas de comprar porque soy de Ipiales, pero me hicieron el envío nacional por Servientrega y pagué en efectivo al recibir a los 3 días. La chaqueta es de horma un poco reducida pero pedí una talla más como recomiendan y quedó perfecta.",
-    verified: true,
-    avatar: "👨"
-  }
-];
+// Dynamic reviews based on category
+const reviews = product.category === 'perfumes'
+  ? [
+      {
+        name: "María F.",
+        rating: 5,
+        date: "Hace 2 días",
+        text: "Me encantó el perfume. Es 100% original, venía sellado y con su caja intacta de fábrica. La fragancia dura muchísimo. Me lo entregaron el mismo día aquí en Pasto.",
+        verified: true,
+        avatar: "👩"
+      },
+      {
+        name: "Andrés G.",
+        rating: 5,
+        date: "Hace 4 días",
+        text: "Excelente servicio. Pedí la loción Bleu Intense y me llegó a Ipiales en 2 días por Servientrega. El pago contra entrega me dio mucha seguridad.",
+        verified: true,
+        avatar: "👨"
+      },
+      {
+        name: "Liliana R.",
+        rating: 5,
+        date: "Hace 1 semana",
+        text: "Súper recomendado. Compré Vibranza de Ésika y el aroma es exquisito, tal cual el catálogo original de Ésika. El precio es el mejor de Nariño.",
+        verified: true,
+        avatar: "👩"
+      }
+    ]
+  : product.category === 'relojes'
+  ? [
+      {
+        name: "Roberto T.",
+        rating: 5,
+        date: "Hace 3 días",
+        text: "El reloj es precioso, el diseño minimalista combina con todo. La correa de cuero es suave y de buena calidad. Me lo entregaron gratis en Pasto.",
+        verified: true,
+        avatar: "👨"
+      },
+      {
+        name: "Claudia V.",
+        rating: 5,
+        date: "Hace 6 días",
+        text: "Pedí el modelo Elegance en acero y tiene unos acabados muy finos. Se ve muy costoso. Llegó rápido y bien empacado.",
+        verified: true,
+        avatar: "👩"
+      },
+      {
+        name: "Fernando S.",
+        rating: 5,
+        date: "Hace 2 semanas",
+        text: "Soporta salpicaduras de agua y el cristal es resistente. Por este precio es un regalo. Excelente producto.",
+        verified: true,
+        avatar: "👨"
+      }
+    ]
+  : [
+      {
+        name: "Cristian I.",
+        rating: 5,
+        date: "Hace 1 día",
+        text: "Excelente calidad, la tela es impermeable y es forrada por dentro súper calientica. El gorro se puede quitar y poner fácil. Talla L me quedó excelente. Me la entregaron a domicilio hoy mismo en Pasto y pagué al recibir.",
+        verified: true,
+        avatar: "👨"
+      },
+      {
+        name: "Marta P.",
+        rating: 5,
+        date: "Hace 3 días",
+        text: "Pedí el Pack 2 (Duo Estilo) para mi esposo y para mí. Nos ahorramos 20 mil pesos y el material es excelente. Súper abrigadas para el frío de Pasto.",
+        verified: true,
+        avatar: "👩"
+      },
+      {
+        name: "Carlos E.",
+        rating: 5,
+        date: "Hace 1 semana",
+        text: "Tenía dudas de comprar porque soy de Ipiales, pero me hicieron el envío nacional por Servientrega y pagué en efectivo al recibir a los 3 días. La chaqueta es de horma un poco reducida pero pedí una talla más como recomiendan y quedó perfecta.",
+        verified: true,
+        avatar: "👨"
+      }
+    ];
 
-// FAQs native accordion data - STRICTLY FOR JACKETS
-const faqs = [
-  {
-    question: "¿En cuánto tiempo llega mi pedido?",
-    answer: "Pasto: Entrega a domicilio inmediata el mismo día para pedidos confirmados antes de las 6:00 PM.\nNacional: Envíos nacionales por transportadora (Servientrega, Envía, Interrapidisimo) demoran entre 3 a 5 días hábiles a cualquier ciudad de Colombia."
-  },
-  {
-    question: "¿Puedo pagar cuando reciba el producto?",
-    answer: "Sí. Ofrecemos pago contra entrega en efectivo, Nequi o Daviplata tanto para entrega a domicilio en Pasto como para envíos nacionales en todo Colombia. Pagas únicamente al recibir tu paquete."
-  },
-  {
-    question: "¿Qué talla debo elegir y cuáles son las medidas?",
-    answer: "Ten en cuenta que nuestras chaquetas son de horma un poco reducida. 😉 Te aconsejamos pedir una talla más de la habitual si te gusta usarla holgada.\n\nMedidas disponibles:\n• Talla M: Largo 63.5 cm, Ancho 53.5 cm\n• Talla L: Largo 67 cm, Ancho 57 cm\n• Talla XL: Largo 70 cm, Ancho 60 cm\n• Talla XXL: Largo 74 cm, Ancho 64 cm"
-  },
-  {
-    question: "¿Cómo funciona la garantía y cambios?",
-    answer: "Ofrecemos cambio de talla durante los primeros 5 días. En Pasto puedes realizar el cambio directamente en nuestro punto físico o coordinarlo a domicilio. Cuentas también con 30 días de garantía por cualquier defecto de fábrica."
-  }
-];
+// Dynamic FAQs based on category
+const faqs = product.category === 'perfumes'
+  ? [
+      {
+        question: "¿En cuánto tiempo llega mi pedido de loción?",
+        answer: "Pasto: Entrega a domicilio inmediata el mismo día para pedidos confirmados antes de las 6:00 PM.\nNacional: Envíos nacionales por transportadora (Servientrega, Envía, Interrapidisimo) demoran entre 3 a 5 días hábiles a cualquier municipio de Colombia."
+      },
+      {
+        question: "¿Puedo pagar al recibir?",
+        answer: "Sí. Ofrecemos pago contra entrega tanto para Pasto como para envíos nacionales en todo Colombia. Pagas en efectivo, Nequi o Daviplata al recibir tu paquete."
+      },
+      {
+        question: "¿Las fragancias son 100% originales de catálogo?",
+        answer: "Sí. Todos nuestros perfumes son 100% originales, adquiridos directamente en los canales de venta oficial de Yanbal, Ésika, Cyzone, Avon y L'Bel. Vienen en sus empaques originales sellados de fábrica con celofán y códigos de lote verificables."
+      },
+      {
+        question: "¿Cómo funciona la garantía de perfumes?",
+        answer: "Garantizamos el perfecto estado del producto. Si tu perfume presenta fallas en la válvula, atomizador o filtración durante los primeros 5 días hábiles, te realizamos el cambio inmediato sin costo en nuestro punto físico en Pasto."
+      }
+    ]
+  : product.category === 'relojes'
+  ? [
+      {
+        question: "¿En cuánto tiempo llega mi reloj?",
+        answer: "Pasto: Entrega a domicilio inmediata el mismo día para pedidos confirmados antes de las 6:00 PM.\nNacional: Envíos nacionales por transportadora (Servientrega, Envía, Interrapidisimo) demoran entre 3 a 5 días hábiles."
+      },
+      {
+        question: "¿Puedo pagar contra entrega?",
+        answer: "Sí. Ofrecemos pago contra entrega tanto para Pasto como para envíos nacionales en todo Colombia. Pagas únicamente al recibir tu reloj."
+      },
+      {
+        question: "¿Tienen garantía los relojes?",
+        answer: "Sí, todos nuestros relojes cuentan con 30 días de garantía por maquinaria o defectos de fabricación. Los cambios de modelo o devoluciones se pueden realizar en nuestro punto físico en Pasto durante los primeros 5 días."
+      },
+      {
+        question: "¿Los relojes son resistentes al agua?",
+        answer: "Nuestros relojes soportan salpicaduras de agua leves por lavado de manos o lluvia. No son aptos para sumergir, bañarse o nadar."
+      }
+    ]
+  : [
+      {
+        question: "¿En cuánto tiempo llega mi pedido?",
+        answer: "Pasto: Entrega a domicilio inmediata el mismo día para pedidos confirmados antes de las 6:00 PM.\nNacional: Envíos nacionales por transportadora (Servientrega, Envía, Interrapidisimo) demoran entre 3 a 5 días hábiles a cualquier ciudad de Colombia."
+      },
+      {
+        question: "¿Puedo pagar cuando reciba el producto?",
+        answer: "Sí. Ofrecemos pago contra entrega en efectivo, Nequi o Daviplata tanto para entrega a domicilio en Pasto como para envíos nacionales en todo Colombia. Pagas únicamente al recibir tu paquete."
+      },
+      {
+        question: "¿Qué talla debo elegir y cuáles son las medidas?",
+        answer: "Ten en cuenta que nuestras chaquetas son de horma un poco reducida. 😉 Te aconsejamos pedir una talla más de la habitual si te gusta usarla holgada.\n\nMedidas disponibles:\n• Talla M: Largo 63.5 cm, Ancho 53.5 cm\n• Talla L: Largo 67 cm, Ancho 57 cm\n• Talla XL: Largo 70 cm, Ancho 60 cm\n• Talla XXL: Largo 74 cm, Ancho 64 cm"
+      },
+      {
+        question: "¿Cómo funciona la garantía y cambios?",
+        answer: "Ofrecemos cambio de talla durante los primeros 5 días. En Pasto puedes realizar el cambio directamente en nuestro punto físico o coordinarlo a domicilio. Cuentas también con 30 días de garantía por cualquier defecto de fábrica."
+      }
+    ];
 ---
 
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
@@ -384,19 +476,33 @@ const faqs = [
         <h2 class="text-lg sm:text-xl font-black text-text-main border-b border-border-light pb-4 mb-6 uppercase tracking-wide">Nuestra Garantía de Satisfacción</h2>
         <div class="grid sm:grid-cols-3 gap-6">
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
-            <span class="text-3xl mb-2 block">🏠</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Pruébalo en Casa</h3>
-            <p class="text-[10px] text-text-muted">Te lo llevamos a domicilio en Pasto. Te lo mides y si te queda bien, lo pagas.</p>
+            <span class="text-3xl mb-2 block">{product.category === 'chaquetas' ? '🏠' : '✨'}</span>
+            <h3 class="text-xs font-black text-text-main uppercase mb-1">
+              {product.category === 'chaquetas' ? 'Pruébalo en Casa' : '100% Original'}
+            </h3>
+            <p class="text-[10px] text-text-muted">
+              {product.category === 'chaquetas' 
+                ? 'Te lo llevamos a domicilio en Pasto. Te lo mides y si te queda bien, lo pagas.' 
+                : 'Fragancias oficiales selladas de fábrica y directas del catálogo oficial.'}
+            </p>
           </div>
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
             <span class="text-3xl mb-2 block">📍</span>
             <h3 class="text-xs font-black text-text-main uppercase mb-1">Punto Físico</h3>
-            <p class="text-[10px] text-text-muted">Si necesitas un cambio de talla, puedes acercarte a nuestro local físico en Pasto.</p>
+            <p class="text-[10px] text-text-muted">
+              {product.category === 'chaquetas'
+                ? 'Si necesitas un cambio de talla, puedes acercarte a nuestro local físico en Pasto.'
+                : 'Para cualquier reclamo o cambio, puedes visitarnos en nuestro punto físico en Pasto.'}
+            </p>
           </div>
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
             <span class="text-3xl mb-2 block">🔒</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Cambio de 5 Días</h3>
-            <p class="text-[10px] text-text-muted">Garantizamos cambio de talla sin complicaciones dentro de los primeros 5 días.</p>
+            <h3 class="text-xs font-black text-text-main uppercase mb-1">Garantía Segura</h3>
+            <p class="text-[10px] text-text-muted">
+              {product.category === 'chaquetas'
+                ? 'Garantizamos cambio de talla sin complicaciones dentro de los primeros 5 días.'
+                : 'Garantizamos cambio inmediato por fallas en válvula o defectos en los primeros 5 días.'}
+            </p>
           </div>
         </div>
       </div>
