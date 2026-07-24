@@ -137,8 +137,8 @@ interface NotionJacketVariant {
 }
 
 export async function fetchJacketsFromNotion(): Promise<Product[]> {
-  const token = import.meta.env.NOTION_TOKEN;
-  const databaseId = import.meta.env.NOTION_DATABASE_ID;
+  const token = process.env.NOTION_TOKEN || import.meta.env.NOTION_TOKEN;
+  const databaseId = process.env.NOTION_DATABASE_ID || import.meta.env.NOTION_DATABASE_ID;
 
   if (!token || !databaseId) {
     console.warn('⚠️ Notion credentials not found in env. Using fallback jacket data.');
