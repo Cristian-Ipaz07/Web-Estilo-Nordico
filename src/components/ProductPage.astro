@@ -583,6 +583,7 @@ const faqs = [
       const sizeOptions = document.getElementById('size-options');
       if (sizeOptions) {
         sizeOptions.classList.add('ring-4', 'ring-red-500/50', 'animate-shake');
+        sizeOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
           sizeOptions.classList.remove('animate-shake');
         }, 500);
