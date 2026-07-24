@@ -33,7 +33,7 @@ const COLOR_HEX: Record<string, string> = {
 };
 
 const DEFAULT_JACKET_PRICE = 90000;
-const DEFAULT_JACKET_ANCHOR_PRICE = 150000;
+const DEFAULT_JACKET_ANCHOR_PRICE = 120000;
 
 // ─── Notion helpers ──────────────────────────────────────
 
@@ -222,12 +222,12 @@ function groupVariantsIntoProducts(variants: NotionJacketVariant[]): Product[] {
       image: COLOR_IMAGE[color] || '/assets/products/chaqueta-impermeable.png',
       description: `Chaqueta impermeable premium color ${color}. Protección total contra lluvia y viento, ideal para el clima de Pasto. Disponible en tallas M, L, XL y XXL.`,
       features: [
-        'Material impermeable de alta calidad',
-        'Diseño urbano moderno',
+        'Acolchado térmico (retiene calor corporal)',
+        'Gorro / Capucha extraíble',
+        'Forro térmico interno protector',
+        'Tela cortaviento ultra resistente',
+        'Exterior semi-impermeable (soporta llovizna)',
         `Color: ${color}`,
-        'Cierre frontal con cremallera',
-        'Bolsillos laterales con cierre',
-        'Ideal para el clima de Pasto',
       ],
       variants: productVariants,
       stock: totalStock,
@@ -257,10 +257,17 @@ function getFallbackJackets(): Product[] {
       category: 'chaquetas',
       tags: ['impermeable', 'urbana', 'azul'],
       price: 90000,
-      anchorPrice: 150000,
+      anchorPrice: 120000,
       image: '/assets/products/jacket-azul.jpeg',
       description: 'Chaqueta impermeable premium color Azul.',
-      features: ['Material impermeable', 'Diseño urbano', 'Color: Azul'],
+      features: [
+        'Acolchado térmico (retiene calor corporal)',
+        'Gorro / Capucha extraíble',
+        'Forro térmico interno protector',
+        'Tela cortaviento ultra resistente',
+        'Exterior semi-impermeable (soporta llovizna)',
+        'Color: Azul',
+      ],
       variants: [
         { id: 'fb-1', talla: 'M', color: 'Azul', stock: 3, status: 'disponible', referencia: 'AZ-M' },
         { id: 'fb-2', talla: 'L', color: 'Azul', stock: 2, status: 'disponible', referencia: 'AZ-L' },
@@ -280,10 +287,17 @@ function getFallbackJackets(): Product[] {
       category: 'chaquetas',
       tags: ['impermeable', 'urbana', 'negro'],
       price: 90000,
-      anchorPrice: 150000,
+      anchorPrice: 120000,
       image: '/assets/products/jacket-negro.jpeg',
       description: 'Chaqueta impermeable premium color Negro.',
-      features: ['Material impermeable', 'Diseño urbano', 'Color: Negro'],
+      features: [
+        'Acolchado térmico (retiene calor corporal)',
+        'Gorro / Capucha extraíble',
+        'Forro térmico interno protector',
+        'Tela cortaviento ultra resistente',
+        'Exterior semi-impermeable (soporta llovizna)',
+        'Color: Negro',
+      ],
       variants: [
         { id: 'fb-4', talla: 'M', color: 'Negro', stock: 4, status: 'disponible', referencia: 'NE-M' },
         { id: 'fb-5', talla: 'L', color: 'Negro', stock: 0, status: 'agotado', referencia: 'NE-L' },

@@ -5,7 +5,7 @@
  * Secciones:
  * 1. Breadcrumbs
  * 2. Grid principal (Imagen a la izquierda, detalles y compra a la derecha)
- * 3. Urgency Offer Banner (Oferta 2 por $160.000)
+ * 3. Urgency Offer Banner (Oferta 1 por $90k, 2 por $160k, 3 por $234k)
  * 4. AliExpress style trust bar
  * 5. AliExpress style reviews (Testimonios)
  * 6. FAQ Accordion (Preguntas Frecuentes)
@@ -25,7 +25,6 @@ interface Props {
 const { product, categoryLabel, categoryHref, allProducts = [] } = Astro.props;
 const discount = getDiscount(product.price, product.anchorPrice);
 const hasVariants = product.variants && product.variants.length > 0;
-const availableVariants = product.variants?.filter(v => v.status === 'disponible') || [];
 const whatsappNumber = STORE_CONFIG.whatsapp.number;
 
 // Find other color variants of this jacket family
@@ -33,13 +32,13 @@ const colorVariants = product.category === 'chaquetas'
   ? allProducts.filter(p => p.category === 'chaquetas')
   : [];
 
-// Standard testimonials customized for Pasto
+// Standard testimonials customized for Pasto and Nariño
 const reviews = [
   {
     name: "Cristian I.",
     rating: 5,
     date: "Hace 1 día",
-    text: "Excelente calidad, la tela es 100% impermeable, ideal para el frío y lluvia de Pasto. La talla L me quedó perfecta, y el envío fue súper rápido en el mismo día. La pagué al recibir.",
+    text: "Excelente calidad, la tela es impermeable y es forrada por dentro súper calientica. El gorro se puede quitar y poner fácil. Talla L me quedó excelente. Me la entregaron a domicilio hoy mismo en Pasto y pagué al recibir.",
     verified: true,
     avatar: "👨"
   },
@@ -47,7 +46,7 @@ const reviews = [
     name: "Marta P.",
     rating: 5,
     date: "Hace 3 días",
-    text: "Compré el combo de la chaqueta beige con el perfume de Yanbal por $130mil y me pareció un regalo completo. Súper originales los productos y muy amables en WhatsApp.",
+    text: "Pedí el Pack 2 (Duo Estilo) para mi esposo y para mí. Nos ahorramos 20 mil pesos y el material es excelente. Súper abrigadas para el frío de Pasto.",
     verified: true,
     avatar: "👩"
   },
@@ -55,29 +54,29 @@ const reviews = [
     name: "Carlos E.",
     rating: 5,
     date: "Hace 1 semana",
-    text: "Muy recomendados, vivo por el sector de Unicentro y me llegó la chaqueta en menos de 3 horas. Buena atención y producto tal cual como en la foto.",
+    text: "Tenía dudas de comprar porque soy de Ipiales, pero me hicieron el envío nacional por Servientrega y pagué en efectivo al recibir a los 3 días. La chaqueta es de horma un poco reducida pero pedí una talla más como recomiendan y quedó perfecta.",
     verified: true,
     avatar: "👨"
   }
 ];
 
-// FAQs native accordion data
+// FAQs native accordion data - STRICTLY FOR JACKETS
 const faqs = [
   {
-    question: "¿Cómo funciona el envío gratis en Pasto?",
-    answer: "El envío es 100% gratuito en todo el casco urbano de Pasto. Entregamos el mismo día (same-day) para compras confirmadas antes de las 4:00 PM."
+    question: "¿En cuánto tiempo llega mi pedido?",
+    answer: "Pasto: Entrega a domicilio inmediata el mismo día para pedidos confirmados antes de las 6:00 PM.\nNacional: Envíos nacionales por transportadora (Servientrega, Envía, Interrapidisimo) demoran entre 3 a 5 días hábiles a cualquier ciudad de Colombia."
   },
   {
-    question: "¿Qué métodos de pago aceptan?",
-    answer: "Manejamos Pago Contraentrega en Pasto, es decir, pagas en efectivo o transferencia (Nequi/Daviplata) al momento de recibir el producto en tu puerta. ¡Cero riesgos!"
+    question: "¿Puedo pagar cuando reciba el producto?",
+    answer: "Sí. Ofrecemos pago contra entrega en efectivo, Nequi o Daviplata tanto para entrega a domicilio en Pasto como para envíos nacionales en todo Colombia. Pagas únicamente al recibir tu paquete."
   },
   {
-    question: "¿Qué pasa si la talla no me queda?",
-    answer: "No te preocupes. Hacemos cambios de talla sin costo adicional en Pasto durante los primeros 5 días tras recibir el pedido, siempre que la prenda esté limpia y con sus etiquetas."
+    question: "¿Qué talla debo elegir y cuáles son las medidas?",
+    answer: "Ten en cuenta que nuestras chaquetas son de horma un poco reducida. 😉 Te aconsejamos pedir una talla más de la habitual si te gusta usarla holgada.\n\nMedidas disponibles:\n• Talla M: Largo 63.5 cm, Ancho 53.5 cm\n• Talla L: Largo 67 cm, Ancho 57 cm\n• Talla XL: Largo 70 cm, Ancho 60 cm\n• Talla XXL: Largo 74 cm, Ancho 64 cm"
   },
   {
-    question: "¿Los perfumes y relojes son originales?",
-    answer: "Sí, garantizamos al 100% que todos nuestros perfumes son de catálogo directo (Yanbal, Ésika, Avon) originales. Todos los relojes cuentan con garantía de funcionamiento."
+    question: "¿Cómo funciona la garantía y cambios?",
+    answer: "Ofrecemos cambio de talla durante los primeros 5 días. En Pasto puedes realizar el cambio directamente en nuestro punto físico o coordinarlo a domicilio. Cuentas también con 30 días de garantía por cualquier defecto de fábrica."
   }
 ];
 ---
@@ -90,7 +89,7 @@ const faqs = [
 
   <!-- 1. Main Grid -->
   <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 bg-white rounded-3xl border border-border-light shadow-sm p-4 sm:p-8 mb-12">
-    <!-- Left Column: Media (AliExpress style slider feel) -->
+    <!-- Left Column: Media -->
     <div class="lg:col-span-7 space-y-4">
       <div class="relative overflow-hidden rounded-2xl bg-gradient-to-b from-gray-50 to-gray-100 aspect-square border border-border-light">
         <img 
@@ -127,12 +126,12 @@ const faqs = [
     <!-- Right Column: Buying controls & Conversion details -->
     <div class="lg:col-span-5 flex flex-col justify-between">
       <div>
-        <!-- AliExpress Brand & Rating header -->
+        <!-- Brand & Rating header -->
         <div class="flex items-center gap-2 mb-2">
-          <span class="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-md uppercase tracking-wider">{product.brand}</span>
+          <span class="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-md uppercase tracking-wider">Calidad Premium Colombiana</span>
           <div class="flex items-center text-gold text-sm font-semibold gap-1">
             <span>★★★★★</span>
-            <span class="text-text-muted text-xs font-medium">5.0 (48 valoraciones)</span>
+            <span class="text-text-muted text-xs font-medium">4.7 (48 valoraciones)</span>
           </div>
         </div>
         
@@ -145,9 +144,9 @@ const faqs = [
         <div class="p-4 bg-bg rounded-2xl mb-6 border border-border-light">
           <span class="text-[10px] text-text-muted uppercase font-bold tracking-wider block mb-1">Precio Especial Contraentrega</span>
           <div class="flex items-baseline gap-3">
-            <span class="text-3xl sm:text-4xl font-black text-primary">${formatPrice(product.price)}</span>
-            <span class="text-base text-text-light line-through font-medium">${formatPrice(product.anchorPrice)}</span>
-            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wide">AHORRAS ${getDiscount(product.price, product.anchorPrice)}%</span>
+            <span class="text-3xl sm:text-4xl font-black text-primary" id="display-price">${formatPrice(product.price)}</span>
+            <span class="text-base text-text-light line-through font-medium" id="display-anchor-price">${formatPrice(product.anchorPrice)}</span>
+            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wide" id="display-saving-badge">AHORRAS {getDiscount(product.price, product.anchorPrice)}%</span>
           </div>
         </div>
 
@@ -185,7 +184,10 @@ const faqs = [
         <!-- Variant selector (sizes) -->
         {hasVariants && (
           <div class="mb-6" id="variant-selector">
-            <label class="block text-sm font-bold text-text-main mb-2">Talla:</label>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-sm font-bold text-text-main">Talla:</label>
+              <span class="text-xs text-primary font-bold bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">Horma reducida 😉</span>
+            </div>
             <div class="flex flex-wrap gap-2" id="size-options">
               {product.variants!.map((v) => (
                 <button
@@ -208,17 +210,88 @@ const faqs = [
                 </button>
               ))}
             </div>
-            <p class="mt-2.5 text-xs text-text-muted" id="selected-size-info">Selecciona una talla para pedir</p>
+            <p class="mt-2 text-xs text-text-muted" id="selected-size-info">Selecciona una talla para pedir</p>
+
+            <!-- Mini visual measurements table -->
+            <div class="mt-4 p-3 bg-bg rounded-xl border border-border-light">
+              <span class="text-[10px] font-bold text-text-muted uppercase block mb-2">Guía de medidas de costura:</span>
+              <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-text-main">
+                <div class="p-1.5 bg-white rounded-lg border border-border-light">M: 63x53 cm</div>
+                <div class="p-1.5 bg-white rounded-lg border border-border-light">L: 67x57 cm</div>
+                <div class="p-1.5 bg-white rounded-lg border border-border-light">XL: 70x60 cm</div>
+                <div class="p-1.5 bg-white rounded-lg border border-border-light">XXL: 74x64 cm</div>
+              </div>
+            </div>
           </div>
         )}
 
-        <!-- Promotion Urgency Banner -->
+        <!-- 3. AliExpress Package Selector Widget -->
         {product.category === 'chaquetas' && (
-          <div class="p-3 bg-red-50 border border-red-100 rounded-xl mb-6 flex items-start gap-3">
-            <span class="text-xl">🔥</span>
-            <div>
-              <p class="text-xs font-extrabold text-red-800 uppercase tracking-wide">¡PROMO DE HOY EN PASTO!</p>
-              <p class="text-xs text-red-700 font-medium">Lleva 1 chaqueta por $90.000 COP o <strong class="text-red-900 font-black underline">2 por $160.000 COP</strong> (Ahorras $20.000). Envío gratis.</p>
+          <div class="mb-6">
+            <label class="block text-sm font-bold text-text-main mb-3">Elige tu mejor oferta hoy:</label>
+            <div class="grid grid-cols-1 gap-3">
+              <!-- Pack 1 -->
+              <button 
+                class="pack-option border-2 border-primary bg-primary/5 rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                data-pack-id="1"
+                data-pack-name="Pack 1 Individual"
+                data-pack-price="90000"
+                data-pack-anchor="120000"
+                data-pack-desc="1 Chaqueta (Ideal para probar)"
+              >
+                <div>
+                  <span class="inline-block bg-primary/10 text-primary text-[9px] font-bold px-2 py-0.5 rounded-md uppercase mb-1">Individual</span>
+                  <p class="text-sm font-black text-text-main">1 Chaqueta</p>
+                  <p class="text-xs text-text-muted">Largo y ancho exacto</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-black text-primary">$90.000</p>
+                  <p class="text-xs text-text-light line-through">$120.000</p>
+                </div>
+                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" id="pack-check-1">✓</div>
+              </button>
+
+              <!-- Pack 2 -->
+              <button 
+                class="pack-option border-2 border-border hover:border-primary/50 bg-white rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                data-pack-id="2"
+                data-pack-name="Pack 2 Duo Estilo"
+                data-pack-price="160000"
+                data-pack-anchor="240000"
+                data-pack-desc="2 Chaquetas (Ahorras $20.000)"
+              >
+                <div>
+                  <span class="inline-block bg-gold text-primary text-[9px] font-black px-2 py-0.5 rounded-md uppercase mb-1">Más vendido</span>
+                  <p class="text-sm font-black text-text-main">2 Chaquetas</p>
+                  <p class="text-xs text-text-muted">Ahorras $20.000 en combo</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-black text-text-main">$160.000</p>
+                  <p class="text-xs text-text-light line-through">$240.000</p>
+                </div>
+                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hidden" id="pack-check-2">✓</div>
+              </button>
+
+              <!-- Pack 3 -->
+              <button 
+                class="pack-option border-2 border-border hover:border-primary/50 bg-white rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                data-pack-id="3"
+                data-pack-name="Pack 3 Combo Familiar"
+                data-pack-price="234000"
+                data-pack-anchor="360000"
+                data-pack-desc="3 Chaquetas ($78.000 c/u)"
+              >
+                <div>
+                  <span class="inline-block bg-green-100 text-green-800 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase mb-1">Ahorro Máximo</span>
+                  <p class="text-sm font-black text-text-main">3 Chaquetas</p>
+                  <p class="text-xs text-text-muted">Mejor precio por unidad</p>
+                </div>
+                <div class="text-right">
+                  <p class="text-lg font-black text-text-main">$234.000</p>
+                  <p class="text-xs text-text-light line-through">$360.000</p>
+                </div>
+                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hidden" id="pack-check-3">✓</div>
+              </button>
             </div>
           </div>
         )}
@@ -240,7 +313,7 @@ const faqs = [
         <!-- WhatsApp CTA -->
         <button
           id="product-buy-btn"
-          class="w-full btn-whatsapp py-4 px-6 rounded-2xl text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg font-black tracking-wide"
+          class="w-full btn-whatsapp py-4 px-6 rounded-2xl text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg font-black tracking-wide cursor-pointer"
           data-product-name={product.name}
           data-product-brand={product.brand}
           data-product-id={product.id}
@@ -254,22 +327,28 @@ const faqs = [
           <span id="buy-btn-text">Pedir por WhatsApp (Pago Contraentrega)</span>
         </button>
 
+        <!-- Social Proof Widget -->
+        <div class="p-3 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2 text-center shadow-sm">
+          <span class="text-lg">📦</span>
+          <span class="text-xs font-black text-green-800">Más de 500 chaquetas entregadas en Nariño</span>
+        </div>
+
         <!-- Trust seals AliExpress style -->
         <div class="grid grid-cols-3 gap-3 text-center border-t border-border-light pt-4">
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">🚚</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Envío Gratis</span>
-            <span class="text-[9px] text-text-muted">En Pasto mismo día</span>
+            <span class="text-xl mb-1">🏠</span>
+            <span class="text-[10px] font-black text-text-main uppercase">Pago en Casa</span>
+            <span class="text-[9px] text-text-muted">Domicilio en Pasto</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">💰</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Contraentrega</span>
-            <span class="text-[9px] text-text-muted">Pagas al recibir</span>
+            <span class="text-xl mb-1">🇨🇴</span>
+            <span class="text-[10px] font-black text-text-main uppercase">Envíos del país</span>
+            <span class="text-[9px] text-text-muted">Llega de 3 a 5 días</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">✅</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Original</span>
-            <span class="text-[9px] text-text-muted">Garantía total</span>
+            <span class="text-xl mb-1">🧥</span>
+            <span class="text-[10px] font-black text-text-main uppercase">Premium</span>
+            <span class="text-[9px] text-text-muted">Confección nacional</span>
           </div>
         </div>
       </div>
@@ -305,19 +384,19 @@ const faqs = [
         <h2 class="text-lg sm:text-xl font-black text-text-main border-b border-border-light pb-4 mb-6 uppercase tracking-wide">Nuestra Garantía de Satisfacción</h2>
         <div class="grid sm:grid-cols-3 gap-6">
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
-            <span class="text-3xl mb-2 block">🤝</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Pruébalo Primero</h3>
-            <p class="text-[10px] text-text-muted">Te lo llevamos a casa, te lo mides, y si te gusta lo compras. ¡Cero riesgos!</p>
+            <span class="text-3xl mb-2 block">🏠</span>
+            <h3 class="text-xs font-black text-text-main uppercase mb-1">Pruébalo en Casa</h3>
+            <p class="text-[10px] text-text-muted">Te lo llevamos a domicilio en Pasto. Te lo mides y si te queda bien, lo pagas.</p>
           </div>
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
-            <span class="text-3xl mb-2 block">🔄</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Cambio de Talla</h3>
-            <p class="text-[10px] text-text-muted">¿No te quedó? Te cambiamos la talla sin costo adicional de mensajería en Pasto.</p>
+            <span class="text-3xl mb-2 block">📍</span>
+            <h3 class="text-xs font-black text-text-main uppercase mb-1">Punto Físico</h3>
+            <p class="text-[10px] text-text-muted">Si necesitas un cambio de talla, puedes acercarte a nuestro local físico en Pasto.</p>
           </div>
           <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
             <span class="text-3xl mb-2 block">🔒</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">100% Seguro</h3>
-            <p class="text-[10px] text-text-muted">Sin tarjetas de crédito. Pagas directamente al mensajero de confianza.</p>
+            <h3 class="text-xs font-black text-text-main uppercase mb-1">Cambio de 5 Días</h3>
+            <p class="text-[10px] text-text-muted">Garantizamos cambio de talla sin complicaciones dentro de los primeros 5 días.</p>
           </div>
         </div>
       </div>
@@ -335,7 +414,7 @@ const faqs = [
                 <span class="text-text-muted group-open:rotate-180 transition-transform duration-200">▼</span>
               </summary>
               <div class="p-4 pt-0 border-t border-border-light/50">
-                <p class="text-xs text-text-muted leading-relaxed">{faq.answer}</p>
+                <p class="text-xs text-text-muted leading-relaxed whitespace-pre-line">{faq.answer}</p>
               </div>
             </details>
           ))}
@@ -349,13 +428,13 @@ const faqs = [
     <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border-light pb-4 mb-6 gap-4">
       <div>
         <h2 class="text-lg sm:text-xl font-black text-text-main uppercase tracking-wide">Valoraciones de Clientes</h2>
-        <p class="text-xs text-text-muted mt-1">Opiniones verificadas de compradores de San Juan de Pasto</p>
+        <p class="text-xs text-text-muted mt-1">Opiniones verificadas de compradores de San Juan de Pasto y Nariño</p>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-2xl font-black text-text-main">5.0</span>
+        <span class="text-2xl font-black text-text-main">4.7</span>
         <div class="flex flex-col">
           <span class="text-gold text-sm font-semibold">★★★★★</span>
-          <span class="text-[10px] text-text-muted font-medium">Basado en 48 ventas recientes</span>
+          <span class="text-[10px] text-text-muted font-medium">Basado en valoraciones reales del local</span>
         </div>
       </div>
     </div>
@@ -370,7 +449,7 @@ const faqs = [
                 <div>
                   <h3 class="text-xs font-black text-text-main">{rev.name}</h3>
                   <span class="text-[9px] text-green-600 font-bold flex items-center gap-1">
-                    <span class="text-xs">✓</span> Comprador verificado en Pasto
+                    <span class="text-xs">✓</span> Comprador verificado
                   </span>
                 </div>
               </div>
@@ -391,9 +470,58 @@ const faqs = [
   const buyBtn = document.getElementById('product-buy-btn') as HTMLButtonElement;
   const buyBtnText = document.getElementById('buy-btn-text');
   const sizeInfo = document.getElementById('selected-size-info');
+  const packOptions = document.querySelectorAll('.pack-option');
+  
   let selectedSize = '';
   let selectedRef = '';
+  let selectedPack = '1';
+  let selectedPackName = 'Pack 1 Individual';
+  let selectedPackPrice = 90000;
+  let selectedPackDesc = '1 Chaqueta (Ideal para probar)';
 
+  // Handle pack selections
+  packOptions.forEach(opt => {
+    opt.addEventListener('click', () => {
+      // Remove selection classes
+      packOptions.forEach(o => {
+        o.classList.remove('border-primary', 'bg-primary/5');
+        o.classList.add('border-border', 'bg-white');
+        const check = document.getElementById(`pack-check-${o.getAttribute('data-pack-id')}`);
+        if (check) check.classList.add('hidden');
+      });
+
+      // Add selection classes
+      opt.classList.remove('border-border', 'bg-white');
+      opt.classList.add('border-primary', 'bg-primary/5');
+      const packId = opt.getAttribute('data-pack-id') || '1';
+      const check = document.getElementById(`pack-check-${packId}`);
+      if (check) check.classList.remove('hidden');
+
+      selectedPack = packId;
+      selectedPackName = opt.getAttribute('data-pack-name') || '';
+      selectedPackPrice = parseFloat(opt.getAttribute('data-pack-price') || '90000');
+      selectedPackDesc = opt.getAttribute('data-pack-desc') || '';
+
+      // Update display prices
+      const displayPrice = document.getElementById('display-price');
+      const displayAnchorPrice = document.getElementById('display-anchor-price');
+      const displaySavingBadge = document.getElementById('display-saving-badge');
+      
+      const formattedPrice = new Intl.NumberFormat('es-CO', { style: 'decimal', minimumFractionDigits: 0 }).format(selectedPackPrice);
+      const anchorVal = parseFloat(opt.getAttribute('data-pack-anchor') || '120000');
+      const formattedAnchor = new Intl.NumberFormat('es-CO', { style: 'decimal', minimumFractionDigits: 0 }).format(anchorVal);
+      const discountPct = Math.round(((anchorVal - selectedPackPrice) / anchorVal) * 100);
+
+      if (displayPrice) displayPrice.textContent = `$${formattedPrice}`;
+      if (displayAnchorPrice) displayAnchorPrice.textContent = `$${formattedAnchor}`;
+      if (displaySavingBadge) displaySavingBadge.textContent = `AHORRAS ${discountPct}%`;
+
+      // Update WhatsApp checkout button text
+      updateCheckoutButton();
+    });
+  });
+
+  // Handle size selections
   sizeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       if (btn.getAttribute('data-available') !== 'true') return;
@@ -415,12 +543,28 @@ const faqs = [
       if (sizeInfo) {
         sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles`;
         sizeInfo.classList.add('text-primary', 'font-bold');
+        sizeInfo.classList.remove('text-red-500');
       }
-      if (buyBtnText) {
-        buyBtnText.textContent = `Pedir Talla ${selectedSize} por WhatsApp`;
-      }
+      
+      updateCheckoutButton();
     });
   });
+
+  function updateCheckoutButton() {
+    if (!buyBtnText) return;
+    
+    let text = 'Pedir por WhatsApp (Pago Contraentrega)';
+    
+    if (selectedPack === '1') {
+      text = selectedSize ? `Pedir Talla ${selectedSize} por WhatsApp` : 'Selecciona una talla para pedir';
+    } else if (selectedPack === '2') {
+      text = 'Pedir Duo Estilo (2 Chaquetas) por WhatsApp';
+    } else if (selectedPack === '3') {
+      text = 'Pedir Combo Familiar (3 Chaquetas) por WhatsApp';
+    }
+
+    buyBtnText.textContent = text;
+  }
 
   buyBtn?.addEventListener('click', () => {
     const hasVariants = buyBtn.getAttribute('data-has-variants') === 'true';
@@ -436,27 +580,31 @@ const faqs = [
     const name = buyBtn.getAttribute('data-product-name') || '';
     const brand = buyBtn.getAttribute('data-product-brand') || '';
     const id = buyBtn.getAttribute('data-product-id') || '';
-    const price = parseFloat(buyBtn.getAttribute('data-product-price') || '0');
     const phone = buyBtn.getAttribute('data-phone') || '';
 
     const formattedPrice = new Intl.NumberFormat('es-CO', {
       style: 'decimal',
       minimumFractionDigits: 0,
-    }).format(price);
+    }).format(selectedPackPrice);
 
+    let orderDetailText = `📦 *Pedido:* ${selectedPackName} (${selectedPackDesc})`;
     let sizeText = '';
-    if (selectedSize) {
+
+    if (selectedPack === '1') {
       sizeText = `\n👕 *Talla:* ${selectedSize}`;
       if (selectedRef) sizeText += ` (Ref: ${selectedRef})`;
+    } else {
+      sizeText = `\n👕 *Talla Solicitada de Referencia:* ${selectedSize}\n📝 _(Coordinaré las tallas de las otras chaquetas del combo contigo en este chat)_`;
     }
 
     const message = 
-      `*SOLICITUD DE PEDIDO CONTRAENTREGA (PASTO)*\n\n` +
-      `📦 *Producto:* ${name} (${brand})` +
+      `*SOLICITUD DE PEDIDO CONTRAENTREGA*\n\n` +
+      `🧥 *Producto:* ${name} (${brand})` +
+      `\n${orderDetailText}` +
       sizeText +
-      `\n🆔 *Código:* ${id}\n` +
-      `💰 *Precio Especial:* $${formattedPrice} COP\n\n` +
-      `📍 _Por favor, indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._`;
+      `\n🆔 *Código Base:* ${id}\n` +
+      `💰 *Valor Total:* $${formattedPrice} COP\n\n` +
+      `📍 _Por favor, indícame tu nombre, ciudad (Pasto o envío nacional) y dirección para coordinar el envío hoy mismo._`;
 
     const encodedMessage = encodeURIComponent(message);
     const whatsAppUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
@@ -467,7 +615,7 @@ const faqs = [
         content_ids: [id],
         content_type: 'product',
         content_name: name,
-        value: price,
+        value: selectedPackPrice,
         currency: 'COP'
       }, { eventID: `evt-${id}-${Date.now()}` });
     }
