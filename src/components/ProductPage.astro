@@ -476,7 +476,7 @@ const faqs = [
   let selectedRef = '';
   let selectedPack = '1';
   let selectedPackName = 'Pack 1 Individual';
-  let selectedPackPrice = 90000;
+  let selectedPackPrice = buyBtn ? parseFloat(buyBtn.getAttribute('data-product-price') || '90000') : 90000;
   let selectedPackDesc = '1 Chaqueta (Ideal para probar)';
 
   // Handle pack selections
@@ -545,6 +545,12 @@ const faqs = [
         sizeInfo.classList.add('text-primary', 'font-bold');
         sizeInfo.classList.remove('text-red-500');
       }
+
+      // Clear any validation highlight
+      const sizeOptions = document.getElementById('size-options');
+      if (sizeOptions) {
+        sizeOptions.classList.remove('ring-4', 'ring-red-500/50');
+      }
       
       updateCheckoutButton();
     });
@@ -573,6 +579,13 @@ const faqs = [
       if (sizeInfo) {
         sizeInfo.textContent = '⚠️ Por favor selecciona una talla antes de pedir';
         sizeInfo.classList.add('text-red-500', 'font-bold');
+      }
+      const sizeOptions = document.getElementById('size-options');
+      if (sizeOptions) {
+        sizeOptions.classList.add('ring-4', 'ring-red-500/50', 'animate-shake');
+        setTimeout(() => {
+          sizeOptions.classList.remove('animate-shake');
+        }, 500);
       }
       return;
     }
@@ -625,3 +638,14 @@ const faqs = [
     }, 300);
   });
 </script>
+
+<style>
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+    20%, 40%, 60%, 80% { transform: translateX(5px); }
+  }
+  .animate-shake {
+    animation: shake 0.4s ease-in-out;
+  }
+</style>
