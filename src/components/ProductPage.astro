@@ -463,10 +463,20 @@ const faqs = product.category === 'perfumes'
         <!-- Callout Banner for Direct Distributor request (for Perfumes/Watches only) -->
         {product.category !== 'chaquetas' && (
           <div class="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-center shadow-sm mt-4">
-            <p class="text-[11px] font-black text-purple-900 uppercase">✨ ¿No encuentras tu loción favorita?</p>
-            <p class="text-[10px] text-purple-700 mt-0.5 leading-tight">Trabajamos directo con distribuidor de fábrica. Te conseguimos cualquier loción de catálogo.</p>
+            <p class="text-[11px] font-black text-purple-900 uppercase">
+              {product.category === 'perfumes' ? '✨ ¿No encuentras tu loción favorita?' : '✨ ¿Buscas otro modelo de reloj?'}
+            </p>
+            <p class="text-[10px] text-purple-700 mt-0.5 leading-tight">
+              {product.category === 'perfumes' 
+                ? 'Trabajamos directo con distribuidor de fábrica. Te conseguimos cualquier loción de catálogo.' 
+                : 'Trabajamos directo con distribuidor autorizado. Escríbenos y te conseguimos el modelo que buscas.'}
+            </p>
             <a 
-              href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(`Hola, estoy buscando un perfume de catálogo que no veo en la web. ¿Me ayudan a conseguirlo?`)}`}
+              href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(
+                product.category === 'perfumes' 
+                  ? 'Hola, estoy buscando un perfume de catálogo que no veo en la web. ¿Me ayudan a conseguirlo?' 
+                  : 'Hola, estoy buscando un modelo de reloj que no veo en la web. ¿Me ayudan a conseguirlo?'
+              )}`}
               target="_blank"
               rel="noopener noreferrer"
               class="inline-block mt-2 text-[10px] font-black text-white bg-purple-600 px-4 py-2 rounded-xl hover:bg-purple-700 transition-all cursor-pointer"
