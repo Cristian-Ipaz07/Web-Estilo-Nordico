@@ -1,19 +1,10 @@
 ---
 /**
- * index.astro — Página de inicio de Estilo Nórdico
- * 
- * Secciones:
- * 1. Hero con producto gancho (chaqueta impermeable)
- * 2. Beneficios/Trust signals
- * 3. Productos destacados
- * 4. Categorías
- * 5. Combo especial
- * 6. CTA final WhatsApp
+ * index.astro — Página de inicio de Estilo Nórdico (Rediseño Premium Editorial)
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProductCard from '../components/ProductCard.astro';
-import CategoryBanner from '../components/CategoryBanner.astro';
 import { fetchJacketsFromNotion } from '../lib/notion';
 import { perfumes, relojes, formatPrice } from '../data/products';
 import { STORE_CONFIG } from '../config/store';
@@ -31,57 +22,62 @@ const featuredProducts = [...featuredJackets, ...featuredPerfumes, ...featuredRe
 const hookProduct = jackets.find(j => j.hook) || jackets[0];
 ---
 
-<BaseLayout title="Tienda de Moda Urbana en Pasto" description="Chaquetas impermeables, perfumes originales y relojes con envío gratis en Pasto y pago contraentrega. Pide por WhatsApp.">
+<BaseLayout title="Moda & Fragancias Premium" description="Chaquetas de confección nacional, perfumes de catálogo y relojes de lujo. Paga al recibir en Pasto y envíos nacionales rápidos.">
   
-  <!-- Hero Section -->
+  <!-- Hero Section (Rediseñado con malla animada) -->
   <Hero product={hookProduct} />
 
-  <!-- Trust Signals -->
-  <section class="py-8 sm:py-12 bg-white border-b border-border-light" id="trust-signals">
+  <!-- 1. Trust Signals (Estilo Bento Lineal Minimalista) -->
+  <section class="py-12 bg-white border-b border-border-light relative z-20" id="trust-signals">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <div class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-bg">
-          <span class="text-2xl sm:text-3xl">🏠</span>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-y-8 lg:gap-y-0 divide-y lg:divide-y-0 lg:divide-x divide-border-light">
+        
+        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left">
+          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">🏠</span>
           <div>
-            <p class="text-xs sm:text-sm font-bold text-text-main">Paga al Recibir</p>
-            <p class="text-[10px] sm:text-xs text-text-muted">Domicilio gratis en Pasto</p>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Paga al Recibir</h3>
+            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Domicilio y pago en casa en Pasto</p>
           </div>
         </div>
-        <div class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-bg">
-          <span class="text-2xl sm:text-3xl">📦</span>
+
+        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
+          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">📦</span>
           <div>
-            <p class="text-xs sm:text-sm font-bold text-text-main">Envíos Nacionales</p>
-            <p class="text-[10px] sm:text-xs text-text-muted">Llega de 3 a 5 días hábiles</p>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Envíos Nacionales</h3>
+            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Llega de 3 a 5 días hábiles a tu ciudad</p>
           </div>
         </div>
-        <div class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-bg">
-          <span class="text-2xl sm:text-3xl">🇨🇴</span>
+
+        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
+          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">🇨🇴</span>
           <div>
-            <p class="text-xs sm:text-sm font-bold text-text-main">Calidad Premium</p>
-            <p class="text-[10px] sm:text-xs text-text-muted">Confección 100% colombiana</p>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Calidad Premium</h3>
+            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Confección nacional y garantía real</p>
           </div>
         </div>
-        <div class="flex items-center gap-3 p-3 sm:p-4 rounded-xl bg-bg">
-          <span class="text-2xl sm:text-3xl">⚡</span>
+
+        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
+          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">⚡</span>
           <div>
-            <p class="text-xs sm:text-sm font-bold text-text-main">Entrega Rápida</p>
-            <p class="text-[10px] sm:text-xs text-text-muted">Same-day en Pasto</p>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Entrega Same-Day</h3>
+            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Entregas el mismo día en Pasto</p>
           </div>
         </div>
+
       </div>
     </div>
   </section>
 
-  <!-- Featured Products -->
-  <section class="py-12 sm:py-16 lg:py-20" id="featured-products">
+  <!-- 2. Featured Products (Grilla Premium) -->
+  <section class="py-16 sm:py-24" id="featured-products">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10 sm:mb-12">
-        <span class="inline-block bg-primary/10 text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">Lo más vendido</span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-text-main">Productos Destacados</h2>
-        <p class="mt-2 text-sm sm:text-base text-text-muted max-w-lg mx-auto">Los favoritos de nuestros clientes en Pasto. Calidad premium a precios increíbles.</p>
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="inline-block bg-gold/10 text-gold text-[10px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest">Lo más solicitado</span>
+        <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main tracking-tight">Productos Destacados</h2>
+        <p class="mt-2 text-sm sm:text-base text-text-muted max-w-md mx-auto">Selección exclusiva de nuestras piezas de moda y fragancias preferidas en Pasto.</p>
       </div>
 
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
         {featuredProducts.map((product, index) => (
           <div class={`fade-in fade-in-delay-${(index % 4) + 1}`}>
             <ProductCard
@@ -104,111 +100,141 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
     </div>
   </section>
 
-  <!-- Special Combo -->
-  <section class="py-12 sm:py-16 bg-gradient-to-r from-primary via-primary-light to-[#3B5998] text-white" id="combo-especial">
+  <!-- 3. Special Combo (Bento Grid Dark Premium Card) -->
+  <section class="py-10 sm:py-16 bg-white" id="combo-especial">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-        <div class="flex-1 text-center lg:text-left">
-          <span class="inline-block bg-gold text-primary text-xs font-bold px-4 py-1.5 rounded-full mb-4 uppercase tracking-wider">🔥 Oferta Especial</span>
-          <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black mb-4">Combo Chaqueta + Perfume</h2>
-          <p class="text-base sm:text-lg text-white/80 mb-6 max-w-lg mx-auto lg:mx-0">
-            Llévate nuestra chaqueta impermeable junto con un perfume Yanbal original a un precio inmejorable. <strong>¡Envío gratis en Pasto!</strong>
-          </p>
-          <div class="flex items-center gap-4 justify-center lg:justify-start mb-6">
-            <div class="flex flex-col">
-              <span class="text-3xl sm:text-4xl font-black">$130.000</span>
-              <span class="text-xs text-white/50">COP — Combo completo</span>
+      
+      <!-- Premium Bento Card Wrapper -->
+      <div class="relative bg-gradient-to-br from-[#111D33] via-[#1B2A4A] to-[#0A1224] border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.15)] rounded-[3rem] p-8 lg:p-14 overflow-hidden bg-grain">
+        
+        <!-- Subtle background glow -->
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary-light/30 rounded-full blur-3xl opacity-60"></div>
+        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-gold/10 rounded-full blur-3xl opacity-35"></div>
+
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+          
+          <!-- Text and Price Details -->
+          <div class="lg:col-span-7 text-center lg:text-left text-white">
+            <span class="inline-block bg-gold text-[#111D33] text-[9px] font-black px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest">🔥 Combo Estrella</span>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-title font-black mb-4 tracking-tight leading-tight">Chaqueta + Perfume original</h2>
+            <p class="text-sm sm:text-base text-white/70 mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
+              Arma tu combo ideal: Llévate nuestra icónica chaqueta impermeable colombiana junto con un perfume Yanbal original con domicilio incluido.
+            </p>
+            
+            <div class="flex items-center gap-5 justify-center lg:justify-start mb-8">
+              <div class="flex flex-col">
+                <span class="text-3xl sm:text-4xl font-black text-white">$130.000</span>
+                <span class="text-[9px] text-white/50 font-black uppercase tracking-widest mt-0.5">COP — Combo completo</span>
+              </div>
+              <div class="h-10 w-px bg-white/10"></div>
+              <div class="flex flex-col items-start">
+                <span class="text-base text-white/40 line-through">$260.000</span>
+                <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider mt-0.5">Save -50% OFF</span>
+              </div>
             </div>
-            <div class="flex flex-col">
-              <span class="text-lg text-white/40 line-through">$260.000</span>
-              <span class="bg-red-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">-50% OFF</span>
+
+            <a
+              href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE COMBO ESPECIAL CONTRAENTREGA (PASTO)*\n\n📦 *Combo:* Chaqueta Impermeable + Perfume Yanbal\n💰 *Precio Especial:* $130.000 COP\n\n📍 _Por favor, indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              id="combo-cta"
+              class="inline-flex items-center justify-center gap-3 bg-accent hover:bg-accent-hover hover:scale-[1.02] text-white font-black text-xs sm:text-sm uppercase tracking-widest px-8 py-4.5 rounded-2xl transition-all duration-300 shadow-[0_12px_24px_-8px_rgba(37,211,102,0.4)] cursor-pointer"
+            >
+              ¡Solicitar Combo por WhatsApp!
+            </a>
+          </div>
+
+          <!-- Overlapping Premium Products Collage -->
+          <div class="lg:col-span-5 flex items-center justify-center lg:justify-end pr-4 mt-8 lg:mt-0 relative">
+            <div class="relative w-40 sm:w-48 rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.3)] bg-white/5 border border-white/10 backdrop-blur-md p-2.5 rotate-[-6deg] hover:rotate-[0deg] hover:scale-105 transition-all duration-500 z-10">
+              <img src="/assets/products/jacket-azul.jpeg" alt="Chaqueta Impermeable" class="rounded-2xl w-full aspect-square object-cover" />
+              <p class="text-center text-[9px] uppercase tracking-widest font-black text-white/80 mt-2">Chaqueta</p>
+            </div>
+            <div class="relative w-40 sm:w-48 rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.3)] bg-white/5 border border-white/10 backdrop-blur-md p-2.5 rotate-[8deg] hover:rotate-[0deg] hover:scale-105 transition-all duration-500 -ml-16 mt-12 z-20">
+              <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Perfume Yanbal" class="rounded-2xl w-full aspect-square object-cover" />
+              <p class="text-center text-[9px] uppercase tracking-widest font-black text-white/80 mt-2">Ohm Parfum</p>
             </div>
           </div>
-          <a
-            href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE COMBO ESPECIAL CONTRAENTREGA (PASTO)*\n\n📦 *Combo:* Chaqueta Impermeable + Perfume Yanbal\n💰 *Precio Especial:* $130.000 COP\n🚚 *Envío:* GRATIS en Pasto\n\n📍 _Por favor, indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            id="combo-cta"
-            class="inline-flex items-center gap-2.5 btn-whatsapp px-8 py-4 rounded-2xl text-base shadow-xl"
-          >
-            <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-            </svg>
-            ¡Quiero el combo!
-          </a>
+
         </div>
-        <!-- Combo visual -->
-        <div class="flex items-center gap-4">
-          <div class="w-36 sm:w-44 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm p-2">
-            <img src="/assets/products/jacket-azul.jpeg" alt="Chaqueta Impermeable" class="rounded-xl" />
-            <p class="text-center text-xs font-bold mt-2">Chaqueta</p>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- 4. Categories (Banners Editoriales con Imagen) -->
+  <section class="py-16 sm:py-24 bg-bg" id="categories">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="inline-block bg-gold/10 text-gold text-[10px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest">Catálogo</span>
+        <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main tracking-tight">Nuestras Categorías</h2>
+        <p class="mt-2 text-sm sm:text-base text-text-muted">Diseño y estilo curado con la mejor calidad en Pasto.</p>
+      </div>
+
+      <!-- Categories Editorial Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        
+        <!-- Category: Chaquetas -->
+        <a href="/chaquetas" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
+          <img src="/assets/products/jacket-azul.jpeg" alt="Colección Chaquetas" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
+          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
+            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">🧥 {jackets.length} Referencias</span>
+            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Chaquetas</h3>
+            <p class="text-xs text-white/70 mt-1 leading-normal">Impermeables y rompevientos de horma premium.</p>
+            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
           </div>
-          <span class="text-3xl font-black text-gold">+</span>
-          <div class="w-36 sm:w-44 rounded-2xl overflow-hidden shadow-2xl bg-white/10 backdrop-blur-sm p-2">
-            <img src="/assets/products/perfume-yanbal.png" alt="Perfume Yanbal" class="rounded-xl" />
-            <p class="text-center text-xs font-bold mt-2">Perfume</p>
+        </a>
+
+        <!-- Category: Perfumes -->
+        <a href="/perfumes" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
+          <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Colección Perfumes" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
+          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
+            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">🧴 {perfumes.length} Referencias</span>
+            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Perfumes</h3>
+            <p class="text-xs text-white/70 mt-1 leading-normal">Yanbal, Ésika y Avon directos de catálogo.</p>
+            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
           </div>
-        </div>
+        </a>
+
+        <!-- Category: Relojes -->
+        <a href="/relojes" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
+          <img src="/assets/products/relojes/rel-04.png" alt="Colección Relojes" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
+          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
+            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">⌚ {relojes.length} Modelos</span>
+            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Relojes</h3>
+            <p class="text-xs text-white/70 mt-1 leading-normal">Cronógrafos de acero y ediciones de lujo.</p>
+            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
+          </div>
+        </a>
+
       </div>
     </div>
   </section>
 
-  <!-- Categories -->
-  <section class="py-12 sm:py-16 lg:py-20 bg-white" id="categories">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-10 sm:mb-12">
-        <span class="inline-block bg-gold/10 text-gold text-xs font-bold px-4 py-1.5 rounded-full mb-3 uppercase tracking-wider">Explora</span>
-        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-text-main">Nuestras Categorías</h2>
-        <p class="mt-2 text-sm sm:text-base text-text-muted">Todo lo que necesitas para un estilo urbano con actitud</p>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
-        <CategoryBanner
-          title="Chaquetas"
-          subtitle="Impermeables, cortavientos y bombers"
-          href="/chaquetas"
-          productCount={jackets.length}
-          icon="🧥"
-          gradient="bg-gradient-to-br from-primary to-primary-light"
-        />
-        <CategoryBanner
-          title="Perfumes"
-          subtitle="Yanbal, Ésika y Avon originales"
-          href="/perfumes"
-          productCount={perfumes.length}
-          icon="🧴"
-          gradient="bg-gradient-to-br from-[#8B5CF6] to-[#A78BFA]"
-        />
-        <CategoryBanner
-          title="Relojes"
-          subtitle="Diseño nórdico, elegancia urbana"
-          href="/relojes"
-          productCount={relojes.length}
-          icon="⌚"
-          gradient="bg-gradient-to-br from-[#D97706] to-[#F59E0B]"
-        />
-      </div>
-    </div>
-  </section>
-
-  <!-- Final CTA -->
-  <section class="py-12 sm:py-16 bg-bg" id="final-cta">
-    <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
-      <h2 class="text-2xl sm:text-3xl font-black text-text-main mb-4">¿Listo para estrenar?</h2>
-      <p class="text-sm sm:text-base text-text-muted mb-8 max-w-lg mx-auto">
-        Escríbenos por WhatsApp y recibe tu pedido hoy mismo en Pasto con pago contraentrega. ¡Sin costos de envío!
+  <!-- 5. Final CTA -->
+  <section class="py-20 sm:py-28 bg-white" id="final-cta">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative">
+      <span class="text-4xl mb-4 block">🚚</span>
+      <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main mb-4 tracking-tight">¿Listo para renovar tu outfit?</h2>
+      <p class="text-sm sm:text-base text-text-muted mb-8 max-w-lg mx-auto leading-relaxed">
+        Escríbenos por WhatsApp y programamos tu entrega inmediata hoy mismo en Pasto. Paga en casa al recibir, sin enredos.
       </p>
       <a
         href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent(STORE_CONFIG.whatsapp.defaultMessage)}`}
         target="_blank"
         rel="noopener noreferrer"
         id="final-cta-whatsapp"
-        class="inline-flex items-center gap-2.5 btn-whatsapp px-8 py-4 rounded-2xl text-base shadow-lg"
+        class="inline-flex items-center justify-center gap-3 bg-accent hover:bg-accent-hover hover:scale-[1.02] text-white font-black text-xs sm:text-sm uppercase tracking-widest px-8 py-4.5 rounded-2xl transition-all duration-300 shadow-[0_12px_24px_-8px_rgba(37,211,102,0.4)] cursor-pointer"
       >
-        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+        <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
           <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
         </svg>
-        Escríbenos por WhatsApp
+        Chatear con un Asesor por WhatsApp
       </a>
     </div>
   </section>
