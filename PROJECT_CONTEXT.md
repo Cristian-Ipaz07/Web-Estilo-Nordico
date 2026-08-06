@@ -51,14 +51,15 @@
 | Tailwind CSS | 4.x | Utilidades de estilo |
 | TypeScript | 5.x | Tipado de datos y componentes |
 | Notion API | v2022-06-28 | Fuente de datos para chaquetas (build-time) |
-| Vercel/Netlify | - | Hosting gratuito (deploy futuro) |
+| Vercel | Production | Hosting oficial: **https://web-estilo-nordico.vercel.app** |
 
 ## Configuración Clave
 
 - **WhatsApp**: `573218888046` (sin +, sin espacios)
-- **Píxel de Meta**: `TU_PIXEL_ID_REAL` (placeholder — actualizar cuando se obtenga)
-- **Notion Token**: En `.env` (no commitear)
-- **Notion DB ID**: En `.env`
+- **Píxel de Meta**: `1065979052606365` (Activo — Rastrea `PageView` e `InitiateCheckout`)
+- **Notion Token**: Configurado en `.env` local y en variables de entorno de Vercel
+- **Notion DB ID**: `396bbb90088e815dbc1fc6894f88bf9f` Configurado en `.env` local y Vercel
+- **URL de Producción**: **https://web-estilo-nordico.vercel.app**
 
 ## Reglas de Desarrollo
 

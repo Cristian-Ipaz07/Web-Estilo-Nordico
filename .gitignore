@@ -30,3 +30,4 @@ Thumbs.db
 *.docx
 document_content.txt
 document_content_utf8.txt
+.vercel
