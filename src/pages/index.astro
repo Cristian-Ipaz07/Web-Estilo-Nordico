@@ -1,6 +1,6 @@
 ---
 /**
- * index.astro — Página de inicio de Estilo Nórdico (Rediseño Premium Editorial)
+ * index.astro — Página de inicio de Estilo Nórdico (Ajustada a Fondo Claro con Banners Oscuros)
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
@@ -24,57 +24,106 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
 
 <BaseLayout title="Moda & Fragancias Premium" description="Chaquetas de confección nacional, perfumes de catálogo y relojes de lujo. Paga al recibir en Pasto y envíos nacionales rápidos.">
   
-  <!-- Hero Section (Rediseñado con malla animada) -->
+  <!-- Hero Section (lifestyle background fading to white at the bottom) -->
   <Hero product={hookProduct} />
 
-  <!-- 1. Trust Signals (Estilo Bento Lineal Minimalista) -->
-  <section class="py-12 bg-white border-b border-border-light relative z-20" id="trust-signals">
+  <!-- 1. Trust Signals (Streetwear Minimalist divide, No Emojis, No Icons) -->
+  <section class="py-12 bg-white border-b border-[#E5E7EB] relative z-20" id="trust-signals">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-y-8 lg:gap-y-0 divide-y lg:divide-y-0 lg:divide-x divide-border-light">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-y-8 lg:gap-y-0 divide-y lg:divide-y-0 lg:divide-[#E5E7EB] divide-[#E5E7EB]">
         
-        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left">
-          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">🏠</span>
-          <div>
-            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Paga al Recibir</h3>
-            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Domicilio y pago en casa en Pasto</p>
-          </div>
+        <div class="flex flex-col gap-1 px-6 py-2 justify-center text-left">
+          <span class="text-[9px] text-text-muted font-black uppercase tracking-widest">01 / Entrega en Pasto</span>
+          <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-widest font-title mt-1">Paga al Recibir</h3>
+          <p class="text-[11px] text-text-muted font-light mt-0.5 leading-relaxed">Domicilio y pago en casa gratis en Pasto</p>
         </div>
 
-        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
-          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">📦</span>
-          <div>
-            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Envíos Nacionales</h3>
-            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Llega de 3 a 5 días hábiles a tu ciudad</p>
-          </div>
+        <div class="flex flex-col gap-1 px-6 py-2 justify-center text-left pt-6 lg:pt-2">
+          <span class="text-[9px] text-text-muted font-black uppercase tracking-widest">02 / Envíos</span>
+          <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-widest font-title mt-1">Cobertura Nacional</h3>
+          <p class="text-[11px] text-text-muted font-light mt-0.5 leading-relaxed">Envíos seguros de 3 a 5 días hábiles</p>
         </div>
 
-        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
-          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">🇨🇴</span>
-          <div>
-            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Calidad Premium</h3>
-            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Confección nacional y garantía real</p>
-          </div>
+        <div class="flex flex-col gap-1 px-6 py-2 justify-center text-left pt-6 lg:pt-2">
+          <span class="text-[9px] text-text-muted font-black uppercase tracking-widest">03 / Confección</span>
+          <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-widest font-title mt-1">Calidad Premium</h3>
+          <p class="text-[11px] text-text-muted font-light mt-0.5 leading-relaxed">Producción nacional con costura reforzada</p>
         </div>
 
-        <div class="flex items-center gap-4 px-4 py-2 justify-center lg:justify-start flex-col sm:flex-row text-center sm:text-left pt-6 lg:pt-2">
-          <span class="text-3xl bg-primary/5 p-3 rounded-2xl">⚡</span>
-          <div>
-            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">Entrega Same-Day</h3>
-            <p class="text-[11px] sm:text-xs text-text-muted mt-0.5">Entregas el mismo día en Pasto</p>
-          </div>
+        <div class="flex flex-col gap-1 px-6 py-2 justify-center text-left pt-6 lg:pt-2">
+          <span class="text-[9px] text-text-muted font-black uppercase tracking-widest">04 / Soporte</span>
+          <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-widest font-title mt-1">Atención Express</h3>
+          <p class="text-[11px] text-text-muted font-light mt-0.5 leading-relaxed">Asesoría directa vía chat de WhatsApp</p>
         </div>
 
       </div>
     </div>
   </section>
 
-  <!-- 2. Featured Products (Grilla Premium) -->
-  <section class="py-16 sm:py-24" id="featured-products">
+  <!-- 2. Banners de Categorías (Grilla Editorial de Fotos 3:4 con Texto en la Esquina Inferior Izquierda) -->
+  <section class="py-16 sm:py-24 bg-white" id="categories">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest mb-3">Colección Principal</span>
+        <h2 class="text-2xl sm:text-4xl font-title font-black text-text-main uppercase tracking-widest">Categorías</h2>
+      </div>
+
+      <!-- Categories Editorial Grid (Aspect Ratio 3:4) -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
+        
+        <!-- Category: Chaquetas -->
+        <a href="/chaquetas" class="group block relative overflow-hidden rounded-md aspect-[3/4] border border-[#E5E7EB] transition-all duration-500">
+          <img 
+            src="/assets/Estilo nordico a futuro.png" 
+            alt="Chaquetas Estilo Nórdico" 
+            class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" 
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent"></div>
+          <div class="absolute bottom-6 left-6 text-left text-white z-10">
+            <h3 class="text-lg font-title font-black uppercase tracking-widest">Chaquetas</h3>
+            <p class="text-[9px] text-[#A3A3A3] mt-1 font-black tracking-widest uppercase">Confección Nacional Premium</p>
+          </div>
+        </a>
+
+        <!-- Category: Perfumes -->
+        <a href="/perfumes" class="group block relative overflow-hidden rounded-md aspect-[3/4] border border-[#E5E7EB] transition-all duration-500">
+          <img 
+            src="/assets/products/perfumes/Ohm Perfume.jpg" 
+            alt="Perfumes de Catálogo" 
+            class="object-cover absolute inset-0 w-full h-full brightness-[0.35] group-hover:scale-105 group-hover:brightness-[0.4] transition-all duration-700" 
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent"></div>
+          <div class="absolute bottom-6 left-6 text-left text-white z-10">
+            <h3 class="text-lg font-title font-black uppercase tracking-widest">Perfumes</h3>
+            <p class="text-[9px] text-[#A3A3A3] mt-1 font-black tracking-widest uppercase">Fragancias de Catálogo</p>
+          </div>
+        </a>
+
+        <!-- Category: Relojes -->
+        <a href="/relojes" class="group block relative overflow-hidden rounded-md aspect-[3/4] border border-[#E5E7EB] transition-all duration-500">
+          <img 
+            src="/assets/products/relojes/rel-04.png" 
+            alt="Relojes de Lujo" 
+            class="object-cover absolute inset-0 w-full h-full brightness-[0.35] group-hover:scale-105 group-hover:brightness-[0.4] transition-all duration-700" 
+          />
+          <div class="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-transparent"></div>
+          <div class="absolute bottom-6 left-6 text-left text-white z-10">
+            <h3 class="text-lg font-title font-black uppercase tracking-widest">Relojes</h3>
+            <p class="text-[9px] text-[#A3A3A3] mt-1 font-black tracking-widest uppercase">Cronógrafos Premium</p>
+          </div>
+        </a>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Featured Products (Light Mode Streetwear Grid) -->
+  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="featured-products">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="text-center mb-12 sm:mb-16">
-        <span class="inline-block bg-gold/10 text-gold text-[10px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest">Lo más solicitado</span>
-        <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main tracking-tight">Productos Destacados</h2>
-        <p class="mt-2 text-sm sm:text-base text-text-muted max-w-md mx-auto">Selección exclusiva de nuestras piezas de moda y fragancias preferidas en Pasto.</p>
+        <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest mb-3">Top Ventas</span>
+        <h2 class="text-2xl sm:text-4xl font-title font-black text-text-main uppercase tracking-widest">Productos Destacados</h2>
       </div>
 
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
@@ -100,36 +149,31 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
     </div>
   </section>
 
-  <!-- 3. Special Combo (Bento Grid Dark Premium Card) -->
-  <section class="py-10 sm:py-16 bg-white" id="combo-especial">
+  <!-- 4. Special Combo (Luxury Bento Matte Layout stays dark for visual block callout) -->
+  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="combo-especial">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Premium Bento Card Wrapper -->
-      <div class="relative bg-gradient-to-br from-[#111D33] via-[#1B2A4A] to-[#0A1224] border border-white/10 shadow-[0_40px_80px_rgba(0,0,0,0.15)] rounded-[3rem] p-8 lg:p-14 overflow-hidden bg-grain">
-        
-        <!-- Subtle background glow -->
-        <div class="absolute -top-40 -left-40 w-96 h-96 bg-primary-light/30 rounded-full blur-3xl opacity-60"></div>
-        <div class="absolute -bottom-40 -right-40 w-96 h-96 bg-gold/10 rounded-full blur-3xl opacity-35"></div>
-
-        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center relative z-10">
+      <!-- Premium Bento Card (Dark Matte Minimalist Callout) -->
+      <div class="bg-[#121214] border border-[#262626] rounded-md p-8 lg:p-14 overflow-hidden relative">
+        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
           
           <!-- Text and Price Details -->
           <div class="lg:col-span-7 text-center lg:text-left text-white">
-            <span class="inline-block bg-gold text-[#111D33] text-[9px] font-black px-4 py-1.5 rounded-full mb-5 uppercase tracking-widest">🔥 Combo Estrella</span>
-            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-title font-black mb-4 tracking-tight leading-tight">Chaqueta + Perfume original</h2>
-            <p class="text-sm sm:text-base text-white/70 mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
-              Arma tu combo ideal: Llévate nuestra icónica chaqueta impermeable colombiana junto con un perfume Yanbal original con domicilio incluido.
+            <span class="inline-block text-[#A3A3A3] text-[9px] font-black uppercase tracking-widest mb-4">Combo Especial</span>
+            <h2 class="text-3xl sm:text-4xl font-title font-black mb-4 tracking-widest uppercase">Chaqueta + Perfume</h2>
+            <p class="text-xs sm:text-sm text-[#A3A3A3] mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
+              Arma tu combo ideal: Llévate una chaqueta impermeable premium junto con un perfume original con envío express a domicilio.
             </p>
             
             <div class="flex items-center gap-5 justify-center lg:justify-start mb-8">
               <div class="flex flex-col">
-                <span class="text-3xl sm:text-4xl font-black text-white">$130.000</span>
-                <span class="text-[9px] text-white/50 font-black uppercase tracking-widest mt-0.5">COP — Combo completo</span>
+                <span class="text-2xl sm:text-3xl font-black text-white font-title">$130.000</span>
+                <span class="text-[9px] text-[#A3A3A3] font-black uppercase tracking-widest mt-1">COP — Combo completo</span>
               </div>
-              <div class="h-10 w-px bg-white/10"></div>
+              <div class="h-10 w-px bg-[#262626]"></div>
               <div class="flex flex-col items-start">
-                <span class="text-base text-white/40 line-through">$260.000</span>
-                <span class="bg-red-500 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider mt-0.5">Save -50% OFF</span>
+                <span class="text-sm text-neutral-600 line-through">${formatPrice(260000)}</span>
+                <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest mt-1">Save -50%</span>
               </div>
             </div>
 
@@ -138,103 +182,85 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
               target="_blank"
               rel="noopener noreferrer"
               id="combo-cta"
-              class="inline-flex items-center justify-center gap-3 bg-accent hover:bg-accent-hover hover:scale-[1.02] text-white font-black text-xs sm:text-sm uppercase tracking-widest px-8 py-4.5 rounded-2xl transition-all duration-300 shadow-[0_12px_24px_-8px_rgba(37,211,102,0.4)] cursor-pointer"
+              class="inline-flex items-center justify-center gap-3 bg-white hover:bg-neutral-200 text-black font-black text-[10px] sm:text-xs uppercase tracking-widest px-8 py-4 rounded-md transition-all duration-300 shadow-md cursor-pointer"
             >
-              ¡Solicitar Combo por WhatsApp!
+              Pedir Combo por WhatsApp
             </a>
           </div>
 
           <!-- Overlapping Premium Products Collage -->
           <div class="lg:col-span-5 flex items-center justify-center lg:justify-end pr-4 mt-8 lg:mt-0 relative">
-            <div class="relative w-40 sm:w-48 rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.3)] bg-white/5 border border-white/10 backdrop-blur-md p-2.5 rotate-[-6deg] hover:rotate-[0deg] hover:scale-105 transition-all duration-500 z-10">
-              <img src="/assets/products/jacket-azul.jpeg" alt="Chaqueta Impermeable" class="rounded-2xl w-full aspect-square object-cover" />
-              <p class="text-center text-[9px] uppercase tracking-widest font-black text-white/80 mt-2">Chaqueta</p>
+            <div class="relative w-36 sm:w-44 rounded-md overflow-hidden shadow-2xl bg-[#0B0B0C] border border-[#262626] p-2 rotate-[-5deg] hover:rotate-0 transition-all duration-500 z-10">
+              <img src="/assets/Estilo nordico a futuro.png" alt="Chaqueta Impermeable" class="rounded-sm w-full aspect-square object-cover" />
+              <p class="text-center text-[8px] uppercase tracking-widest font-black text-[#A3A3A3] mt-2">Chaqueta</p>
             </div>
-            <div class="relative w-40 sm:w-48 rounded-3xl overflow-hidden shadow-[0_20px_40px_rgba(0,0,0,0.3)] bg-white/5 border border-white/10 backdrop-blur-md p-2.5 rotate-[8deg] hover:rotate-[0deg] hover:scale-105 transition-all duration-500 -ml-16 mt-12 z-20">
-              <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Perfume Yanbal" class="rounded-2xl w-full aspect-square object-cover" />
-              <p class="text-center text-[9px] uppercase tracking-widest font-black text-white/80 mt-2">Ohm Parfum</p>
+            <div class="relative w-36 sm:w-44 rounded-md overflow-hidden shadow-2xl bg-[#0B0B0C] border border-[#262626] p-2 rotate-[6deg] hover:rotate-0 transition-all duration-500 -ml-12 mt-12 z-20">
+              <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Perfume Yanbal" class="rounded-sm w-full aspect-square object-cover" />
+              <p class="text-center text-[8px] uppercase tracking-widest font-black text-[#A3A3A3] mt-2">Ohm Parfum</p>
             </div>
           </div>
 
         </div>
-
       </div>
 
     </div>
   </section>
 
-  <!-- 4. Categories (Banners Editoriales con Imagen) -->
-  <section class="py-16 sm:py-24 bg-bg" id="categories">
+  <!-- 5. Landing Informativa (Ubicación, Misión, Propósito - Estilo Minimalista) -->
+  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="landing-info">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      
-      <div class="text-center mb-12 sm:mb-16">
-        <span class="inline-block bg-gold/10 text-gold text-[10px] font-black px-4 py-1.5 rounded-full mb-3 uppercase tracking-widest">Catálogo</span>
-        <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main tracking-tight">Nuestras Categorías</h2>
-        <p class="mt-2 text-sm sm:text-base text-text-muted">Diseño y estilo curado con la mejor calidad en Pasto.</p>
-      </div>
-
-      <!-- Categories Editorial Grid -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 max-w-5xl mx-auto">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
         
-        <!-- Category: Chaquetas -->
-        <a href="/chaquetas" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
-          <img src="/assets/products/jacket-azul.jpeg" alt="Colección Chaquetas" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
-          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
-          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
-            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">🧥 {jackets.length} Referencias</span>
-            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Chaquetas</h3>
-            <p class="text-xs text-white/70 mt-1 leading-normal">Impermeables y rompevientos de horma premium.</p>
-            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
-          </div>
-        </a>
+        <!-- Story / Brand Identity -->
+        <div class="space-y-6">
+          <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest">Nuestra Filosofía</span>
+          <h2 class="text-2xl sm:text-3xl font-title font-black text-text-main uppercase tracking-widest leading-none">Elegancia con Propósito</h2>
+          <div class="h-0.5 w-12 bg-neutral-200"></div>
+          <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
+            Estilo Nórdico representa una comunidad joven y emprendedora que busca transformar la manera de vestir en Pasto. Nuestra propuesta impulsa una mentalidad sólida: verse bien, sentirse bien y crecer juntos.
+          </p>
+          <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
+            Inspiramos a las personas a vestirse con estilo y actitud, mientras acompañamos su proceso de crecimiento personal y profesional con prendas icónicas y perfumes seleccionados.
+          </p>
+        </div>
 
-        <!-- Category: Perfumes -->
-        <a href="/perfumes" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
-          <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Colección Perfumes" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
-          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
-          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
-            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">🧴 {perfumes.length} Referencias</span>
-            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Perfumes</h3>
-            <p class="text-xs text-white/70 mt-1 leading-normal">Yanbal, Ésika y Avon directos de catálogo.</p>
-            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
+        <!-- Location, Schedule and Contact -->
+        <div class="space-y-8 bg-[#F9F9FB] border border-[#E5E7EB] p-8 sm:p-10 rounded-md">
+          <div class="space-y-4">
+            <span class="text-text-muted text-[9px] font-black uppercase tracking-widest block">Ubicación y Entregas</span>
+            <h3 class="text-lg font-title font-black text-text-main uppercase tracking-widest">Showroom / Local</h3>
+            <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
+              📍 Calle 18, Centro Histórico de Pasto, Colombia.<br />
+              Horario de atención: Lunes a Sábado | 9:00 AM a 7:00 PM.
+            </p>
           </div>
-        </a>
-
-        <!-- Category: Relojes -->
-        <a href="/relojes" class="group block relative overflow-hidden rounded-[2rem] aspect-[4/5] shadow-lg border-glow transition-all duration-500">
-          <img src="/assets/products/relojes/rel-04.png" alt="Colección Relojes" class="object-cover absolute inset-0 w-full h-full brightness-[0.4] group-hover:scale-105 group-hover:brightness-[0.45] transition-all duration-700" />
-          <div class="absolute inset-0 bg-gradient-to-t from-primary-dark/95 via-primary-dark/20 to-transparent"></div>
-          <div class="absolute bottom-0 inset-x-0 p-6 text-white z-10">
-            <span class="text-xs bg-white/10 backdrop-blur-md px-3 py-1 rounded-full text-white mb-2 inline-block font-semibold">⌚ {relojes.length} Modelos</span>
-            <h3 class="text-xl sm:text-2xl font-title font-black tracking-tight">Relojes</h3>
-            <p class="text-xs text-white/70 mt-1 leading-normal">Cronógrafos de acero y ediciones de lujo.</p>
-            <span class="inline-flex items-center gap-1 text-[10px] sm:text-xs font-black text-gold uppercase tracking-widest mt-4 group-hover:translate-x-1 transition-transform">Ver colección →</span>
+          
+          <div class="space-y-2 border-t border-[#E5E7EB] pt-6">
+            <span class="text-text-muted text-[9px] font-black uppercase tracking-widest block mb-2">Canal Directo</span>
+            <p class="text-sm text-text-main font-black tracking-widest">📞 WHATSAPP: +57 321 888 8046</p>
+            <p class="text-[11px] text-text-muted mt-1 font-light leading-relaxed">Escríbenos para programar envíos inmediatos el mismo día en Pasto.</p>
           </div>
-        </a>
+        </div>
 
       </div>
     </div>
   </section>
 
-  <!-- 5. Final CTA -->
-  <section class="py-20 sm:py-28 bg-white" id="final-cta">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center relative">
-      <span class="text-4xl mb-4 block">🚚</span>
-      <h2 class="text-3xl sm:text-4xl font-title font-black text-text-main mb-4 tracking-tight">¿Listo para renovar tu outfit?</h2>
-      <p class="text-sm sm:text-base text-text-muted mb-8 max-w-lg mx-auto leading-relaxed">
-        Escríbenos por WhatsApp y programamos tu entrega inmediata hoy mismo en Pasto. Paga en casa al recibir, sin enredos.
+  <!-- 6. Final CTA (Monochrome minimalist) -->
+  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="final-cta">
+    <div class="max-w-3xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-2xl sm:text-3xl font-title font-black text-text-main uppercase tracking-widest mb-4">¿Listo para renovar tu estilo?</h2>
+      <p class="text-xs sm:text-sm text-text-muted mb-8 max-w-md mx-auto leading-relaxed">
+        Escríbenos por WhatsApp y programamos tu entrega inmediata hoy mismo en Pasto. Paga al recibir en la puerta de tu casa.
       </p>
       <a
         href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent(STORE_CONFIG.whatsapp.defaultMessage)}`}
         target="_blank"
         rel="noopener noreferrer"
         id="final-cta-whatsapp"
-        class="inline-flex items-center justify-center gap-3 bg-accent hover:bg-accent-hover hover:scale-[1.02] text-white font-black text-xs sm:text-sm uppercase tracking-widest px-8 py-4.5 rounded-2xl transition-all duration-300 shadow-[0_12px_24px_-8px_rgba(37,211,102,0.4)] cursor-pointer"
+        class="inline-flex items-center justify-center gap-3 bg-text-main hover:bg-neutral-800 text-white font-black text-[10px] sm:text-xs uppercase tracking-widest px-8 py-4.5 rounded-md transition-all duration-300 shadow-md cursor-pointer"
       >
-        <svg class="w-5 h-5 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-        </svg>
-        Chatear con un Asesor por WhatsApp
+        Chatear con un Asesor
       </a>
     </div>
   </section>

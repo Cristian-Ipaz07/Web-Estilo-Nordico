@@ -1,35 +1,109 @@
 ---
 /**
- * /relojes/index.astro — Catálogo de relojes
+ * /relojes/index.astro — Catálogo de relojes (Estilo Dark Mode Streetwear)
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
 import { relojes } from '../../data/products';
+
+const featured = relojes.filter(r => r.featured);
 ---
 
 <BaseLayout title="Relojes de Alta Gama" description="Relojes ejecutivos, cronógrafos y de lujo Curren, SKMEI y RISTOS. Paga al recibir en Pasto y envíos nacionales rápidos.">
   
-  <!-- Page Header -->
-  <section class="bg-gradient-to-br from-[#D97706] to-[#F59E0B] text-white py-12 sm:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <span class="inline-block text-4xl mb-3">⌚</span>
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Relojes Premium</h1>
-      <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
-        Diseños exclusivos de lujo y deportivos. {relojes.length} modelos en stock real.
-      </p>
-      <div class="flex flex-wrap gap-3 justify-center mt-6">
-        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          🏠 Paga al Recibir en Pasto
+  <!-- Page Header (Premium Watch Banner with right layout alignment and bottom fade to white) -->
+  <section class="relative w-full h-[65vh] sm:h-[75vh] lg:h-[80vh] min-h-[550px] flex items-center overflow-hidden bg-black" id="relojes-hero">
+    <!-- Background Image (Aligned bottom-right to show the watch prominently) -->
+    <div class="absolute inset-0 z-0">
+      <img 
+        src="/assets/fondo relojes.png" 
+        alt="Colección Relojes Estilo Nórdico" 
+        class="w-full h-full object-cover brightness-[0.7] sm:brightness-90"
+        style="object-position: right bottom;"
+        loading="eager"
+      />
+      <!-- Bottom gradient overlay to blend into the white section -->
+      <div class="absolute inset-0 bg-gradient-to-t from-white via-black/40 to-transparent z-10"></div>
+    </div>
+
+    <!-- Content Container -->
+    <div class="relative z-20 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="max-w-2xl text-left">
+        
+        <!-- Tagline -->
+        <span class="inline-block text-gold text-[9px] font-black uppercase tracking-[0.25em] mb-3">
+          Accesorios de Lujo
         </span>
-        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          🇨🇴 Envíos a todo el país
-        </span>
+
+        <!-- Title -->
+        <h1 class="text-5xl sm:text-7xl lg:text-8xl font-title font-black text-white leading-none tracking-wider uppercase mb-4">
+          Relojes
+        </h1>
+
+        <!-- Subtitle -->
+        <div class="max-w-md mb-6">
+          <p class="text-xs sm:text-sm text-zinc-300 font-light leading-relaxed">
+            Diseños exclusivos de lujo y deportivos. 
+            <span class="text-gold font-bold block sm:inline mt-1 sm:mt-0"> {relojes.length} modelos en stock real.</span>
+          </p>
+          <div class="h-px w-10 bg-gold/45 mt-4"></div>
+        </div>
+
+        <!-- Trust Signals (Horizontal Grid) -->
+        <div class="flex flex-wrap gap-x-8 gap-y-4 items-center mb-8">
+          
+          <!-- Signal 1 -->
+          <div class="flex items-center gap-2.5">
+            <svg class="w-5 h-5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+            <div class="leading-tight">
+              <span class="text-[8px] text-zinc-400 font-black uppercase tracking-widest block">Paga al Recibir</span>
+              <span class="text-[9px] text-white font-black uppercase tracking-widest block">En Pasto</span>
+            </div>
+          </div>
+
+          <!-- Signal 2 -->
+          <div class="flex items-center gap-2.5">
+            <svg class="w-5 h-5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0" />
+            </svg>
+            <div class="leading-tight">
+              <span class="text-[8px] text-zinc-400 font-black uppercase tracking-widest block">Envíos</span>
+              <span class="text-[9px] text-white font-black uppercase tracking-widest block">Nacionales</span>
+            </div>
+          </div>
+
+          <!-- Signal 3 -->
+          <div class="flex items-center gap-2.5">
+            <svg class="w-5 h-5 text-gold flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 0 001.946.806 3.42 0 013.138 3.138 3.42 0 00.806 1.946 3.42 0 010 4.438 3.42 0 00-.806 1.946 3.42 0 01-3.138 3.138 3.42 0 00-1.946.806 3.42 0 01-4.438 0 3.42 0 00-1.946-.806 3.42 0 01-3.138-3.138 3.42 0 00-.806-1.946 3.42 0 010-4.438 3.42 0 00.806-1.946 3.42 0 013.138-3.138z" />
+            </svg>
+            <div class="leading-tight">
+              <span class="text-[8px] text-zinc-400 font-black uppercase tracking-widest block">Calidad Premium</span>
+              <span class="text-[9px] text-white font-black uppercase tracking-widest block">Garantizada</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- CTA Button -->
+        <div>
+          <a 
+            href="#relojes-grid-container"
+            class="inline-flex items-center justify-center gap-2 border-2 border-gold bg-black hover:bg-neutral-950 text-white font-black text-[11px] sm:text-xs uppercase tracking-widest px-8 py-4.5 rounded-md transition-all duration-300 cursor-pointer shadow-md"
+          >
+            Ver Catálogo <span class="ml-1">→</span>
+          </a>
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- Products Grid -->
-  <section class="py-12 sm:py-16">
+  <section class="py-12 sm:py-16 bg-white" id="relojes-grid-container">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-4xl mx-auto">
         {relojes.map((product) => (
@@ -50,15 +124,29 @@ import { relojes } from '../../data/products';
   </section>
 
   <!-- Cross-sell -->
-  <section class="py-12 sm:py-16 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] text-white">
+  <section class="py-16 bg-[#121214] border-t border-[#262626] text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-      <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">Complementa con un perfume de catálogo 🧴</h2>
-      <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
-        Fragancias Yanbal, Ésika y Cyzone originales con envío inmediato a domicilio.
+      <h2 class="text-2xl font-title font-black uppercase tracking-widest mb-3">Complementa con un perfume de catálogo</h2>
+      <p class="text-xs sm:text-sm text-[#A3A3A3] mb-6 max-w-lg mx-auto font-light leading-relaxed">
+        Fragancias Yanbal, Ésika y Cyzone originales con envío inmediato a tu domicilio.
       </p>
-      <a href="/perfumes" class="inline-flex items-center gap-2 bg-white text-[#8B5CF6] font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm">
+      <a href="/perfumes" class="inline-flex items-center gap-2 border border-white hover:bg-white hover:text-[#0B0B0C] font-black text-[10px] sm:text-xs uppercase tracking-widest px-6 py-3 rounded-md transition-all duration-300">
         Ver perfumes →
       </a>
     </div>
   </section>
 </BaseLayout>
+
+<style>
+  /* Endless slow scrolling marquee */
+  @keyframes marquee {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+  .animate-marquee {
+    animation: marquee 35s linear infinite;
+  }
+  .animate-marquee:hover {
+    animation-play-state: paused;
+  }
+</style>

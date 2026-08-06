@@ -1,9 +1,6 @@
 ---
 /**
- * /chaquetas/index.astro — Catálogo de chaquetas desde Notion
- * 
- * Carga inventario real desde Notion en build-time.
- * Muestra filtros por color y talla con filtrado client-side.
+ * /chaquetas/index.astro — Catálogo de chaquetas (Estilo Dark Mode Streetwear)
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
@@ -18,39 +15,81 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
 <BaseLayout title="Chaquetas Impermeables" description="Chaquetas impermeables de Confección Premium Colombiana con stock real. Filtros por color y talla. Paga al recibir en Pasto y envíos a todo el país.">
   
-  <!-- Page Header -->
-  <section class="bg-gradient-to-br from-primary to-primary-light text-white py-12 sm:py-16">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-      <span class="inline-block text-4xl mb-3">🧥</span>
-      <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black mb-3">Chaquetas Premium</h1>
-      <p class="text-base sm:text-lg text-white/70 max-w-lg mx-auto">
-        Confección nacional con stock real en Pasto. {jackets.length} modelos, {availableCount} disponibles.
-      </p>
-      <div class="flex flex-wrap gap-3 justify-center mt-6">
-        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          🏠 Paga al Recibir en Pasto
+  <!-- Page Header (Premium Jackets Banner with bottom white fade) -->
+  <section class="relative w-full h-[70vh] sm:h-[80vh] flex items-end overflow-hidden bg-black" id="chaquetas-hero">
+    <!-- Image Background -->
+    <div class="absolute inset-0 z-0">
+      <img 
+        src="/assets/baner cha.png" 
+        alt="Colección Chaquetas Estilo Nórdico" 
+        class="w-full h-full object-cover brightness-[0.75]"
+        style="object-position: 80% center;"
+        loading="eager"
+      />
+      <!-- Dark bottom gradient overlay that fades to white at the bottom edge -->
+      <div class="absolute inset-0 bg-gradient-to-t from-white via-black/60 to-transparent z-10"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-20 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-16 sm:pb-24">
+      <div class="max-w-2xl text-left">
+        
+        <!-- Minimalist Tagline -->
+        <span class="inline-block border border-white/20 bg-white/5 backdrop-blur-md text-white text-[9px] font-black px-3.5 py-1.5 rounded-md uppercase tracking-widest mb-4">
+          COLECCIÓN 2026
         </span>
-        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          🇨🇴 Confección Nacional Premium
-        </span>
-        <span class="inline-flex items-center gap-1.5 bg-white/10 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold">
-          🚚 Envíos a todo el país
-        </span>
+
+        <!-- Title -->
+        <h1 class="text-4xl sm:text-5xl lg:text-6xl font-title font-black text-white leading-none tracking-wider uppercase mb-4">
+          Chaquetas
+        </h1>
+
+        <!-- Slogan -->
+        <p class="text-xs sm:text-sm lg:text-base text-zinc-300 mb-6 font-light leading-relaxed max-w-md">
+          Para quienes buscan estilo, comodidad y protección.
+        </p>
+
+        <!-- Trust Signals (List style) -->
+        <ul class="space-y-2 mb-8 text-xs text-white/90 font-semibold tracking-wider uppercase">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Calidad Premium
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Envíos Nacionales
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Pago Contra Entrega
+          </li>
+        </ul>
+
+        <!-- CTA -->
+        <div>
+          <a 
+            href="#filter-bar"
+            class="inline-flex items-center justify-center gap-2 bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-2 border-[#C9A962] hover:border-[#D4B878] font-black text-[11px] sm:text-xs uppercase tracking-widest px-8 py-4.5 rounded-md transition-all duration-300 cursor-pointer shadow-md"
+          >
+            Ver Catálogo <span class="ml-1">→</span>
+          </a>
+        </div>
+
       </div>
     </div>
   </section>
 
   <!-- Filters + Products -->
-  <section class="py-8 sm:py-12 lg:py-16">
+  <section class="py-8 sm:py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Filter Bar -->
-      <div class="mb-8 p-4 sm:p-6 bg-white rounded-2xl border border-border-light shadow-sm" id="filter-bar">
+      <!-- Filter Bar (Light Theme) -->
+      <div class="mb-8 p-5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]" id="filter-bar">
         <div class="flex flex-wrap gap-4 items-end">
           <!-- Color filter -->
           <div class="flex-1 min-w-[140px]">
-            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Color</label>
-            <select id="filter-color" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
+            <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Color</label>
+            <select id="filter-color" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
               <option value="all">Todos los colores</option>
               {colors.map(color => (
                 <option value={color}>{color}</option>
@@ -59,8 +98,8 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
           </div>
           <!-- Size filter -->
           <div class="flex-1 min-w-[120px]">
-            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Talla</label>
-            <select id="filter-size" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
+            <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Talla</label>
+            <select id="filter-size" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
               <option value="all">Todas</option>
               {sizes.map(size => (
                 <option value={size}>{size}</option>
@@ -69,19 +108,19 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
           </div>
           <!-- Status filter -->
           <div class="flex-1 min-w-[130px]">
-            <label class="block text-xs font-bold text-text-main mb-2 uppercase tracking-wider">Estado</label>
-            <select id="filter-status" class="w-full px-3 py-2.5 rounded-xl border border-border bg-bg text-sm text-text-main">
-              <option value="all">Todos</option>
-              <option value="disponible" selected>Disponibles</option>
+            <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Estado</label>
+            <select id="filter-status" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+              <option value="all" selected>Todos</option>
+              <option value="disponible">Disponibles</option>
               <option value="agotado">Agotados</option>
             </select>
           </div>
           <!-- Reset -->
-          <button id="filter-reset" class="px-4 py-2.5 rounded-xl text-xs font-bold text-primary border-2 border-primary hover:bg-primary hover:text-white transition-all">
+          <button id="filter-reset" class="px-5 py-2.5 rounded-md text-[10px] font-black uppercase tracking-widest text-text-main border border-[#E5E7EB] hover:border-[#0B0B0C] hover:bg-[#F9F9FB] transition-all cursor-pointer">
             Limpiar
           </button>
         </div>
-        <p class="mt-3 text-xs text-text-muted" id="filter-count">{jackets.length} productos</p>
+        <p class="mt-3 text-[10px] text-text-muted uppercase tracking-wider" id="filter-count">{jackets.length} productos</p>
       </div>
 
       <!-- Products Grid -->
@@ -114,21 +153,21 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
       <!-- Empty state -->
       <div id="empty-state" class="hidden text-center py-16">
-        <span class="text-4xl mb-4 block">🔍</span>
-        <p class="text-lg font-bold text-text-main">No hay productos con estos filtros</p>
-        <p class="text-sm text-text-muted mt-1">Intenta cambiar los filtros de búsqueda</p>
+        <span class="text-3xl mb-4 block">🔍</span>
+        <p class="text-sm font-black text-text-main uppercase tracking-widest">No hay chaquetas con estos filtros</p>
+        <p class="text-xs text-text-muted mt-1 uppercase tracking-wider">Intenta cambiar la combinación de filtros</p>
       </div>
     </div>
   </section>
 
   <!-- Cross-sell Banner -->
-  <section class="py-12 sm:py-16 bg-gradient-to-r from-[#8B5CF6] to-[#A78BFA] text-white">
+  <section class="py-16 bg-[#121214] border-t border-[#262626] text-white">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
-      <h2 class="text-xl sm:text-2xl lg:text-3xl font-black mb-3">¿Y si le sumas un perfume? 🧴</h2>
-      <p class="text-sm sm:text-base text-white/80 mb-6 max-w-lg mx-auto">
-        Combo chaqueta + perfume original desde <strong>$130.000 COP</strong> con envío inmediato a domicilio en Pasto.
+      <h2 class="text-2xl font-title font-black uppercase tracking-widest mb-3">¿Y si le sumas un perfume?</h2>
+      <p class="text-xs sm:text-sm text-[#A3A3A3] mb-6 max-w-lg mx-auto font-light leading-relaxed">
+        Combo chaqueta + perfume original desde <strong>$130.000 COP</strong> con entrega inmediata hoy mismo en Pasto.
       </p>
-      <a href="/perfumes" class="inline-flex items-center gap-2 bg-white text-[#8B5CF6] font-bold px-6 py-3 rounded-xl transition-all duration-200 hover:shadow-xl hover:scale-105 text-sm">
+      <a href="/perfumes" class="inline-flex items-center gap-2 border border-white hover:bg-white hover:text-[#0B0B0C] font-black text-[10px] sm:text-xs uppercase tracking-widest px-6 py-3 rounded-md transition-all duration-300">
         Ver perfumes →
       </a>
     </div>

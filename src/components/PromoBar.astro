@@ -1,24 +1,35 @@
 ---
 /**
  * PromoBar.astro — Barra promocional superior animada
- * Muestra mensaje de envío gratis en Pasto
+ * Muestra mensaje adaptado a la categoría (Lociones vs Chaquetas)
  */
 import { STORE_CONFIG } from '../config/store';
+
+const currentPath = Astro.url.pathname;
+
+let promoText = "PAGA EN EFECTIVO O NEQUI AL RECIBIR EN TU PUERTA 📦 DOMICILIO EN PASTO • ENVÍOS NACIONALES (3-5 DÍAS)";
+
+if (currentPath.includes('/perfumes')) {
+  promoText = "PAGA EN EFECTIVO O NEQUI AL RECIBIR EN TU PUERTA 📦 DOMICILIO EN PASTO • ENVÍOS NACIONALES (3-5 DÍAS)";
+} else if (currentPath.includes('/chaquetas')) {
+  promoText = "ENVÍO GRATIS EN PASTO 📦 ENVÍOS NACIONALES • PAGA EN EFECTIVO O NEQUI AL RECIBIR EN TU PUERTA";
+}
 ---
 
-<div class="bg-primary text-white text-xs sm:text-sm py-2 overflow-hidden relative">
-  <div class="flex whitespace-nowrap promo-scroll">
-    <span class="mx-8 flex items-center gap-2">
-      🏠 <strong>Paga al Recibir</strong> en Pasto &nbsp;•&nbsp; 🇨🇴 <strong>Calidad Premium Colombiana</strong> &nbsp;•&nbsp; 🚚 Envíos a todo el país (3-5 días)
+<div class="bg-[#121214] text-white border-b border-[#262626] text-[10px] py-2 overflow-hidden relative">
+  <div class="flex whitespace-nowrap promo-scroll uppercase tracking-widest font-black">
+    <span class="mx-8 flex items-center gap-1">
+      {promoText} &nbsp;•&nbsp; CALIDAD PREMIUM &nbsp;•&nbsp; PRODUCTOS 100% ORIGINALES
     </span>
-    <span class="mx-8 flex items-center gap-2">
-      🏠 <strong>Paga al Recibir</strong> en Pasto &nbsp;•&nbsp; 🇨🇴 <strong>Calidad Premium Colombiana</strong> &nbsp;•&nbsp; 🚚 Envíos a todo el país (3-5 días)
+    <span class="mx-8 flex items-center gap-1">
+      {promoText} &nbsp;•&nbsp; CALIDAD PREMIUM &nbsp;•&nbsp; PRODUCTOS 100% ORIGINALES
     </span>
-    <span class="mx-8 flex items-center gap-2">
-      🏠 <strong>Paga al Recibir</strong> en Pasto &nbsp;•&nbsp; 🇨🇴 <strong>Calidad Premium Colombiana</strong> &nbsp;•&nbsp; 🚚 Envíos a todo el país (3-5 días)
+    <span class="mx-8 flex items-center gap-1">
+      {promoText} &nbsp;•&nbsp; CALIDAD PREMIUM &nbsp;•&nbsp; PRODUCTOS 100% ORIGINALES
     </span>
-    <span class="mx-8 flex items-center gap-2">
-      🏠 <strong>Paga al Recibir</strong> en Pasto &nbsp;•&nbsp; 🇨🇴 <strong>Calidad Premium Colombiana</strong> &nbsp;•&nbsp; 🚚 Envíos a todo el país (3-5 días)
+    <span class="mx-8 flex items-center gap-1">
+      {promoText} &nbsp;•&nbsp; CALIDAD PREMIUM &nbsp;•&nbsp; PRODUCTOS 100% ORIGINALES
     </span>
   </div>
 </div>
+

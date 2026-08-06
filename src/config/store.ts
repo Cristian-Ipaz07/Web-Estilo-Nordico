@@ -22,10 +22,10 @@ export const STORE_CONFIG = {
     defaultMessage: '¡Hola! Me interesa conocer más sobre los productos de Estilo Nórdico. 🛒',
   },
 
-  // Meta Pixel (actualizar cuando se obtenga el ID real)
+  // Meta Pixel
   metaPixel: {
-    id: 'TU_PIXEL_ID_REAL',
-    enabled: false, // Cambiar a true cuando se tenga el ID real
+    id: '1065979052606365',
+    enabled: true,
   },
 
   // Branding / Colores

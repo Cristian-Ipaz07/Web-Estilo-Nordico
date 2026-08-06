@@ -173,31 +173,31 @@ const faqs = product.category === 'perfumes'
     ];
 ---
 
-<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-10 pb-28 md:pb-10">
   <Breadcrumbs items={[
     { label: categoryLabel, href: categoryHref },
     { label: product.name }
   ]} />
 
   <!-- 1. Main Grid -->
-  <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 bg-white rounded-3xl border border-border-light shadow-sm p-4 sm:p-8 mb-12">
+  <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 bg-white rounded-md border border-[#E5E7EB] p-4 sm:p-8 mb-12">
     <!-- Left Column: Media -->
     <div class="lg:col-span-7 space-y-4">
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-b from-gray-50 to-gray-100 aspect-square border border-border-light">
+      <div class="relative overflow-hidden rounded-md bg-[#F3F4F6] aspect-square border border-[#E5E7EB]">
         <img 
           src={product.image} 
           alt={product.name}
-          class="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+          class="w-full h-full object-cover transition-transform duration-700 hover:scale-105"
           id="main-product-image"
           loading="eager"
         />
         {discount > 0 && (
-          <div class="absolute top-4 left-4 bg-red-500 text-white text-xs font-black px-3.5 py-1.5 rounded-full badge-discount shadow-lg uppercase tracking-wider">
+          <div class="absolute top-4 left-4 bg-red-600 text-white text-[9px] font-black px-3.5 py-1.5 rounded-md uppercase tracking-wider shadow-lg">
             Oferta -{discount}%
           </div>
         )}
         {product.status === 'agotado' && (
-          <div class="absolute top-4 right-4 bg-gray-800 text-white text-xs font-bold px-3 py-1.5 rounded-full uppercase">
+          <div class="absolute top-4 right-4 bg-neutral-850 text-neutral-400 text-[9px] font-black px-3 py-1.5 rounded-md uppercase tracking-wider">
             Agotado
           </div>
         )}
@@ -207,7 +207,7 @@ const faqs = product.category === 'perfumes'
       {product.images && product.images.length > 1 && (
         <div class="grid grid-cols-4 gap-2">
           {product.images.map((img, i) => (
-            <button class="rounded-lg overflow-hidden border-2 border-transparent hover:border-primary transition-all aspect-square thumbnail-btn" data-img={img}>
+            <button class="rounded-md overflow-hidden border border-[#E5E7EB] hover:border-text-main transition-all aspect-square thumbnail-btn" data-img={img}>
               <img src={img} alt={`${product.name} vista ${i + 1}`} class="w-full h-full object-cover" loading="lazy" />
             </button>
           ))}
@@ -220,25 +220,35 @@ const faqs = product.category === 'perfumes'
       <div>
         <!-- Brand & Rating header -->
         <div class="flex items-center gap-2 mb-2">
-          <span class="text-xs font-bold text-accent bg-accent/10 px-2.5 py-1 rounded-md uppercase tracking-wider">Calidad Premium Colombiana</span>
-          <div class="flex items-center text-gold text-sm font-semibold gap-1">
+          <span class="text-[9px] font-black text-text-main bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-widest">Calidad Premium</span>
+          <div class="flex items-center text-gold text-xs font-semibold gap-1">
             <span>★★★★★</span>
-            <span class="text-text-muted text-xs font-medium">4.7 (48 valoraciones)</span>
+            <span class="text-text-muted text-[10px] font-medium ml-1">4.7 (48)</span>
           </div>
         </div>
         
         <!-- Title -->
-        <h1 class="text-2xl sm:text-3xl font-black text-text-main leading-tight mb-2" id="product-title">
+        <h1 class="text-xl sm:text-2xl font-black text-text-main uppercase tracking-wider leading-tight mb-2 font-title" id="product-title">
           {product.name}
         </h1>
 
-        <!-- Price AliExpress style -->
-        <div class="p-4 bg-bg rounded-2xl mb-6 border border-border-light">
-          <span class="text-[10px] text-text-muted uppercase font-bold tracking-wider block mb-1">Precio Especial Contraentrega</span>
-          <div class="flex items-baseline gap-3">
-            <span class="text-3xl sm:text-4xl font-black text-primary" id="display-price">${formatPrice(product.price)}</span>
-            <span class="text-base text-text-light line-through font-medium" id="display-anchor-price">${formatPrice(product.anchorPrice)}</span>
-            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-wide" id="display-saving-badge">AHORRAS {getDiscount(product.price, product.anchorPrice)}%</span>
+        <!-- Price Anchoring Comparison Block -->
+        <div class="p-4 bg-[#F9F9FB] rounded-md mb-6 border border-[#E5E7EB] shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-[10px] text-text-muted uppercase font-black tracking-widest">Oferta Local Contraentrega</span>
+            <span class="bg-red-600 text-white text-[10px] font-black px-2.5 py-0.5 rounded-md uppercase tracking-widest shadow-sm" id="display-saving-badge">
+              AHORRAS {getDiscount(product.price, product.anchorPrice)}%
+            </span>
+          </div>
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-xs text-text-muted">
+              <span>Precio Comercial:</span>
+              <span class="line-through font-semibold text-text-light" id="display-anchor-price">${formatPrice(product.anchorPrice)} COP</span>
+            </div>
+            <div class="flex items-center justify-between text-base sm:text-lg font-black text-text-main font-title pt-1 border-t border-[#E5E7EB]">
+              <span>Precio Estilo Nórdico:</span>
+              <span class="text-2xl sm:text-3xl text-emerald-600 font-black font-title" id="display-price">${formatPrice(product.price)} COP</span>
+            </div>
           </div>
         </div>
 
@@ -277,17 +287,17 @@ const faqs = product.category === 'perfumes'
         {hasVariants && (
           <div class="mb-6" id="variant-selector">
             <div class="flex items-center justify-between mb-2">
-              <label class="block text-sm font-bold text-text-main">Talla:</label>
-              <span class="text-xs text-primary font-bold bg-primary/5 px-2 py-0.5 rounded-md border border-primary/10">Horma reducida 😉</span>
+              <label class="block text-xs font-black text-text-main uppercase tracking-widest">Talla:</label>
+              <span class="text-[9px] text-text-main font-black bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-wider">Horma reducida 😉</span>
             </div>
             <div class="flex flex-wrap gap-2" id="size-options">
               {product.variants!.map((v) => (
                 <button
                   class:list={[
-                    'size-btn px-4 py-2.5 rounded-xl text-sm font-bold border-2 transition-all duration-200 shadow-sm flex items-center gap-1.5',
+                    'size-btn px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-widest border transition-all duration-200 shadow-sm flex items-center gap-1.5',
                     v.status === 'disponible'
-                      ? 'border-border hover:border-primary hover:bg-primary/5 cursor-pointer bg-white text-text-main'
-                      : 'border-border-light text-text-light line-through cursor-not-allowed opacity-50 bg-bg'
+                      ? 'border-[#E5E7EB] hover:border-text-main cursor-pointer bg-white text-text-main'
+                      : 'border-[#F3F4F6] text-text-light line-through cursor-not-allowed opacity-40 bg-[#F9F9FB]'
                   ]}
                   data-talla={v.talla}
                   data-stock={v.stock}
@@ -297,21 +307,31 @@ const faqs = product.category === 'perfumes'
                 >
                   {v.talla}
                   {v.status === 'disponible' && (
-                    <span class="text-[10px] text-text-muted font-normal bg-bg border border-border px-1.5 py-0.5 rounded-md">({v.stock})</span>
+                    <span class="text-[9px] text-text-muted font-black bg-[#F9F9FB] border border-[#E5E7EB] px-1.5 py-0.5 rounded-sm">({v.stock})</span>
                   )}
                 </button>
               ))}
             </div>
-            <p class="mt-2 text-xs text-text-muted" id="selected-size-info">Selecciona una talla para pedir</p>
+            <p class="mt-2 text-[10px] text-text-muted uppercase tracking-wider" id="selected-size-info">Selecciona una talla para pedir</p>
+
+            {product.status === 'agotado' && (
+              <div class="my-3.5 p-3.5 bg-amber-50 border border-amber-200 rounded-md text-amber-900 text-xs flex gap-2.5 items-start text-left">
+                <span class="text-base leading-none">🔔</span>
+                <div>
+                  <p class="font-black uppercase tracking-wider text-[10px] text-amber-900">¿Buscabas este modelo/color?</p>
+                  <p class="font-light mt-0.5 leading-relaxed text-[11px] text-amber-800">No te preocupes. Escríbenos y <strong>lo encargaremos en nuestro próximo pedido de fábrica</strong> sin ningún compromiso. ¡Te avisamos apenas esté listo!</p>
+                </div>
+              </div>
+            )}
 
             <!-- Mini visual measurements table -->
-            <div class="mt-4 p-3 bg-bg rounded-xl border border-border-light">
-              <span class="text-[10px] font-bold text-text-muted uppercase block mb-2">Guía de medidas de costura:</span>
-              <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-bold text-text-main">
-                <div class="p-1.5 bg-white rounded-lg border border-border-light">M: 63x53 cm</div>
-                <div class="p-1.5 bg-white rounded-lg border border-border-light">L: 67x57 cm</div>
-                <div class="p-1.5 bg-white rounded-lg border border-border-light">XL: 70x60 cm</div>
-                <div class="p-1.5 bg-white rounded-lg border border-border-light">XXL: 74x64 cm</div>
+            <div class="mt-4 p-3.5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]">
+              <span class="text-[9px] font-black text-text-muted uppercase tracking-widest block mb-2.5">Medidas de costura:</span>
+              <div class="grid grid-cols-4 gap-2 text-center text-[10px] font-black text-text-main uppercase">
+                <div class="p-1.5 bg-white rounded-md border border-[#E5E7EB]">M: 63x53 cm</div>
+                <div class="p-1.5 bg-white rounded-md border border-[#E5E7EB]">L: 67x57 cm</div>
+                <div class="p-1.5 bg-white rounded-md border border-[#E5E7EB]">XL: 70x60 cm</div>
+                <div class="p-1.5 bg-white rounded-md border border-[#E5E7EB]">XXL: 74x64 cm</div>
               </div>
             </div>
           </div>
@@ -320,11 +340,11 @@ const faqs = product.category === 'perfumes'
         <!-- 3. AliExpress Package Selector Widget -->
         {product.category === 'chaquetas' && (
           <div class="mb-6">
-            <label class="block text-sm font-bold text-text-main mb-3">Elige tu mejor oferta hoy:</label>
+            <label class="block text-xs font-black text-text-muted uppercase tracking-widest mb-3">Elige tu mejor oferta hoy:</label>
             <div class="grid grid-cols-1 gap-3">
               <!-- Pack 1 -->
               <button 
-                class="pack-option border-2 border-primary bg-primary/5 rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                class="pack-option border border-text-main bg-neutral-50 rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="1"
                 data-pack-name="Pack 1 Individual"
                 data-pack-price="90000"
@@ -332,20 +352,20 @@ const faqs = product.category === 'perfumes'
                 data-pack-desc="1 Chaqueta (Ideal para probar)"
               >
                 <div>
-                  <span class="inline-block bg-primary/10 text-primary text-[9px] font-bold px-2 py-0.5 rounded-md uppercase mb-1">Individual</span>
-                  <p class="text-sm font-black text-text-main">1 Chaqueta</p>
-                  <p class="text-xs text-text-muted">Largo y ancho exacto</p>
+                  <span class="inline-block bg-[#F9F9FB] border border-[#E5E7EB] text-text-main text-[8px] font-black px-2.5 py-0.5 rounded-sm uppercase tracking-widest mb-1">Individual</span>
+                  <p class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">1 Chaqueta</p>
+                  <p class="text-[10px] text-text-muted font-light">Largo y ancho exacto</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-lg font-black text-primary">$90.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title">$90.000</p>
                   <p class="text-xs text-text-light line-through">$120.000</p>
                 </div>
-                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold" id="pack-check-1">✓</div>
+                <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold" id="pack-check-1">✓</div>
               </button>
 
               <!-- Pack 2 -->
               <button 
-                class="pack-option border-2 border-border hover:border-primary/50 bg-white rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                class="pack-option border border-[#E5E7EB] hover:border-neutral-500 bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="2"
                 data-pack-name="Pack 2 Duo Estilo"
                 data-pack-price="160000"
@@ -353,20 +373,20 @@ const faqs = product.category === 'perfumes'
                 data-pack-desc="2 Chaquetas (Ahorras $20.000)"
               >
                 <div>
-                  <span class="inline-block bg-gold text-primary text-[9px] font-black px-2 py-0.5 rounded-md uppercase mb-1">Más vendido</span>
-                  <p class="text-sm font-black text-text-main">2 Chaquetas</p>
-                  <p class="text-xs text-text-muted">Ahorras $20.000 en combo</p>
+                  <span class="inline-block bg-gold/10 border border-gold/30 text-gold text-[8px] font-black px-2.5 py-0.5 rounded-sm uppercase tracking-widest mb-1">Más vendido</span>
+                  <p class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">2 Chaquetas</p>
+                  <p class="text-[10px] text-text-muted font-light">Ahorras $20.000 en combo</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-lg font-black text-text-main">$160.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title">$160.000</p>
                   <p class="text-xs text-text-light line-through">$240.000</p>
                 </div>
-                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hidden" id="pack-check-2">✓</div>
+                <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold hidden" id="pack-check-2">✓</div>
               </button>
 
               <!-- Pack 3 -->
               <button 
-                class="pack-option border-2 border-border hover:border-primary/50 bg-white rounded-2xl p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                class="pack-option border border-[#E5E7EB] hover:border-neutral-500 bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="3"
                 data-pack-name="Pack 3 Combo Familiar"
                 data-pack-price="234000"
@@ -374,55 +394,73 @@ const faqs = product.category === 'perfumes'
                 data-pack-desc="3 Chaquetas ($78.000 c/u)"
               >
                 <div>
-                  <span class="inline-block bg-green-100 text-green-800 text-[9px] font-bold px-2 py-0.5 rounded-md uppercase mb-1">Ahorro Máximo</span>
-                  <p class="text-sm font-black text-text-main">3 Chaquetas</p>
-                  <p class="text-xs text-text-muted">Mejor precio por unidad</p>
+                  <span class="inline-block bg-neutral-100 border border-neutral-200 text-text-muted text-[8px] font-black px-2.5 py-0.5 rounded-sm uppercase tracking-widest mb-1">Ahorro Máximo</span>
+                  <p class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider font-title">3 Chaquetas</p>
+                  <p class="text-[10px] text-text-muted font-light">Mejor precio por unidad</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-lg font-black text-text-main">$234.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title">$234.000</p>
                   <p class="text-xs text-text-light line-through">$360.000</p>
                 </div>
-                <div class="absolute -top-2 -right-2 bg-primary text-white w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold hidden" id="pack-check-3">✓</div>
+                <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold hidden" id="pack-check-3">✓</div>
               </button>
             </div>
           </div>
         )}
 
         <!-- Stock state -->
-        {product.stock !== undefined && (
-          <div class="mb-6 flex items-center gap-2">
-            <span class="flex h-2.5 w-2.5 relative">
-              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-            </span>
-            <span class="text-xs font-semibold text-green-700">Stock real en local Pasto disponible para entrega hoy</span>
-          </div>
-        )}
+        <div class="mb-6 flex items-center gap-2">
+          {product.status === 'agotado' ? (
+            <>
+              <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+              </span>
+              <span class="text-[10px] font-black text-red-600 uppercase tracking-widest text-left">Agotado temporalmente</span>
+            </>
+          ) : (
+            <>
+              <span class="flex h-2 w-2 relative">
+                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              <span class="text-[10px] font-black text-green-500 uppercase tracking-widest text-left">Stock real disponible para entrega hoy</span>
+            </>
+          )}
+        </div>
       </div>
 
       <!-- Actions -->
       <div class="space-y-4">
-        <!-- WhatsApp CTA -->
-        <button
-          id="product-buy-btn"
-          class="w-full btn-whatsapp py-4 px-6 rounded-2xl text-base sm:text-lg flex items-center justify-center gap-3 shadow-lg font-black tracking-wide cursor-pointer"
-          data-product-name={product.name}
-          data-product-brand={product.brand}
-          data-product-id={product.id}
-          data-product-price={product.price}
-          data-phone={whatsappNumber}
-          data-has-variants={hasVariants ? 'true' : 'false'}
-        >
-          <svg class="w-6 h-6 animate-pulse" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-          </svg>
-          <span id="buy-btn-text">Pedir por WhatsApp (Pago Contraentrega)</span>
-        </button>
+        <!-- WhatsApp Sticky Bottom Bar on Mobile -->
+        <div class="fixed bottom-0 left-0 right-0 z-50 p-3 bg-white/95 backdrop-blur-md border-t border-[#E5E7EB] shadow-2xl md:relative md:p-0 md:bg-transparent md:border-none md:shadow-none md:z-auto">
+          <button
+            id="product-buy-btn"
+            class:list={[
+              "w-full py-3.5 sm:py-4 px-6 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-lg font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2",
+              product.status === 'agotado'
+                ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962] hover:border-[#D4B878]"
+                : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366] hover:border-[#1DA851]"
+            ]}
+            data-product-name={product.name}
+            data-product-brand={product.brand}
+            data-product-id={product.id}
+            data-product-price={product.price}
+            data-phone={whatsappNumber}
+            data-has-variants={hasVariants ? 'true' : 'false'}
+            data-status={product.status}
+          >
+            <span id="buy-btn-text">
+              {product.status === 'agotado'
+                ? 'Encargar para Próximo Pedido'
+                : '🟢 Pedir por WhatsApp (Pago Contraentrega en Pasto)'}
+            </span>
+          </button>
+        </div>
 
         <!-- Social Proof Widget -->
-        <div class="p-3 bg-green-50 border border-green-200 rounded-2xl flex items-center justify-center gap-2 text-center shadow-sm">
-          <span class="text-lg">📦</span>
-          <span class="text-xs font-black text-green-800">
+        <div class="p-3 bg-[#F9F9FB] border border-[#E5E7EB] rounded-md flex items-center justify-center gap-2 text-center">
+          <span class="text-xs font-black text-text-main uppercase tracking-widest">
             {product.category === 'chaquetas' && 'Más de 500 chaquetas entregadas en Nariño'}
             {product.category === 'perfumes' && 'Más de 800 lociones entregadas en Nariño'}
             {product.category === 'relojes' && 'Más de 300 relojes entregados en Nariño'}
@@ -430,29 +468,22 @@ const faqs = product.category === 'perfumes'
         </div>
 
         <!-- Trust seals AliExpress style -->
-        <div class="grid grid-cols-3 gap-3 text-center border-t border-border-light pt-4">
+        <div class="grid grid-cols-3 gap-3 text-center border-t border-[#E5E7EB] pt-4">
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">🏠</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Pago en Casa</span>
-            <span class="text-[9px] text-text-muted">Domicilio en Pasto</span>
+            <span class="text-[10px] font-black text-text-main uppercase tracking-widest">Pago en Casa</span>
+            <span class="text-[9px] text-text-muted mt-0.5">Domicilio en Pasto</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">🇨🇴</span>
-            <span class="text-[10px] font-black text-text-main uppercase">Envíos del país</span>
-            <span class="text-[9px] text-text-muted">Llega de 3 a 5 días</span>
+            <span class="text-[10px] font-black text-text-main uppercase tracking-widest">Envíos del país</span>
+            <span class="text-[9px] text-text-muted mt-0.5">Llega de 3 a 5 días</span>
           </div>
           <div class="flex flex-col items-center">
-            <span class="text-xl mb-1">
-              {product.category === 'chaquetas' && '🧥'}
-              {product.category === 'perfumes' && '🧴'}
-              {product.category === 'relojes' && '⌚'}
-            </span>
-            <span class="text-[10px] font-black text-text-main uppercase">
+            <span class="text-[10px] font-black text-text-main uppercase tracking-widest">
               {product.category === 'chaquetas' && 'Premium'}
               {product.category === 'perfumes' && 'Original'}
               {product.category === 'relojes' && 'Nórdico'}
             </span>
-            <span class="text-[9px] text-text-muted">
+            <span class="text-[9px] text-text-muted mt-0.5">
               {product.category === 'chaquetas' && 'Confección nacional'}
               {product.category === 'perfumes' && 'Distribuidor oficial'}
               {product.category === 'relojes' && 'Garantía de máquina'}
@@ -460,28 +491,28 @@ const faqs = product.category === 'perfumes'
           </div>
         </div>
 
-        <!-- Callout Banner for Direct Distributor request (for Perfumes/Watches only) -->
+        <!-- Callout Banner for Direct Distributor request (for Perfumes/Watches only - High Contrast Dark Card with Gentle Bounce Button) -->
         {product.category !== 'chaquetas' && (
-          <div class="p-3.5 bg-purple-50 border border-purple-200 rounded-2xl text-center shadow-sm mt-4">
-            <p class="text-[11px] font-black text-purple-900 uppercase">
-              {product.category === 'perfumes' ? '✨ ¿No encuentras tu loción favorita?' : '✨ ¿Buscas otro modelo de reloj?'}
+          <div class="p-6 bg-neutral-900 border border-neutral-800 rounded-md text-center mt-6 shadow-md">
+            <p class="text-xs sm:text-sm font-black text-white uppercase tracking-widest">
+              {product.category === 'perfumes' ? '¿No encuentras tu loción favorita?' : '¿Buscas otro modelo de reloj?'}
             </p>
-            <p class="text-[10px] text-purple-700 mt-0.5 leading-tight">
+            <p class="text-[11px] text-zinc-300 mt-1.5 font-light leading-relaxed">
               {product.category === 'perfumes' 
-                ? 'Trabajamos directo con distribuidor de fábrica. Te conseguimos cualquier loción de catálogo.' 
-                : 'Trabajamos directo con distribuidor autorizado. Escríbenos y te conseguimos el modelo que buscas.'}
+                ? 'Trabajamos directo con distribuidor de fábrica. ¡Pregunta por la que deseas para conseguírtela hoy mismo!' 
+                : 'Trabajamos directo con distribuidor autorizado. ¡Pregunta por el que deseas para conseguírtelo hoy mismo!'}
             </p>
             <a 
               href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(
                 product.category === 'perfumes' 
-                  ? 'Hola, estoy buscando un perfume de catálogo que no veo en la web. ¿Me ayudan a conseguirlo?' 
-                  : 'Hola, estoy buscando un modelo de reloj que no veo en la web. ¿Me ayudan a conseguirlo?'
+                  ? 'Hola, estoy buscando una loción de catálogo que no veo en la web. Pregunto por la que deseo para conseguírmela hoy mismo. ¿Me ayudan?' 
+                  : 'Hola, estoy buscando un modelo de reloj de catálogo que no veo en la web. Pregunto por el que deseo para conseguírmelo hoy mismo. ¿Me ayudan?'
               )}`}
               target="_blank"
               rel="noopener noreferrer"
-              class="inline-block mt-2 text-[10px] font-black text-white bg-purple-600 px-4 py-2 rounded-xl hover:bg-purple-700 transition-all cursor-pointer"
+              class="inline-block mt-3.5 text-[9px] sm:text-[10px] font-black border border-white bg-white hover:bg-neutral-200 text-black px-6 py-3.5 rounded-md transition-all duration-300 uppercase tracking-widest cursor-pointer shadow-md animate-bounce-gentle"
             >
-              Preguntar por WhatsApp
+              Consultar por WhatsApp
             </a>
           </div>
         )}
@@ -493,10 +524,10 @@ const faqs = product.category === 'perfumes'
   <div class="grid lg:grid-cols-3 gap-8 mb-12">
     <!-- Description & Features (Left/Middle 2 Columns) -->
     <div class="lg:col-span-2 space-y-8">
-      <div class="bg-white rounded-3xl border border-border-light p-6 sm:p-8 shadow-sm">
-        <h2 class="text-lg sm:text-xl font-black text-text-main border-b border-border-light pb-4 mb-6 uppercase tracking-wide">Detalles del Producto</h2>
+      <div class="bg-white rounded-md border border-[#E5E7EB] p-6 sm:p-8">
+        <h2 class="text-sm sm:text-base font-black text-text-main border-b border-[#E5E7EB] pb-4 mb-6 uppercase tracking-widest font-title">Detalles del Producto</h2>
         
-        <p class="text-sm sm:text-base text-text-muted mb-6 leading-relaxed">
+        <p class="text-xs sm:text-sm text-text-muted mb-6 leading-relaxed font-light">
           {product.description}
         </p>
 
@@ -504,43 +535,44 @@ const faqs = product.category === 'perfumes'
         {product.features && product.features.length > 0 && (
           <div class="grid sm:grid-cols-2 gap-4">
             {product.features.map((feature) => (
-              <div class="flex items-center gap-3 p-3 bg-bg rounded-xl border border-border-light">
-                <span class="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-xs font-bold">✓</span>
-                <span class="text-xs sm:text-sm font-semibold text-text-main">{feature}</span>
+              <div class="flex items-center gap-3 p-3 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]">
+                <span class="flex items-center justify-center w-5 h-5 rounded-md bg-[#E5E7EB] border border-[#D1D5DB] text-text-main text-[9px] font-black">✓</span>
+                <span class="text-xs font-semibold text-text-main uppercase tracking-wider">{feature}</span>
               </div>
             ))}
           </div>
         )}
       </div>
 
+
       <!-- Guarantee Section (AliExpress style) -->
-      <div class="bg-white rounded-3xl border border-border-light p-6 sm:p-8 shadow-sm">
-        <h2 class="text-lg sm:text-xl font-black text-text-main border-b border-border-light pb-4 mb-6 uppercase tracking-wide">Nuestra Garantía de Satisfacción</h2>
+      <div class="bg-white rounded-md border border-[#E5E7EB] p-6 sm:p-8">
+        <h2 class="text-sm sm:text-base font-black text-text-main border-b border-[#E5E7EB] pb-4 mb-6 uppercase tracking-widest font-title">Nuestra Garantía</h2>
         <div class="grid sm:grid-cols-3 gap-6">
-          <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
+          <div class="text-center p-4 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]">
             <span class="text-3xl mb-2 block">{product.category === 'chaquetas' ? '🏠' : '✨'}</span>
             <h3 class="text-xs font-black text-text-main uppercase mb-1">
               {product.category === 'chaquetas' ? 'Pruébalo en Casa' : '100% Original'}
             </h3>
-            <p class="text-[10px] text-text-muted">
+            <p class="text-[10px] text-text-muted leading-relaxed">
               {product.category === 'chaquetas' 
                 ? 'Te lo llevamos a domicilio en Pasto. Te lo mides y si te queda bien, lo pagas.' 
                 : 'Fragancias oficiales selladas de fábrica y directas del catálogo oficial.'}
             </p>
           </div>
-          <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
-            <span class="text-3xl mb-2 block">📍</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Punto Físico</h3>
-            <p class="text-[10px] text-text-muted">
+          <div class="text-center p-4 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]">
+            <span class="text-[9px] font-black text-text-main uppercase tracking-widest block mb-1">01 / Cambio de Talla</span>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase mb-1">Punto Físico</h3>
+            <p class="text-[10px] text-text-muted leading-relaxed">
               {product.category === 'chaquetas'
-                ? 'Si necesitas un cambio de talla, puedes acercarte a nuestro local físico en Pasto.'
+                ? 'Si necesitas un cambio de talla, puedes acercarte a nuestro showroom en Pasto.'
                 : 'Para cualquier reclamo o cambio, puedes visitarnos en nuestro punto físico en Pasto.'}
             </p>
           </div>
-          <div class="text-center p-4 bg-bg rounded-2xl border border-border-light">
-            <span class="text-3xl mb-2 block">🔒</span>
-            <h3 class="text-xs font-black text-text-main uppercase mb-1">Garantía Segura</h3>
-            <p class="text-[10px] text-text-muted">
+          <div class="text-center p-4 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]">
+            <span class="text-[9px] font-black text-text-main uppercase tracking-widest block mb-1">02 / Satisfacción</span>
+            <h3 class="text-xs sm:text-sm font-black text-text-main uppercase mb-1">Garantía Segura</h3>
+            <p class="text-[10px] text-text-muted leading-relaxed">
               {product.category === 'chaquetas'
                 ? 'Garantizamos cambio de talla sin complicaciones dentro de los primeros 5 días.'
                 : 'Garantizamos cambio inmediato por fallas en válvula o defectos en los primeros 5 días.'}
@@ -552,17 +584,17 @@ const faqs = product.category === 'perfumes'
 
     <!-- Right Sidebar FAQ (1 Column) -->
     <div class="space-y-8">
-      <div class="bg-white rounded-3xl border border-border-light p-6 sm:p-8 shadow-sm">
-        <h2 class="text-lg sm:text-xl font-black text-text-main border-b border-border-light pb-4 mb-6 uppercase tracking-wide">Preguntas Frecuentes</h2>
+      <div class="bg-white rounded-md border border-[#E5E7EB] p-6 sm:p-8">
+        <h2 class="text-sm sm:text-base font-black text-text-main border-b border-[#E5E7EB] pb-4 mb-6 uppercase tracking-widest font-title">Preguntas Frecuentes</h2>
         <div class="space-y-3">
           {faqs.map((faq, index) => (
-            <details class="group bg-bg border border-border-light rounded-xl overflow-hidden [&_summary::-webkit-details-marker]:hidden" open={index === 0}>
+            <details class="group bg-[#F9F9FB] border border-[#E5E7EB] rounded-md overflow-hidden [&_summary::-webkit-details-marker]:hidden" open={index === 0}>
               <summary class="flex justify-between items-center p-4 cursor-pointer select-none">
-                <span class="text-xs font-extrabold text-text-main tracking-tight pr-4">{faq.question}</span>
+                <span class="text-xs font-black text-text-main uppercase tracking-widest pr-4">{faq.question}</span>
                 <span class="text-text-muted group-open:rotate-180 transition-transform duration-200">▼</span>
               </summary>
-              <div class="p-4 pt-0 border-t border-border-light/50">
-                <p class="text-xs text-text-muted leading-relaxed whitespace-pre-line">{faq.answer}</p>
+              <div class="p-4 pt-0 border-t border-[#E5E7EB]">
+                <p class="text-xs text-text-muted leading-relaxed whitespace-pre-line font-light">{faq.answer}</p>
               </div>
             </details>
           ))}
@@ -572,39 +604,38 @@ const faqs = product.category === 'perfumes'
   </div>
 
   <!-- 3. AliExpress Customer Reviews Section -->
-  <div class="bg-white rounded-3xl border border-border-light p-6 sm:p-8 shadow-sm mb-12" id="reviews-section">
-    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-border-light pb-4 mb-6 gap-4">
+  <div class="bg-white rounded-md border border-[#E5E7EB] p-6 sm:p-8 mb-12" id="reviews-section">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center border-b border-[#E5E7EB] pb-4 mb-6 gap-4">
       <div>
-        <h2 class="text-lg sm:text-xl font-black text-text-main uppercase tracking-wide">Valoraciones de Clientes</h2>
-        <p class="text-xs text-text-muted mt-1">Opiniones verificadas de compradores de San Juan de Pasto y Nariño</p>
+        <h2 class="text-sm sm:text-base font-black text-text-main uppercase tracking-widest font-title">Valoraciones de Clientes</h2>
+        <p class="text-xs text-text-muted mt-1 font-light">Opiniones verificadas de compradores de San Juan de Pasto y Nariño</p>
       </div>
       <div class="flex items-center gap-2">
-        <span class="text-2xl font-black text-text-main">4.7</span>
+        <span class="text-2xl font-black text-text-main font-title">4.7</span>
         <div class="flex flex-col">
           <span class="text-gold text-sm font-semibold">★★★★★</span>
-          <span class="text-[10px] text-text-muted font-medium">Basado en valoraciones reales del local</span>
+          <span class="text-[9px] text-text-muted font-black uppercase tracking-widest mt-0.5">Valoraciones reales del local</span>
         </div>
       </div>
     </div>
 
     <div class="grid md:grid-cols-3 gap-6">
       {reviews.map((rev) => (
-        <div class="p-5 bg-bg rounded-2xl border border-border-light flex flex-col justify-between">
+        <div class="p-5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB] flex flex-col justify-between">
           <div>
             <div class="flex items-center justify-between mb-3">
               <div class="flex items-center gap-2">
-                <span class="text-xl">{rev.avatar}</span>
                 <div>
-                  <h3 class="text-xs font-black text-text-main">{rev.name}</h3>
-                  <span class="text-[9px] text-green-600 font-bold flex items-center gap-1">
-                    <span class="text-xs">✓</span> Comprador verificado
+                  <h3 class="text-xs font-black text-text-main uppercase tracking-widest">{rev.name}</h3>
+                  <span class="text-[9px] text-green-500 font-bold flex items-center gap-1 uppercase tracking-wider">
+                    <span>✓</span> Verificado
                   </span>
                 </div>
               </div>
               <span class="text-[10px] text-text-light">{rev.date}</span>
             </div>
             <div class="text-gold text-xs font-semibold mb-2">★★★★★</div>
-            <p class="text-xs text-text-muted leading-relaxed">{rev.text}</p>
+            <p class="text-xs text-text-muted leading-relaxed font-light">{rev.text}</p>
           </div>
         </div>
       ))}
@@ -632,15 +663,15 @@ const faqs = product.category === 'perfumes'
     opt.addEventListener('click', () => {
       // Remove selection classes
       packOptions.forEach(o => {
-        o.classList.remove('border-primary', 'bg-primary/5');
-        o.classList.add('border-border', 'bg-white');
+        o.classList.remove('border-white', 'bg-white/5');
+        o.classList.add('border-[#262626]', 'bg-[#0B0B0C]');
         const check = document.getElementById(`pack-check-${o.getAttribute('data-pack-id')}`);
         if (check) check.classList.add('hidden');
       });
 
       // Add selection classes
-      opt.classList.remove('border-border', 'bg-white');
-      opt.classList.add('border-primary', 'bg-primary/5');
+      opt.classList.remove('border-[#262626]', 'bg-[#0B0B0C]');
+      opt.classList.add('border-white', 'bg-white/5');
       const packId = opt.getAttribute('data-pack-id') || '1';
       const check = document.getElementById(`pack-check-${packId}`);
       if (check) check.classList.remove('hidden');
@@ -676,13 +707,13 @@ const faqs = product.category === 'perfumes'
       
       // Deselect all
       sizeButtons.forEach(b => {
-        b.classList.remove('border-primary', 'bg-primary/10', 'text-primary');
-        b.classList.add('border-border');
+        b.classList.remove('bg-text-main', 'text-white', 'border-text-main');
+        b.classList.add('border-[#E5E7EB]');
       });
       
       // Select this one
-      btn.classList.remove('border-border');
-      btn.classList.add('border-primary', 'bg-primary/10', 'text-primary');
+      btn.classList.remove('border-[#E5E7EB]');
+      btn.classList.add('bg-text-main', 'text-white', 'border-text-main');
       
       selectedSize = btn.getAttribute('data-talla') || '';
       selectedRef = btn.getAttribute('data-ref') || '';
@@ -690,14 +721,14 @@ const faqs = product.category === 'perfumes'
       
       if (sizeInfo) {
         sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles`;
-        sizeInfo.classList.add('text-primary', 'font-bold');
-        sizeInfo.classList.remove('text-red-500');
+        sizeInfo.classList.add('text-text-main', 'font-black');
+        sizeInfo.classList.remove('text-red-600');
       }
 
       // Clear any validation highlight
       const sizeOptions = document.getElementById('size-options');
       if (sizeOptions) {
-        sizeOptions.classList.remove('ring-4', 'ring-red-500/50');
+        sizeOptions.classList.remove('ring-2', 'ring-red-600/50');
       }
       
       updateCheckoutButton();
@@ -707,30 +738,69 @@ const faqs = product.category === 'perfumes'
   function updateCheckoutButton() {
     if (!buyBtnText) return;
     
-    let text = 'Pedir por WhatsApp (Pago Contraentrega)';
+    const isAgotado = buyBtn ? buyBtn.getAttribute('data-status') === 'agotado' : false;
+    if (isAgotado) {
+      buyBtnText.textContent = 'Encargar para Próximo Pedido';
+      return;
+    }
     
-    if (selectedPack === '1') {
-      text = selectedSize ? `Pedir Talla ${selectedSize} por WhatsApp` : 'Selecciona una talla para pedir';
-    } else if (selectedPack === '2') {
-      text = 'Pedir Duo Estilo (2 Chaquetas) por WhatsApp';
-    } else if (selectedPack === '3') {
-      text = 'Pedir Combo Familiar (3 Chaquetas) por WhatsApp';
+    const hasVariants = buyBtn ? buyBtn.getAttribute('data-has-variants') === 'true' : false;
+    let text = '🟢 Pedir por WhatsApp (Pago Contraentrega en Pasto)';
+    
+    if (hasVariants) {
+      if (selectedPack === '1') {
+        text = selectedSize ? `🟢 Pedir Talla ${selectedSize} por WhatsApp` : 'Selecciona una talla para pedir';
+      } else if (selectedPack === '2') {
+        text = '🟢 Pedir Duo Estilo (2 Chaquetas) por WhatsApp';
+      } else if (selectedPack === '3') {
+        text = '🟢 Pedir Combo Familiar (3 Chaquetas) por WhatsApp';
+      }
     }
 
     buyBtnText.textContent = text;
   }
 
   buyBtn?.addEventListener('click', () => {
+    const isAgotado = buyBtn.getAttribute('data-status') === 'agotado';
+    if (isAgotado) {
+      const name = buyBtn.getAttribute('data-product-name') || '';
+      const brand = buyBtn.getAttribute('data-product-brand') || '';
+      const id = buyBtn.getAttribute('data-product-id') || '';
+      const phone = buyBtn.getAttribute('data-phone') || '';
+      
+      const message = 
+        `*PRE-ENCARGO DE PRODUCTO SIN STOCK*\n\n` +
+        `🧥 *Producto:* ${name} (${brand})` +
+        `\n⚠️ *Estado:* Agotado (Deseo encargarlo para el próximo pedido de fábrica)\n` +
+        `🆔 *Código Base:* ${id}\n\n` +
+        `📍 _Hola, me gustaría encargar este modelo/color para el próximo pedido de fábrica. Por favor, anótenme y avísenme apenas esté disponible de nuevo. Mi nombre es:_`;
+        
+      const encodedMessage = encodeURIComponent(message);
+      const whatsAppUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
+      
+      // Meta Pixel Event
+      if (typeof window !== 'undefined' && (window as any).fbq) {
+        (window as any).fbq('track', 'Contact', {
+          content_category: 'PreOrder',
+          content_name: name,
+          content_ids: [id]
+        });
+      }
+      
+      window.open(whatsAppUrl, '_blank');
+      return;
+    }
+
     const hasVariants = buyBtn.getAttribute('data-has-variants') === 'true';
     
     if (hasVariants && !selectedSize) {
       if (sizeInfo) {
-        sizeInfo.textContent = '⚠️ Por favor selecciona una talla antes de pedir';
-        sizeInfo.classList.add('text-red-500', 'font-bold');
+        sizeInfo.textContent = 'Selecciona tu talla antes de pedir';
+        sizeInfo.classList.add('text-red-600', 'font-black');
       }
       const sizeOptions = document.getElementById('size-options');
       if (sizeOptions) {
-        sizeOptions.classList.add('ring-4', 'ring-red-500/50', 'animate-shake');
+        sizeOptions.classList.add('ring-2', 'ring-red-600/50', 'animate-shake');
         sizeOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
         setTimeout(() => {
           sizeOptions.classList.remove('animate-shake');

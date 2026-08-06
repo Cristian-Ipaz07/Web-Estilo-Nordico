@@ -8,12 +8,14 @@ npm-debug.log*
 
 # Environment
 .env
-.env.local
-.env.production
+.env.*
+!.env.example
 
-# OS
+# OS & Windows Metadata
 .DS_Store
 Thumbs.db
+*:Zone.Identifier
+*.Zone.Identifier
 
 # IDE
 .vscode/
