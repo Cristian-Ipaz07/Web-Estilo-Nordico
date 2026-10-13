@@ -433,56 +433,87 @@ const faqs = product.category === 'perfumes'
 
       <!-- Actions -->
       <div class="space-y-4">
-        <!-- Action Buttons Bar: Add to Cart + Direct WhatsApp -->
-        <div class="fixed bottom-0 left-0 right-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-[#E5E7EB] shadow-2xl md:relative md:p-0 md:bg-transparent md:border-none md:shadow-none md:z-auto">
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-            <!-- Add to Cart Button -->
+        <!-- Action Buttons Bar: Desktop (In-page) -->
+        <div class="hidden md:grid grid-cols-2 gap-3">
+          <!-- Add to Cart Button -->
+          <button
+            id="product-add-cart-btn"
+            class:list={[
+              "w-full py-3.5 px-4 rounded-md text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-sm flex items-center justify-center gap-2",
+              product.status === 'agotado'
+                ? "opacity-50 cursor-not-allowed bg-neutral-200 text-neutral-500 border-neutral-300"
+                : "bg-[#0B0B0C] hover:bg-[#1A1A1D] text-white border-[#0B0B0C] hover:border-[#C9A962]"
+            ]}
+            data-product-name={product.name}
+            data-product-brand={product.brand}
+            data-product-id={product.id}
+            data-product-price={product.price}
+            data-product-image={product.image}
+            data-product-category={product.category}
+            data-has-variants={hasVariants ? 'true' : 'false'}
+            data-status={product.status}
+            disabled={product.status === 'agotado'}
+          >
+            <svg class="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            <span>+ Agregar al Carrito</span>
+          </button>
+
+          <!-- Direct WhatsApp Buy Button -->
+          <button
+            id="product-buy-btn"
+            class:list={[
+              "w-full py-3.5 px-4 rounded-md text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-md flex items-center justify-center gap-2",
+              product.status === 'agotado'
+                ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962]"
+                : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366]"
+            ]}
+            data-product-name={product.name}
+            data-product-brand={product.brand}
+            data-product-id={product.id}
+            data-product-price={product.price}
+            data-phone={whatsappNumber}
+            data-has-variants={hasVariants ? 'true' : 'false'}
+            data-status={product.status}
+          >
+            <span id="buy-btn-text">
+              {product.status === 'agotado'
+                ? 'Encargar Próximo Pedido'
+                : '🟢 Pedir WhatsApp (Pasto)'}
+            </span>
+          </button>
+        </div>
+
+        <!-- Sticky Mobile Bottom Bar (Bershka / ASOS / Tienda Urban CRO Benchmark) -->
+        <div class="fixed bottom-0 left-0 right-0 z-40 bg-[#0B0B0C]/95 backdrop-blur-md border-t border-[#262626] p-2.5 px-4 shadow-2xl flex items-center justify-between gap-3 md:hidden">
+          <div class="flex flex-col min-w-[95px]">
+            <span class="text-[9px] text-[#C9A962] font-black uppercase tracking-widest" id="mobile-sticky-size">
+              Talla: Elegir
+            </span>
+            <span class="text-sm font-black text-white font-title tracking-wider" id="mobile-sticky-price">
+              ${formatPrice(product.price)} COP
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2 flex-1">
             <button
-              id="product-add-cart-btn"
-              class:list={[
-                "w-full py-3.5 sm:py-4 px-4 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2 font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-md",
-                product.status === 'agotado'
-                  ? "opacity-50 cursor-not-allowed bg-neutral-200 text-neutral-500 border-neutral-300"
-                  : "bg-[#0B0B0C] hover:bg-[#1A1A1D] text-white border-[#0B0B0C] hover:border-[#C9A962]"
-              ]}
-              data-product-name={product.name}
-              data-product-brand={product.brand}
-              data-product-id={product.id}
-              data-product-price={product.price}
-              data-product-image={product.image}
-              data-product-category={product.category}
-              data-has-variants={hasVariants ? 'true' : 'false'}
-              data-status={product.status}
-              disabled={product.status === 'agotado'}
+              id="mobile-sticky-cart-btn"
+              type="button"
+              class="p-2.5 rounded-md border border-white/20 bg-white/5 hover:bg-white/10 text-white flex items-center justify-center cursor-pointer active:scale-95 transition-transform"
+              aria-label="Agregar al carrito"
             >
-              <svg class="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg class="w-5 h-5 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
               </svg>
-              <span>+ Agregar al Carrito</span>
             </button>
 
-            <!-- Direct WhatsApp Buy Button -->
             <button
-              id="product-buy-btn"
-              class:list={[
-                "w-full py-3.5 sm:py-4 px-4 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2",
-                product.status === 'agotado'
-                  ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962] hover:border-[#D4B878]"
-                  : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366] hover:border-[#1DA851]"
-              ]}
-              data-product-name={product.name}
-              data-product-brand={product.brand}
-              data-product-id={product.id}
-              data-product-price={product.price}
-              data-phone={whatsappNumber}
-              data-has-variants={hasVariants ? 'true' : 'false'}
-              data-status={product.status}
+              id="mobile-sticky-buy-btn"
+              type="button"
+              class="flex-1 py-3 px-3 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-md text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 shadow-lg cursor-pointer active:scale-95 transition-transform"
             >
-              <span id="buy-btn-text">
-                {product.status === 'agotado'
-                  ? 'Encargar Próximo Pedido'
-                  : '🟢 Pedir Directo WhatsApp'}
-              </span>
+              <span>🟢 Pedir Contraentrega Pasto</span>
             </button>
           </div>
         </div>
@@ -772,6 +803,7 @@ const faqs = product.category === 'perfumes'
         if (displayPrice) displayPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(selectedPackPrice)} COP`;
         if (displayAnchorPrice) displayAnchorPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(activeAnchor)} COP`;
         if (displaySavingBadge) displaySavingBadge.textContent = `AHORRAS ${discountPct}%`;
+        if (mobileStickyPrice) mobileStickyPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(selectedPackPrice)} COP`;
       }
 
       // Sincronizar tallas y stock
@@ -809,6 +841,20 @@ const faqs = product.category === 'perfumes'
   window.addEventListener('focus', syncProductWithLiveERP);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') syncProductWithLiveERP();
+  });
+
+  // Sticky Mobile Bottom Bar Listeners (Tienda Urban / ASOS Style)
+  const mobileStickyBuyBtn = document.getElementById('mobile-sticky-buy-btn');
+  const mobileStickyCartBtn = document.getElementById('mobile-sticky-cart-btn');
+  const mobileStickySize = document.getElementById('mobile-sticky-size');
+  const mobileStickyPrice = document.getElementById('mobile-sticky-price');
+
+  mobileStickyBuyBtn?.addEventListener('click', () => {
+    buyBtn?.click();
+  });
+
+  mobileStickyCartBtn?.addEventListener('click', () => {
+    addCartBtn?.click();
   });
 
   // Micro-chequeo de stock en vivo contra la API del ERP
@@ -873,6 +919,7 @@ const faqs = product.category === 'perfumes'
       if (displayPrice) displayPrice.textContent = `$${formattedPrice}`;
       if (displayAnchorPrice) displayAnchorPrice.textContent = `$${formattedAnchor}`;
       if (displaySavingBadge) displaySavingBadge.textContent = `AHORRAS ${discountPct}%`;
+      if (mobileStickyPrice) mobileStickyPrice.textContent = `$${formattedPrice} COP`;
 
       // Update WhatsApp checkout button text
       updateCheckoutButton();
@@ -903,6 +950,9 @@ const faqs = product.category === 'perfumes'
       if (sizeInfo) {
         sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles`;
         sizeInfo.className = 'mt-2 text-[10px] text-text-main font-black uppercase tracking-wider';
+      }
+      if (mobileStickySize) {
+        mobileStickySize.textContent = `Talla: ${selectedSize}`;
       }
 
       // Clear any validation highlight

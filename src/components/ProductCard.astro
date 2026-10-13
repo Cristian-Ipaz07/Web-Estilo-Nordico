@@ -1,11 +1,10 @@
 ---
 /**
- * ProductCard.astro — Tarjeta de producto reutilizable
+ * ProductCard.astro — Tarjeta de producto de alta conversión (Mattelsa CRO Benchmark)
  * 
- * ACTUALIZADO: Ahora incluye link a product page individual.
- * Incluye imagen, precios, badge de descuento, badge de stock,
- * link "Ver detalles" y botón WhatsApp.
- * Dispara evento InitiateCheckout del Píxel de Meta.
+ * - Selectores rápidos de talla directos en la tarjeta (Quick-Add Pills)
+ * - Muestra ahorro evidente, stock en tiempo real y pago contraentrega en Pasto
+ * - Sincronización instantánea de precios con la API del ERP
  */
 import { formatPrice, getDiscount } from '../data/products';
 import { STORE_CONFIG } from '../config/store';
@@ -23,16 +22,16 @@ interface Props {
   stock?: number;
   status?: string;
   colorHex?: string;
+  variants?: { id: string; talla: string; stock: number; status: string }[];
 }
 
-const { id, slug, name, brand, price, anchorPrice, image, description, category, stock, status, colorHex } = Astro.props;
+const { id, slug, name, brand, price, anchorPrice, image, description, category, stock, status, colorHex, variants } = Astro.props;
 const discount = getDiscount(price, anchorPrice);
-const whatsappNumber = STORE_CONFIG.whatsapp.number;
 const productPageUrl = `/${category}/${slug}`;
 const isAvailable = status !== 'agotado';
 ---
 
-<article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] flex flex-col group" id={`product-${id}`}>
+<article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] hover:border-[#C9A962] transition-colors flex flex-col group relative shadow-sm" id={`product-${id}`}>
   <!-- Image container (clickable → product page) -->
   <a href={productPageUrl} class="relative overflow-hidden bg-[#F3F4F6] aspect-square block">
     <img 
@@ -43,18 +42,18 @@ const isAvailable = status !== 'agotado';
     />
     <!-- Discount badge -->
     {discount > 0 && (
-      <div class="absolute top-3 left-3 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md">
+      <div class="absolute top-2.5 left-2.5 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md">
         -{discount}%
       </div>
     )}
     <!-- Brand badge -->
-    <div class="absolute top-3 right-3 bg-[#0B0B0C]/80 border border-white/10 text-white text-[9px] font-black px-2.5 py-1 rounded-md uppercase tracking-widest shadow-sm">
+    <div class="absolute top-2.5 right-2.5 bg-[#0B0B0C]/80 border border-white/10 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm">
       {brand}
     </div>
     <!-- Stock badge -->
     {status && (
       <div class:list={[
-        'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider',
+        'card-stock-badge absolute bottom-2.5 left-2.5 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider',
         isAvailable 
           ? 'bg-green-600 text-white' 
           : 'bg-neutral-800 text-neutral-400'
@@ -65,58 +64,92 @@ const isAvailable = status !== 'agotado';
     <!-- Color swatch -->
     {colorHex && (
       <div 
-        class="absolute bottom-3 right-3 w-4 h-4 rounded-md border border-white/20 shadow-sm" 
+        class="absolute bottom-2.5 right-2.5 w-4 h-4 rounded-md border border-white/20 shadow-sm" 
         style={`background-color: ${colorHex}`}
         title={name}
       ></div>
     )}
     <!-- Hover overlay -->
     <div class="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-      <span class="text-white text-[10px] font-black uppercase tracking-widest bg-black/60 border border-white/15 px-4 py-2 rounded-md transition-all duration-300">
-        Ver detalles →
+      <span class="text-white text-[10px] font-black uppercase tracking-widest bg-black/70 border border-white/20 px-3 py-1.5 rounded-md transition-all">
+        Ver prenda →
       </span>
     </div>
   </a>
 
   <!-- Content -->
-  <div class="p-4 sm:p-5 flex flex-col flex-grow">
-    <div class="flex-grow">
+  <div class="p-3.5 sm:p-4 flex flex-col flex-grow justify-between">
+    <div>
       <a href={productPageUrl} class="hover:text-neutral-600 transition-colors">
-        <h3 class="text-sm sm:text-base font-black text-text-main uppercase tracking-wider leading-snug mb-1 font-title">{name}</h3>
+        <h3 class="text-xs sm:text-sm font-black text-text-main uppercase tracking-wider leading-snug mb-1 font-title">{name}</h3>
       </a>
-      <p class="text-xs text-text-muted mb-3 line-clamp-2 leading-relaxed font-light">{description}</p>
+      <p class="text-[11px] text-text-muted mb-2.5 line-clamp-2 leading-relaxed font-light">{description}</p>
     </div>
     
-    <!-- Pricing Anchoring Comparison -->
-    <div class="bg-[#F9F9FB] border border-[#E5E7EB] rounded-md p-2.5 mb-4 space-y-1">
-      <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-text-muted">
-        <span>Precio Comercial:</span>
+    <!-- Pricing Comparison -->
+    <div class="bg-[#F9F9FB] border border-[#E5E7EB] rounded-md p-2 mb-2.5 space-y-1">
+      <div class="flex items-center justify-between text-[10px] text-text-muted">
+        <span>Comercial:</span>
         <span class="line-through text-text-light font-semibold card-anchor-price">${formatPrice(anchorPrice)} COP</span>
       </div>
       <div class="flex items-center justify-between text-xs sm:text-sm font-black text-text-main font-title border-t border-[#E5E7EB] pt-1">
-        <span>Precio Estilo Nórdico:</span>
-        <span class="text-sm sm:text-base font-black text-emerald-600 card-price">${formatPrice(price)} COP</span>
+        <span>Estilo Nórdico:</span>
+        <span class="text-xs sm:text-sm font-black text-emerald-600 card-price">${formatPrice(price)} COP</span>
       </div>
       {discount > 0 && (
-        <div class="pt-1 text-center">
-          <span class="card-discount-badge bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest inline-block shadow-sm">
+        <div class="pt-0.5 text-center">
+          <span class="card-discount-badge bg-red-600 text-white text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-widest inline-block shadow-sm">
             AHORRAS {discount}%
           </span>
         </div>
       )}
     </div>
 
-    <!-- Actions: View + WhatsApp -->
+    <!-- Quick Size Selector (Mattelsa CRO Benchmark) -->
+    {variants && variants.length > 0 && isAvailable && (
+      <div class="mb-2.5 pt-1.5 border-t border-[#E5E7EB]">
+        <div class="flex items-center justify-between mb-1">
+          <span class="text-[8px] font-black text-text-muted uppercase tracking-widest">Talla rápida:</span>
+          <span class="text-[8px] text-emerald-600 font-bold uppercase tracking-wider">Hoy en Pasto</span>
+        </div>
+        <div class="flex flex-wrap gap-1">
+          {variants.map((v) => (
+            <button
+              type="button"
+              class:list={[
+                "card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-pointer border",
+                v.status === 'disponible'
+                  ? "border-[#E5E7EB] hover:border-black bg-[#F9F9FB] hover:bg-black hover:text-white text-text-main shadow-sm"
+                  : "border-[#F3F4F6] text-neutral-300 line-through cursor-not-allowed opacity-40"
+              ]}
+              data-product-id={id}
+              data-product-name={name}
+              data-product-brand={brand}
+              data-product-price={price}
+              data-product-image={image}
+              data-category={category}
+              data-variant-id={v.id}
+              data-size={v.talla}
+              disabled={v.status !== 'disponible'}
+              title={v.status === 'disponible' ? `Talla ${v.talla} (${v.stock} disp) — Clic para agregar directo` : 'Agotada'}
+            >
+              {v.talla}
+            </button>
+          ))}
+        </div>
+      </div>
+    )}
+
     <!-- Actions: View + Add to Cart -->
-    <div class="flex gap-2">
+    <div class="flex gap-2 pt-1">
       <a 
         href={productPageUrl}
-        class="flex-1 text-center py-2.5 px-3 rounded-md text-[10px] font-black uppercase tracking-widest border border-border hover:border-text-main hover:bg-[#F9F9FB] text-text-main transition-all duration-300"
+        class="flex-1 text-center py-2 px-2 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-widest border border-border hover:border-text-main hover:bg-[#F9F9FB] text-text-main transition-all duration-300 flex items-center justify-center"
       >
         Detalles
       </a>
       <button 
-        class="flex-1 bg-text-main hover:bg-neutral-800 text-white py-2.5 px-3 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 card-buy-btn transition-all duration-300 cursor-pointer"
+        class="flex-1 bg-text-main hover:bg-neutral-800 text-white py-2 px-2 rounded-md text-[9px] sm:text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1 card-buy-btn transition-all duration-300 cursor-pointer"
         data-id={id}
         data-name={name}
         data-brand={brand}
@@ -181,16 +214,21 @@ const isAvailable = status !== 'agotado';
 
           const buyBtn = card.querySelector('.card-buy-btn');
           if (buyBtn) buyBtn.setAttribute('data-price', String(livePrice));
+
+          // Actualizar data-product-price en botones de talla rápida
+          card.querySelectorAll('.card-quick-size-btn').forEach(btn => {
+            btn.setAttribute('data-product-price', String(livePrice));
+          });
         }
 
         const stockBadge = card.querySelector('.card-stock-badge');
         if (stockBadge) {
           if (totalStock > 0) {
             stockBadge.textContent = `✓ ${totalStock} Disp`;
-            stockBadge.className = 'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-green-600 text-white';
+            stockBadge.className = 'card-stock-badge absolute bottom-2.5 left-2.5 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-green-600 text-white';
           } else {
             stockBadge.textContent = '✗ Agotado';
-            stockBadge.className = 'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-neutral-800 text-neutral-400';
+            stockBadge.className = 'card-stock-badge absolute bottom-2.5 left-2.5 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-neutral-800 text-neutral-400';
           }
         }
       });
@@ -205,6 +243,43 @@ const isAvailable = status !== 'agotado';
   window.addEventListener('focus', syncCardsWithLiveERP);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') syncCardsWithLiveERP();
+  });
+
+  // Selector de Talla Rápido (Mattelsa Benchmark)
+  document.querySelectorAll('.card-quick-size-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const target = e.currentTarget as HTMLButtonElement;
+      const productId = target.getAttribute('data-product-id') || '';
+      const name = target.getAttribute('data-product-name') || '';
+      const brand = target.getAttribute('data-product-brand') || '';
+      const price = parseFloat(target.getAttribute('data-product-price') || '0');
+      const image = target.getAttribute('data-product-image') || '';
+      const category = target.getAttribute('data-category') || '';
+      const variantId = target.getAttribute('data-variant-id') || '';
+      const size = target.getAttribute('data-size') || '';
+
+      addToCart({
+        id: `${productId}-${size}`,
+        productId,
+        variantId,
+        name,
+        brand,
+        category,
+        price,
+        image,
+        size,
+        color: name.replace('Chaqueta Impermeable ', '').trim(),
+        quantity: 1,
+      });
+
+      // Feedback visual rápido
+      target.classList.add('bg-emerald-600', 'text-white', 'border-emerald-600');
+      setTimeout(() => {
+        window.dispatchEvent(new CustomEvent('cart:open'));
+        target.classList.remove('bg-emerald-600', 'text-white', 'border-emerald-600');
+      }, 250);
+    });
   });
 
   document.querySelectorAll('.card-buy-btn').forEach(button => {
@@ -234,6 +309,8 @@ const isAvailable = status !== 'agotado';
         image,
         quantity: 1,
       });
+
+      window.dispatchEvent(new CustomEvent('cart:open'));
     });
   });
 </script>

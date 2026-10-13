@@ -42,6 +42,7 @@ export interface ERPProductPublic {
 export interface GetProductsFilters {
   product_type?: string;
   category?: string;
+  subcategory?: string;
   brand?: string;
   in_stock?: boolean;
   search?: string;
@@ -149,6 +150,7 @@ export async function getProducts(filters: GetProductsFilters = {}): Promise<ERP
   const params = new URLSearchParams();
   if (filters.product_type) params.set('product_type', filters.product_type);
   if (filters.category) params.set('category', filters.category);
+  if (filters.subcategory) params.set('subcategory', filters.subcategory);
   if (filters.brand) params.set('brand', filters.brand);
   if (filters.in_stock !== undefined) params.set('in_stock', String(filters.in_stock));
   if (filters.search) params.set('search', filters.search);

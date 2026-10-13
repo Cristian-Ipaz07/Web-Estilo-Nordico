@@ -142,6 +142,7 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
               stock={product.stock}
               status={product.status}
               colorHex={product.colorHex}
+              variants={product.variants}
             />
           </div>
         ))}
@@ -149,58 +150,87 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
     </div>
   </section>
 
-  <!-- 4. Special Combo (Luxury Bento Matte Layout stays dark for visual block callout) -->
-  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="combo-especial">
+  <!-- 4. Seccion Arma tu Look / Combos Streetwear (Dynamo Brand CRO Booster > $130k) -->
+  <section class="py-16 sm:py-24 bg-[#121214] border-t border-[#262626] text-white" id="combos">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
-      <!-- Premium Bento Card (Dark Matte Minimalist Callout) -->
-      <div class="bg-[#121214] border border-[#262626] rounded-md p-8 lg:p-14 overflow-hidden relative">
-        <div class="grid lg:grid-cols-12 gap-8 lg:gap-12 items-center">
-          
-          <!-- Text and Price Details -->
-          <div class="lg:col-span-7 text-center lg:text-left text-white">
-            <span class="inline-block text-[#A3A3A3] text-[9px] font-black uppercase tracking-widest mb-4">Combo Especial</span>
-            <h2 class="text-3xl sm:text-4xl font-title font-black mb-4 tracking-widest uppercase">Chaqueta + Perfume</h2>
-            <p class="text-xs sm:text-sm text-[#A3A3A3] mb-8 max-w-lg mx-auto lg:mx-0 leading-relaxed font-light">
-              Arma tu combo ideal: Llévate una chaqueta impermeable premium junto con un perfume original con envío express a domicilio.
-            </p>
-            
-            <div class="flex items-center gap-5 justify-center lg:justify-start mb-8">
-              <div class="flex flex-col">
-                <span class="text-2xl sm:text-3xl font-black text-white font-title">$130.000</span>
-                <span class="text-[9px] text-[#A3A3A3] font-black uppercase tracking-widest mt-1">COP — Combo completo</span>
-              </div>
-              <div class="h-10 w-px bg-[#262626]"></div>
-              <div class="flex flex-col items-start">
-                <span class="text-sm text-neutral-600 line-through">${formatPrice(260000)}</span>
-                <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest mt-1">Save -50%</span>
-              </div>
-            </div>
+      <div class="text-center max-w-2xl mx-auto mb-12">
+        <span class="text-[#C9A962] text-[10px] font-black uppercase tracking-widest block mb-2">Ofertas Exclusivas</span>
+        <h2 class="text-2xl sm:text-4xl font-black font-title uppercase tracking-widest">Arma tu Look & Combos</h2>
+        <p class="text-xs sm:text-sm text-[#A3A3A3] mt-2 font-light">
+          Combina tus prendas favoritas y ahorra hasta $80.000 COP con entrega express y pago contraentrega en Pasto.
+        </p>
+      </div>
 
-            <a
-              href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE COMBO ESPECIAL CONTRAENTREGA (PASTO)*\n\n📦 *Combo:* Chaqueta Impermeable + Perfume Yanbal\n💰 *Precio Especial:* $130.000 COP\n\n📍 _Por favor, indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._')}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              id="combo-cta"
-              class="inline-flex items-center justify-center gap-3 bg-white hover:bg-neutral-200 text-black font-black text-[10px] sm:text-xs uppercase tracking-widest px-8 py-4 rounded-md transition-all duration-300 shadow-md cursor-pointer"
-            >
-              Pedir Combo por WhatsApp
-            </a>
-          </div>
-
-          <!-- Overlapping Premium Products Collage -->
-          <div class="lg:col-span-5 flex items-center justify-center lg:justify-end pr-4 mt-8 lg:mt-0 relative">
-            <div class="relative w-36 sm:w-44 rounded-md overflow-hidden shadow-2xl bg-[#0B0B0C] border border-[#262626] p-2 rotate-[-5deg] hover:rotate-0 transition-all duration-500 z-10">
-              <img src="/assets/Estilo nordico a futuro.png" alt="Chaqueta Impermeable" class="rounded-sm w-full aspect-square object-cover" />
-              <p class="text-center text-[8px] uppercase tracking-widest font-black text-[#A3A3A3] mt-2">Chaqueta</p>
-            </div>
-            <div class="relative w-36 sm:w-44 rounded-md overflow-hidden shadow-2xl bg-[#0B0B0C] border border-[#262626] p-2 rotate-[6deg] hover:rotate-0 transition-all duration-500 -ml-12 mt-12 z-20">
-              <img src="/assets/products/perfumes/Ohm Perfume.jpg" alt="Perfume Yanbal" class="rounded-sm w-full aspect-square object-cover" />
-              <p class="text-center text-[8px] uppercase tracking-widest font-black text-[#A3A3A3] mt-2">Ohm Parfum</p>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <!-- Combo 1: Chaqueta + Camiseta -->
+        <div class="bg-[#0B0B0C] border border-[#262626] rounded-md p-6 flex flex-col justify-between hover:border-[#C9A962] transition-colors group">
+          <div>
+            <span class="bg-[#C9A962]/10 border border-[#C9A962]/30 text-[#C9A962] text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest inline-block mb-3">Street Pack</span>
+            <h3 class="text-lg font-black uppercase tracking-wider font-title">Chaqueta + Camiseta</h3>
+            <p class="text-xs text-[#A3A3A3] mt-1 font-light leading-relaxed">Chaqueta impermeable térmica + Camiseta oversize algodón pesado.</p>
+            <div class="my-5 flex items-baseline gap-3">
+              <span class="text-2xl font-black text-white font-title">$130.000</span>
+              <span class="text-xs text-neutral-500 line-through">$210.000</span>
+              <span class="text-xs text-red-500 font-black">-38%</span>
             </div>
           </div>
-
+          <a
+            href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE COMBO STREET PACK (PASTO)*\n\n📦 *Combo:* Chaqueta Impermeable + Camiseta Streetwear\n💰 *Precio:* $130.000 COP\n\n📍 _Por favor indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full py-3 text-center bg-white hover:bg-[#C9A962] text-black font-black text-xs uppercase tracking-widest rounded-md transition-colors"
+          >
+            Pedir Combo por WhatsApp →
+          </a>
         </div>
+
+        <!-- Combo 2: Chaqueta + Perfume (Destacado) -->
+        <div class="bg-[#0B0B0C] border-2 border-[#C9A962] rounded-md p-6 flex flex-col justify-between relative shadow-2xl">
+          <span class="absolute -top-3 right-4 bg-[#C9A962] text-black text-[9px] font-black px-2.5 py-0.5 rounded-sm uppercase tracking-widest shadow-md">Más Popular</span>
+          <div>
+            <span class="text-[#C9A962] text-[9px] font-black uppercase tracking-widest inline-block mb-3">Fragancia & Estilo</span>
+            <h3 class="text-lg font-black uppercase tracking-wider font-title">Chaqueta + Perfume</h3>
+            <p class="text-xs text-[#A3A3A3] mt-1 font-light leading-relaxed">Chaqueta térmica + Fragancia original Yanbal (Ohm, Solo o Zentro).</p>
+            <div class="my-5 flex items-baseline gap-3">
+              <span class="text-2xl font-black text-white font-title">$135.000</span>
+              <span class="text-xs text-neutral-500 line-through">$260.000</span>
+              <span class="text-xs text-red-500 font-black">-48%</span>
+            </div>
+          </div>
+          <a
+            href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE COMBO CHAQUETA + PERFUME (PASTO)*\n\n📦 *Combo:* Chaqueta Impermeable + Perfume Yanbal\n💰 *Precio Especial:* $135.000 COP\n\n📍 _Por favor indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full py-3 text-center bg-[#C9A962] hover:bg-[#D4B878] text-black font-black text-xs uppercase tracking-widest rounded-md transition-colors shadow-md"
+          >
+            Pedir Combo por WhatsApp →
+          </a>
+        </div>
+
+        <!-- Combo 3: Dúo Chaquetas -->
+        <div class="bg-[#0B0B0C] border border-[#262626] rounded-md p-6 flex flex-col justify-between hover:border-[#C9A962] transition-colors group">
+          <div>
+            <span class="bg-neutral-800 text-neutral-300 text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest inline-block mb-3">Pack Dúo Pareja / Amigos</span>
+            <h3 class="text-lg font-black uppercase tracking-wider font-title">Pack 2 Chaquetas</h3>
+            <p class="text-xs text-[#A3A3A3] mt-1 font-light leading-relaxed">2 Chaquetas impermeables térmicas en colores y tallas a tu elección.</p>
+            <div class="my-5 flex items-baseline gap-3">
+              <span class="text-2xl font-black text-white font-title">$160.000</span>
+              <span class="text-xs text-neutral-500 line-through">$240.000</span>
+              <span class="text-xs text-emerald-400 font-black">$80k c/u</span>
+            </div>
+          </div>
+          <a
+            href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('*SOLICITUD DE PACK DÚO 2 CHAQUETAS (PASTO)*\n\n📦 *Combo:* 2 Chaquetas Impermeables Térmicas\n💰 *Precio Dúo:* $160.000 COP\n\n📍 _Por favor indícame las tallas y colores que deseas en Pasto._')}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="w-full py-3 text-center bg-white hover:bg-[#C9A962] text-black font-black text-xs uppercase tracking-widest rounded-md transition-colors"
+          >
+            Pedir Pack Dúo por WhatsApp →
+          </a>
+        </div>
+
       </div>
 
     </div>

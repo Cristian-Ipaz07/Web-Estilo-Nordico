@@ -1,0 +1,53 @@
+---
+/**
+ * CategoryChips.astro — Barra táctil horizontal deslizable para navegación móvil ágil (Mattelsa / Bershka CRO)
+ * Permite explorar y filtrar categorías en 1 toque con el pulgar sin abrir menús.
+ */
+interface Props {
+  activeCategory?: string;
+}
+
+const { activeCategory = 'all' } = Astro.props;
+
+const categories = [
+  { id: 'all', label: '🔥 Todo', href: '/' },
+  { id: 'chaquetas', label: '🧥 Chaquetas', href: '/chaquetas' },
+  { id: 'camisetas', label: '👕 Camisetas', href: '/chaquetas' },
+  { id: 'busos', label: '🧥 Busos & Sacos', href: '/chaquetas' },
+  { id: 'jeans', label: '👖 Jeans & Pants', href: '/chaquetas' },
+  { id: 'perfumes', label: '🧴 Perfumes', href: '/perfumes' },
+  { id: 'relojes', label: '⌚ Relojes', href: '/relojes' },
+  { id: 'combos', label: '💥 Combos Look', href: '/#combos' },
+];
+---
+
+<div class="w-full bg-[#0B0B0C] border-b border-[#262626] py-2 px-3 md:hidden sticky top-16 z-30 shadow-md">
+  <div class="flex items-center gap-2 overflow-x-auto no-scrollbar scroll-smooth whitespace-nowrap px-1">
+    {categories.map((cat) => {
+      const isActive = activeCategory === cat.id;
+      return (
+        <a
+          href={cat.href}
+          class:list={[
+            "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[10px] font-black uppercase tracking-wider transition-all duration-200 border",
+            isActive
+              ? "bg-[#C9A962] text-[#0B0B0C] border-[#C9A962] shadow-sm scale-105"
+              : "bg-[#16161A] text-[#D1D5DB] border-[#2E2E33] hover:text-white hover:border-[#C9A962]"
+          ]}
+        >
+          {cat.label}
+        </a>
+      );
+    })}
+  </div>
+</div>
+
+<style>
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+</style>
