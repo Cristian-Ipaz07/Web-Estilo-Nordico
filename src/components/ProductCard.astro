@@ -54,7 +54,7 @@ const isAvailable = status !== 'agotado';
     <!-- Stock badge -->
     {status && (
       <div class:list={[
-        'absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider',
+        'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider',
         isAvailable 
           ? 'bg-green-600 text-white' 
           : 'bg-neutral-800 text-neutral-400'
@@ -91,15 +91,15 @@ const isAvailable = status !== 'agotado';
     <div class="bg-[#F9F9FB] border border-[#E5E7EB] rounded-md p-2.5 mb-4 space-y-1">
       <div class="flex items-center justify-between text-[10px] sm:text-[11px] text-text-muted">
         <span>Precio Comercial:</span>
-        <span class="line-through text-text-light font-semibold">${formatPrice(anchorPrice)} COP</span>
+        <span class="line-through text-text-light font-semibold card-anchor-price">${formatPrice(anchorPrice)} COP</span>
       </div>
       <div class="flex items-center justify-between text-xs sm:text-sm font-black text-text-main font-title border-t border-[#E5E7EB] pt-1">
         <span>Precio Estilo Nórdico:</span>
-        <span class="text-sm sm:text-base font-black text-emerald-600">${formatPrice(price)} COP</span>
+        <span class="text-sm sm:text-base font-black text-emerald-600 card-price">${formatPrice(price)} COP</span>
       </div>
       {discount > 0 && (
         <div class="pt-1 text-center">
-          <span class="bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest inline-block shadow-sm">
+          <span class="card-discount-badge bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-sm uppercase tracking-widest inline-block shadow-sm">
             AHORRAS {discount}%
           </span>
         </div>
@@ -134,6 +134,78 @@ const isAvailable = status !== 'agotado';
 
 <script>
   import { addToCart } from '../lib/cart';
+
+  // Sincronización instantánea de precios y stock en vivo con el ERP
+  async function syncCardsWithLiveERP() {
+    try {
+      const res = await fetch('http://localhost:8000/api/public/products');
+      if (!res.ok) return;
+      const products = await res.json();
+      
+      const cards = document.querySelectorAll('.product-card');
+      cards.forEach(card => {
+        const titleEl = card.querySelector('h3');
+        const title = titleEl?.textContent?.trim() || '';
+        if (!title.toLowerCase().includes('chaqueta')) return;
+        
+        const colorName = title.replace(/chaqueta impermeable/i, '').trim().toLowerCase();
+        
+        const variants = products.filter((p: any) => {
+          if (!p.ref || !p.ref.startsWith('5080')) return false;
+          if (colorName && p.color && p.color.toLowerCase().trim() === colorName) return true;
+          return false;
+        });
+
+        if (variants.length === 0) return;
+
+        const totalStock = variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+        const liveItem = variants.find((v: any) => v.price_sale && v.price_sale > 0) || variants[0];
+        const livePrice = Number(liveItem?.price_sale);
+        const liveAnchor = Number(liveItem?.compare_price) || 120000;
+
+        if (livePrice && !isNaN(livePrice)) {
+          const fmtPrice = new Intl.NumberFormat('es-CO', { style: 'decimal', minimumFractionDigits: 0 }).format(livePrice);
+          const fmtAnchor = new Intl.NumberFormat('es-CO', { style: 'decimal', minimumFractionDigits: 0 }).format(liveAnchor);
+          const discount = Math.round(((liveAnchor - livePrice) / liveAnchor) * 100);
+
+          const priceEl = card.querySelector('.card-price');
+          if (priceEl) priceEl.textContent = `$${fmtPrice} COP`;
+
+          const anchorEl = card.querySelector('.card-anchor-price');
+          if (anchorEl) anchorEl.textContent = `$${fmtAnchor} COP`;
+
+          const discountEl = card.querySelector('.card-discount-badge');
+          if (discountEl && discount > 0) {
+            discountEl.textContent = `AHORRAS ${discount}%`;
+          }
+
+          const buyBtn = card.querySelector('.card-buy-btn');
+          if (buyBtn) buyBtn.setAttribute('data-price', String(livePrice));
+        }
+
+        const stockBadge = card.querySelector('.card-stock-badge');
+        if (stockBadge) {
+          if (totalStock > 0) {
+            stockBadge.textContent = `✓ ${totalStock} Disp`;
+            stockBadge.className = 'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-green-600 text-white';
+          } else {
+            stockBadge.textContent = '✗ Agotado';
+            stockBadge.className = 'card-stock-badge absolute bottom-3 left-3 text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider bg-neutral-800 text-neutral-400';
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncCardsWithLiveERP);
+  } else {
+    syncCardsWithLiveERP();
+  }
+  window.addEventListener('focus', syncCardsWithLiveERP);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncCardsWithLiveERP();
+  });
 
   document.querySelectorAll('.card-buy-btn').forEach(button => {
     button.addEventListener('click', (event) => {

@@ -348,8 +348,8 @@ const faqs = product.category === 'perfumes'
                 class="pack-option border border-text-main bg-neutral-50 rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="1"
                 data-pack-name="Pack 1 Individual"
-                data-pack-price="90000"
-                data-pack-anchor="120000"
+                data-pack-price={product.price}
+                data-pack-anchor={product.anchorPrice}
                 data-pack-desc="1 Chaqueta (Ideal para probar)"
               >
                 <div>
@@ -358,8 +358,8 @@ const faqs = product.category === 'perfumes'
                   <p class="text-[10px] text-text-muted font-light">Largo y ancho exacto</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-base sm:text-lg font-black text-text-main font-title">$90.000</p>
-                  <p class="text-xs text-text-light line-through">$120.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title" id="pack-1-price">${formatPrice(product.price)}</p>
+                  <p class="text-xs text-text-light line-through" id="pack-1-anchor">${formatPrice(product.anchorPrice)}</p>
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold" id="pack-check-1">✓</div>
               </button>
@@ -369,8 +369,8 @@ const faqs = product.category === 'perfumes'
                 class="pack-option border border-[#E5E7EB] hover:border-neutral-500 bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="2"
                 data-pack-name="Pack 2 Duo Estilo"
-                data-pack-price="160000"
-                data-pack-anchor="240000"
+                data-pack-price={Math.round(product.price * 2 - 20000)}
+                data-pack-anchor={product.anchorPrice * 2}
                 data-pack-desc="2 Chaquetas (Ahorras $20.000)"
               >
                 <div>
@@ -379,8 +379,8 @@ const faqs = product.category === 'perfumes'
                   <p class="text-[10px] text-text-muted font-light">Ahorras $20.000 en combo</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-base sm:text-lg font-black text-text-main font-title">$160.000</p>
-                  <p class="text-xs text-text-light line-through">$240.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title" id="pack-2-price">${formatPrice(Math.round(product.price * 2 - 20000))}</p>
+                  <p class="text-xs text-text-light line-through" id="pack-2-anchor">${formatPrice(product.anchorPrice * 2)}</p>
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold hidden" id="pack-check-2">✓</div>
               </button>
@@ -390,8 +390,8 @@ const faqs = product.category === 'perfumes'
                 class="pack-option border border-[#E5E7EB] hover:border-neutral-500 bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="3"
                 data-pack-name="Pack 3 Combo Familiar"
-                data-pack-price="234000"
-                data-pack-anchor="360000"
+                data-pack-price={Math.round(product.price * 3 * 0.87)}
+                data-pack-anchor={product.anchorPrice * 3}
                 data-pack-desc="3 Chaquetas ($78.000 c/u)"
               >
                 <div>
@@ -400,8 +400,8 @@ const faqs = product.category === 'perfumes'
                   <p class="text-[10px] text-text-muted font-light">Mejor precio por unidad</p>
                 </div>
                 <div class="text-right">
-                  <p class="text-base sm:text-lg font-black text-text-main font-title">$234.000</p>
-                  <p class="text-xs text-text-light line-through">$360.000</p>
+                  <p class="text-base sm:text-lg font-black text-text-main font-title" id="pack-3-price">${formatPrice(Math.round(product.price * 3 * 0.87))}</p>
+                  <p class="text-xs text-text-light line-through" id="pack-3-anchor">${formatPrice(product.anchorPrice * 3)}</p>
                 </div>
                 <div class="absolute -top-1.5 -right-1.5 bg-text-main text-white w-4.5 h-4.5 rounded-full flex items-center justify-center text-[10px] font-bold hidden" id="pack-check-3">✓</div>
               </button>
@@ -688,8 +688,128 @@ const faqs = product.category === 'perfumes'
   let selectedVariantId = '';
   let selectedPack = '1';
   let selectedPackName = 'Pack 1 Individual';
-  let selectedPackPrice = buyBtn ? parseFloat(buyBtn.getAttribute('data-product-price') || '85000') : 85000;
+  let selectedPackPrice = buyBtn ? parseFloat(buyBtn.getAttribute('data-product-price') || '90000') : 90000;
   let selectedPackDesc = '1 Chaqueta (Ideal para probar)';
+
+  // Sincronización instantánea de precios, packs y stock en vivo con el ERP
+  async function syncProductWithLiveERP() {
+    try {
+      const res = await fetch('http://localhost:8000/api/public/products');
+      if (!res.ok) return;
+      const products: any[] = await res.json();
+      
+      const currentColor = document.querySelector('p.text-xs.text-text-muted span.font-bold')?.textContent?.trim().toLowerCase() || '';
+
+      const matchingVariants = products.filter((p: any) => {
+        if (!p.ref || !p.ref.startsWith('5080')) return false;
+        if (currentColor && p.color && p.color.toLowerCase().trim() === currentColor) return true;
+        return false;
+      });
+
+      if (matchingVariants.length === 0) return;
+
+      const liveItem = matchingVariants.find((v: any) => v.price_sale && v.price_sale > 0) || matchingVariants[0];
+      const livePrice = Number(liveItem?.price_sale);
+      const liveAnchor = Number(liveItem?.compare_price) || 120000;
+
+      if (livePrice && !isNaN(livePrice)) {
+        if (buyBtn) buyBtn.setAttribute('data-product-price', String(livePrice));
+        if (addCartBtn) addCartBtn.setAttribute('data-product-price', String(livePrice));
+
+        const p1 = livePrice;
+        const p2 = Math.round(livePrice * 2 - 20000);
+        const p3 = Math.round(livePrice * 3 * 0.87);
+
+        const a1 = liveAnchor;
+        const a2 = liveAnchor * 2;
+        const a3 = liveAnchor * 3;
+
+        const pack1Btn = document.querySelector('.pack-option[data-pack-id="1"]');
+        if (pack1Btn) {
+          pack1Btn.setAttribute('data-pack-price', String(p1));
+          pack1Btn.setAttribute('data-pack-anchor', String(a1));
+          const el = document.getElementById('pack-1-price');
+          if (el) el.textContent = `$${new Intl.NumberFormat('es-CO').format(p1)}`;
+          const anchorEl = document.getElementById('pack-1-anchor');
+          if (anchorEl) anchorEl.textContent = `$${new Intl.NumberFormat('es-CO').format(a1)}`;
+        }
+
+        const pack2Btn = document.querySelector('.pack-option[data-pack-id="2"]');
+        if (pack2Btn) {
+          pack2Btn.setAttribute('data-pack-price', String(p2));
+          pack2Btn.setAttribute('data-pack-anchor', String(a2));
+          const el = document.getElementById('pack-2-price');
+          if (el) el.textContent = `$${new Intl.NumberFormat('es-CO').format(p2)}`;
+          const anchorEl = document.getElementById('pack-2-anchor');
+          if (anchorEl) anchorEl.textContent = `$${new Intl.NumberFormat('es-CO').format(a2)}`;
+        }
+
+        const pack3Btn = document.querySelector('.pack-option[data-pack-id="3"]');
+        if (pack3Btn) {
+          pack3Btn.setAttribute('data-pack-price', String(p3));
+          pack3Btn.setAttribute('data-pack-anchor', String(a3));
+          const el = document.getElementById('pack-3-price');
+          if (el) el.textContent = `$${new Intl.NumberFormat('es-CO').format(p3)}`;
+          const anchorEl = document.getElementById('pack-3-anchor');
+          if (anchorEl) anchorEl.textContent = `$${new Intl.NumberFormat('es-CO').format(a3)}`;
+        }
+
+        if (selectedPack === '1') {
+          selectedPackPrice = p1;
+        } else if (selectedPack === '2') {
+          selectedPackPrice = p2;
+        } else if (selectedPack === '3') {
+          selectedPackPrice = p3;
+        }
+
+        const displayPrice = document.getElementById('display-price');
+        const displayAnchorPrice = document.getElementById('display-anchor-price');
+        const displaySavingBadge = document.getElementById('display-saving-badge');
+        
+        const activeAnchor = selectedPack === '1' ? a1 : (selectedPack === '2' ? a2 : a3);
+        const discountPct = Math.round(((activeAnchor - selectedPackPrice) / activeAnchor) * 100);
+
+        if (displayPrice) displayPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(selectedPackPrice)} COP`;
+        if (displayAnchorPrice) displayAnchorPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(activeAnchor)} COP`;
+        if (displaySavingBadge) displaySavingBadge.textContent = `AHORRAS ${discountPct}%`;
+      }
+
+      // Sincronizar tallas y stock
+      sizeButtons.forEach(btn => {
+        const buttonEl = btn as HTMLButtonElement;
+        const talla = buttonEl.getAttribute('data-talla')?.toUpperCase();
+        const variantLive = matchingVariants.find((v: any) => v.size?.toUpperCase() === talla);
+        if (variantLive) {
+          const liveStock = variantLive.stock || 0;
+          buttonEl.setAttribute('data-stock', String(liveStock));
+          buttonEl.setAttribute('data-available', liveStock > 0 ? 'true' : 'false');
+          buttonEl.setAttribute('data-variant-id', String(variantLive.id));
+          buttonEl.disabled = liveStock <= 0;
+
+          const badge = buttonEl.querySelector('span');
+          if (liveStock > 0) {
+            buttonEl.classList.remove('line-through', 'opacity-40', 'cursor-not-allowed', 'border-[#F3F4F6]');
+            buttonEl.classList.add('border-[#E5E7EB]', 'hover:border-text-main', 'cursor-pointer');
+            if (badge) badge.textContent = `(${liveStock})`;
+          } else {
+            buttonEl.classList.add('line-through', 'opacity-40', 'cursor-not-allowed', 'border-[#F3F4F6]');
+            buttonEl.classList.remove('border-[#E5E7EB]', 'hover:border-text-main', 'cursor-pointer');
+            if (badge) badge.textContent = '(0)';
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncProductWithLiveERP);
+  } else {
+    syncProductWithLiveERP();
+  }
+  window.addEventListener('focus', syncProductWithLiveERP);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncProductWithLiveERP();
+  });
 
   // Micro-chequeo de stock en vivo contra la API del ERP
   async function verifyVariantStockInLive(variantId: string, buttonEl: HTMLButtonElement) {
@@ -737,7 +857,7 @@ const faqs = product.category === 'perfumes'
 
       selectedPack = packId;
       selectedPackName = opt.getAttribute('data-pack-name') || '';
-      selectedPackPrice = parseFloat(opt.getAttribute('data-pack-price') || '85000');
+      selectedPackPrice = parseFloat(opt.getAttribute('data-pack-price') || '90000');
       selectedPackDesc = opt.getAttribute('data-pack-desc') || '';
 
       // Update display prices

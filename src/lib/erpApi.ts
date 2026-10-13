@@ -91,7 +91,7 @@ export const COLOR_LOCAL_WEBP: Record<string, string> = {
   'verde militar': '/assets/products/5080/5080-the-north-face-verde-militar.webp',
 };
 
-const DEFAULT_JACKET_PRICE = 85000;
+const DEFAULT_JACKET_PRICE = 90000;
 const DEFAULT_JACKET_ANCHOR = 120000;
 
 // ─── Utilidades ─────────────────────────────────────────────
