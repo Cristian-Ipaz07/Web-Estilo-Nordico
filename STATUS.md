@@ -26,11 +26,11 @@
 ---
 
 ## 🛠️ OBJETIVOS DE EJECUCIÓN EN ESTE PROYECTO
-- [ ] **Paso 1:** Crear cliente `src/lib/erpApi.ts` con tipado TypeScript para conectar a la API del ERP.
-- [ ] **Paso 2:** Crear componente de Carrito Multi-Producto con checkout directo a WhatsApp (+573218888046).
-- [ ] **Paso 3:** Desacoplar Notion de `/chaquetas/index.astro` y `/chaquetas/[slug].astro` para que consuman `erpApi.ts`.
-- [ ] **Paso 4:** Integrar selector de colores y tallas que cambie dinámicamente la foto WebP y verifique stock en vivo.
-- [ ] **Paso 5:** Probar Meta Pixel (`InitiateCheckout`), ejecutar `npm run build` y deploy en Vercel.
+- [x] **Paso 1:** Crear cliente `src/lib/erpApi.ts` con tipado TypeScript para conectar a la API del ERP. (✅ 100% Funcional y probado con Ref 5080 y WebP)
+- [x] **Paso 2:** Crear componente de Carrito Multi-Producto con checkout directo a WhatsApp (+573218888046) y Meta Pixel `InitiateCheckout`. (✅ `CartDrawer.astro` + `src/lib/cart.ts` con persistencia en localStorage)
+- [x] **Paso 3:** Desacoplar Notion de `/chaquetas/index.astro`, `/chaquetas/[slug].astro` e `index.astro` para que consuman `erpApi.ts`. (✅ Desacoplado al 100%)
+- [x] **Paso 4:** Integrar selector de colores y tallas con fotos WebP y verificación de stock en vivo contra `/api/public/stock-check/{id}`. (✅ 100% Funcional)
+- [x] **Paso 5:** Probar Meta Pixel (`InitiateCheckout`), ejecutar `npm run build` y deploy en Vercel. (✅ `npm run build` genera 55 páginas en 2.09s con 0 errores)
 
 ---
 

@@ -302,6 +302,7 @@ const faqs = product.category === 'perfumes'
                   data-talla={v.talla}
                   data-stock={v.stock}
                   data-ref={v.referencia}
+                  data-variant-id={v.id}
                   data-available={v.status === 'disponible' ? 'true' : 'false'}
                   disabled={v.status !== 'disponible'}
                 >
@@ -432,30 +433,58 @@ const faqs = product.category === 'perfumes'
 
       <!-- Actions -->
       <div class="space-y-4">
-        <!-- WhatsApp Sticky Bottom Bar on Mobile -->
-        <div class="fixed bottom-0 left-0 right-0 z-50 p-3 bg-white/95 backdrop-blur-md border-t border-[#E5E7EB] shadow-2xl md:relative md:p-0 md:bg-transparent md:border-none md:shadow-none md:z-auto">
-          <button
-            id="product-buy-btn"
-            class:list={[
-              "w-full py-3.5 sm:py-4 px-6 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2.5 shadow-lg font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2",
-              product.status === 'agotado'
-                ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962] hover:border-[#D4B878]"
-                : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366] hover:border-[#1DA851]"
-            ]}
-            data-product-name={product.name}
-            data-product-brand={product.brand}
-            data-product-id={product.id}
-            data-product-price={product.price}
-            data-phone={whatsappNumber}
-            data-has-variants={hasVariants ? 'true' : 'false'}
-            data-status={product.status}
-          >
-            <span id="buy-btn-text">
-              {product.status === 'agotado'
-                ? 'Encargar para Próximo Pedido'
-                : '🟢 Pedir por WhatsApp (Pago Contraentrega en Pasto)'}
-            </span>
-          </button>
+        <!-- Action Buttons Bar: Add to Cart + Direct WhatsApp -->
+        <div class="fixed bottom-0 left-0 right-0 z-40 p-3 bg-white/95 backdrop-blur-md border-t border-[#E5E7EB] shadow-2xl md:relative md:p-0 md:bg-transparent md:border-none md:shadow-none md:z-auto">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <!-- Add to Cart Button -->
+            <button
+              id="product-add-cart-btn"
+              class:list={[
+                "w-full py-3.5 sm:py-4 px-4 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2 font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-md",
+                product.status === 'agotado'
+                  ? "opacity-50 cursor-not-allowed bg-neutral-200 text-neutral-500 border-neutral-300"
+                  : "bg-[#0B0B0C] hover:bg-[#1A1A1D] text-white border-[#0B0B0C] hover:border-[#C9A962]"
+              ]}
+              data-product-name={product.name}
+              data-product-brand={product.brand}
+              data-product-id={product.id}
+              data-product-price={product.price}
+              data-product-image={product.image}
+              data-product-category={product.category}
+              data-has-variants={hasVariants ? 'true' : 'false'}
+              data-status={product.status}
+              disabled={product.status === 'agotado'}
+            >
+              <svg class="w-4 h-4 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+              </svg>
+              <span>+ Agregar al Carrito</span>
+            </button>
+
+            <!-- Direct WhatsApp Buy Button -->
+            <button
+              id="product-buy-btn"
+              class:list={[
+                "w-full py-3.5 sm:py-4 px-4 rounded-md text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2",
+                product.status === 'agotado'
+                  ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962] hover:border-[#D4B878]"
+                  : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366] hover:border-[#1DA851]"
+              ]}
+              data-product-name={product.name}
+              data-product-brand={product.brand}
+              data-product-id={product.id}
+              data-product-price={product.price}
+              data-phone={whatsappNumber}
+              data-has-variants={hasVariants ? 'true' : 'false'}
+              data-status={product.status}
+            >
+              <span id="buy-btn-text">
+                {product.status === 'agotado'
+                  ? 'Encargar Próximo Pedido'
+                  : '🟢 Pedir Directo WhatsApp'}
+              </span>
+            </button>
+          </div>
         </div>
 
         <!-- Social Proof Widget -->
@@ -644,19 +673,49 @@ const faqs = product.category === 'perfumes'
 </div>
 
 <script>
+  import { addToCart } from '../lib/cart';
+
   // Size selector and WhatsApp button logic
   const sizeButtons = document.querySelectorAll('.size-btn');
   const buyBtn = document.getElementById('product-buy-btn') as HTMLButtonElement;
+  const addCartBtn = document.getElementById('product-add-cart-btn') as HTMLButtonElement;
   const buyBtnText = document.getElementById('buy-btn-text');
   const sizeInfo = document.getElementById('selected-size-info');
   const packOptions = document.querySelectorAll('.pack-option');
   
   let selectedSize = '';
   let selectedRef = '';
+  let selectedVariantId = '';
   let selectedPack = '1';
   let selectedPackName = 'Pack 1 Individual';
-  let selectedPackPrice = buyBtn ? parseFloat(buyBtn.getAttribute('data-product-price') || '90000') : 90000;
+  let selectedPackPrice = buyBtn ? parseFloat(buyBtn.getAttribute('data-product-price') || '85000') : 85000;
   let selectedPackDesc = '1 Chaqueta (Ideal para probar)';
+
+  // Micro-chequeo de stock en vivo contra la API del ERP
+  async function verifyVariantStockInLive(variantId: string, buttonEl: HTMLButtonElement) {
+    if (!variantId || isNaN(Number(variantId))) return;
+    try {
+      const res = await fetch(`http://localhost:8000/api/public/stock-check/${variantId}`);
+      if (res.ok) {
+        const data = await res.json();
+        if (!data.available || data.stock <= 0) {
+          buttonEl.disabled = true;
+          buttonEl.classList.remove('bg-text-main', 'text-white', 'border-text-main');
+          buttonEl.classList.add('border-[#F3F4F6]', 'text-text-light', 'line-through', 'cursor-not-allowed', 'opacity-40');
+          if (sizeInfo) {
+            sizeInfo.textContent = `🟡 Talla ${selectedSize} reservada en proceso de entrega`;
+            sizeInfo.className = 'mt-2 text-[10px] text-amber-600 font-black uppercase tracking-wider';
+          }
+          selectedSize = '';
+          selectedRef = '';
+          selectedVariantId = '';
+          updateCheckoutButton();
+        }
+      }
+    } catch (_) {
+      // Si el backend no responde, mantiene el stock SSG estático sin bloquear la UI
+    }
+  }
 
   // Handle pack selections
   packOptions.forEach(opt => {
@@ -678,7 +737,7 @@ const faqs = product.category === 'perfumes'
 
       selectedPack = packId;
       selectedPackName = opt.getAttribute('data-pack-name') || '';
-      selectedPackPrice = parseFloat(opt.getAttribute('data-pack-price') || '90000');
+      selectedPackPrice = parseFloat(opt.getAttribute('data-pack-price') || '85000');
       selectedPackDesc = opt.getAttribute('data-pack-desc') || '';
 
       // Update display prices
@@ -703,7 +762,8 @@ const faqs = product.category === 'perfumes'
   // Handle size selections
   sizeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
-      if (btn.getAttribute('data-available') !== 'true') return;
+      const buttonEl = btn as HTMLButtonElement;
+      if (buttonEl.getAttribute('data-available') !== 'true' || buttonEl.disabled) return;
       
       // Deselect all
       sizeButtons.forEach(b => {
@@ -712,17 +772,17 @@ const faqs = product.category === 'perfumes'
       });
       
       // Select this one
-      btn.classList.remove('border-[#E5E7EB]');
-      btn.classList.add('bg-text-main', 'text-white', 'border-text-main');
+      buttonEl.classList.remove('border-[#E5E7EB]');
+      buttonEl.classList.add('bg-text-main', 'text-white', 'border-text-main');
       
-      selectedSize = btn.getAttribute('data-talla') || '';
-      selectedRef = btn.getAttribute('data-ref') || '';
-      const stock = btn.getAttribute('data-stock') || '0';
+      selectedSize = buttonEl.getAttribute('data-talla') || '';
+      selectedRef = buttonEl.getAttribute('data-ref') || '';
+      selectedVariantId = buttonEl.getAttribute('data-variant-id') || '';
+      const stock = buttonEl.getAttribute('data-stock') || '0';
       
       if (sizeInfo) {
         sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles`;
-        sizeInfo.classList.add('text-text-main', 'font-black');
-        sizeInfo.classList.remove('text-red-600');
+        sizeInfo.className = 'mt-2 text-[10px] text-text-main font-black uppercase tracking-wider';
       }
 
       // Clear any validation highlight
@@ -732,6 +792,11 @@ const faqs = product.category === 'perfumes'
       }
       
       updateCheckoutButton();
+
+      // Micro-chequeo en vivo
+      if (selectedVariantId) {
+        verifyVariantStockInLive(selectedVariantId, buttonEl);
+      }
     });
   });
 
@@ -855,6 +920,52 @@ const faqs = product.category === 'perfumes'
     setTimeout(() => {
       window.open(whatsAppUrl, '_blank');
     }, 300);
+  });
+
+  // Listener para agregar al carrito
+  addCartBtn?.addEventListener('click', () => {
+    const isAgotado = addCartBtn.getAttribute('data-status') === 'agotado';
+    if (isAgotado) return;
+
+    const hasVariants = addCartBtn.getAttribute('data-has-variants') === 'true';
+    if (hasVariants && !selectedSize) {
+      if (sizeInfo) {
+        sizeInfo.textContent = 'Selecciona tu talla antes de agregar al carrito';
+        sizeInfo.className = 'mt-2 text-[10px] text-red-600 font-black uppercase tracking-wider';
+      }
+      const sizeOptions = document.getElementById('size-options');
+      if (sizeOptions) {
+        sizeOptions.classList.add('ring-2', 'ring-red-600/50', 'animate-shake');
+        sizeOptions.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        setTimeout(() => {
+          sizeOptions.classList.remove('animate-shake');
+        }, 500);
+      }
+      return;
+    }
+
+    const name = addCartBtn.getAttribute('data-product-name') || '';
+    const brand = addCartBtn.getAttribute('data-product-brand') || '';
+    const id = addCartBtn.getAttribute('data-product-id') || '';
+    const category = addCartBtn.getAttribute('data-product-category') || '';
+    const image = addCartBtn.getAttribute('data-product-image') || '';
+    const price = selectedPackPrice || parseFloat(addCartBtn.getAttribute('data-product-price') || '0');
+
+    const itemId = selectedRef || (selectedVariantId ? `${id}-${selectedVariantId}` : (selectedSize ? `${id}-${selectedSize}` : id));
+
+    addToCart({
+      id: itemId,
+      productId: id,
+      variantId: selectedVariantId || undefined,
+      name,
+      brand,
+      category,
+      price,
+      image,
+      size: selectedSize || undefined,
+      color: name.replace('Chaqueta Impermeable ', '').trim(),
+      quantity: 1,
+    });
   });
 </script>
 

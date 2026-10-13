@@ -45,30 +45,49 @@ const currentPath = Astro.url.pathname;
         ))}
       </div>
 
-      <!-- Monochrome Header Button (streetwear look) -->
-      <a
-        href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent(STORE_CONFIG.whatsapp.defaultMessage)}`}
-        target="_blank"
-        rel="noopener noreferrer"
-        id="nav-whatsapp-cta"
-        class="hidden md:flex items-center gap-2 border border-white/20 hover:border-white bg-white/5 hover:bg-white text-white hover:text-[#0B0B0C] px-5 py-2.5 rounded-md text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
-      >
-        Contáctanos
-      </a>
+      <div class="flex items-center gap-3">
+        <!-- Cart Trigger Button -->
+        <button
+          id="nav-cart-btn"
+          class="relative flex items-center justify-center p-2 sm:p-2.5 rounded-md border border-white/20 hover:border-white bg-white/5 hover:bg-white/10 text-white transition-all cursor-pointer"
+          aria-label="Ver carrito"
+        >
+          <svg class="w-5 h-5 text-[#C9A962]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span
+            id="nav-cart-badge"
+            class="absolute -top-1.5 -right-1.5 bg-[#C9A962] text-black text-[9px] font-black w-4.5 h-4.5 rounded-full flex items-center justify-center scale-0 transition-transform duration-300 shadow-sm"
+          >
+            0
+          </span>
+        </button>
 
-      <!-- Mobile Menu Button -->
-      <button
-        id="mobile-menu-btn"
-        class="md:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-white/5 border border-white/10 transition-colors"
-        aria-label="Abrir menú"
-      >
-        <svg id="menu-icon-open" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
-        </svg>
-        <svg id="menu-icon-close" class="w-5 h-5 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-        </svg>
-      </button>
+        <!-- Monochrome Header Button (streetwear look) -->
+        <a
+          href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent(STORE_CONFIG.whatsapp.defaultMessage)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          id="nav-whatsapp-cta"
+          class="hidden md:flex items-center gap-2 border border-white/20 hover:border-white bg-white/5 hover:bg-white text-white hover:text-[#0B0B0C] px-5 py-2.5 rounded-md text-xs font-black uppercase tracking-widest transition-all duration-300 cursor-pointer"
+        >
+          Contáctanos
+        </a>
+
+        <!-- Mobile Menu Button -->
+        <button
+          id="mobile-menu-btn"
+          class="md:hidden flex items-center justify-center w-10 h-10 rounded-md hover:bg-white/5 border border-white/10 transition-colors"
+          aria-label="Abrir menú"
+        >
+          <svg id="menu-icon-open" class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg id="menu-icon-close" class="w-5 h-5 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <!-- Mobile Menu (Monochrome) -->
@@ -113,4 +132,38 @@ const currentPath = Astro.url.pathname;
     iconClose?.classList.toggle('hidden');
     btn.setAttribute('aria-label', isOpen ? 'Abrir menú' : 'Cerrar menú');
   });
+
+  // Carrito listeners en Navbar
+  const navCartBtn = document.getElementById('nav-cart-btn');
+  const navCartBadge = document.getElementById('nav-cart-badge');
+
+  navCartBtn?.addEventListener('click', () => {
+    window.dispatchEvent(new CustomEvent('cart:open'));
+  });
+
+  window.addEventListener('cart:updated', (e: any) => {
+    const count = e.detail?.count ?? 0;
+    if (!navCartBadge) return;
+    navCartBadge.textContent = String(count);
+    if (count > 0) {
+      navCartBadge.classList.remove('scale-0');
+      navCartBadge.classList.add('scale-100');
+    } else {
+      navCartBadge.classList.remove('scale-100');
+      navCartBadge.classList.add('scale-0');
+    }
+  });
+
+  try {
+    const raw = localStorage.getItem('estilo_nordico_cart_v1');
+    if (raw && navCartBadge) {
+      const items = JSON.parse(raw);
+      const count = items.reduce((s: number, i: any) => s + (i.quantity || 1), 0);
+      if (count > 0) {
+        navCartBadge.textContent = String(count);
+        navCartBadge.classList.remove('scale-0');
+        navCartBadge.classList.add('scale-100');
+      }
+    }
+  } catch (_) {}
 </script>

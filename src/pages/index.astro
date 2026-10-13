@@ -5,12 +5,12 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Hero from '../components/Hero.astro';
 import ProductCard from '../components/ProductCard.astro';
-import { fetchJacketsFromNotion } from '../lib/notion';
+import { fetchJacketsFromERP } from '../lib/erpApi';
 import { perfumes, relojes, formatPrice } from '../data/products';
 import { STORE_CONFIG } from '../config/store';
 
-// Fetch dynamic jackets from Notion
-const jackets = await fetchJacketsFromNotion();
+// Fetch dynamic jackets from ERP
+const jackets = await fetchJacketsFromERP();
 
 // Filter featured products
 const featuredJackets = jackets.filter(j => j.featured);

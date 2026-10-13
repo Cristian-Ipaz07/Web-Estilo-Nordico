@@ -107,6 +107,7 @@ const isAvailable = status !== 'agotado';
     </div>
 
     <!-- Actions: View + WhatsApp -->
+    <!-- Actions: View + Add to Cart -->
     <div class="flex gap-2">
       <a 
         href={productPageUrl}
@@ -115,59 +116,52 @@ const isAvailable = status !== 'agotado';
         Detalles
       </a>
       <button 
-        class="flex-1 bg-text-main hover:bg-neutral-800 text-white py-2.5 px-3 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 buy-btn transition-all duration-300 cursor-pointer"
+        class="flex-1 bg-text-main hover:bg-neutral-800 text-white py-2.5 px-3 rounded-md text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-1.5 card-buy-btn transition-all duration-300 cursor-pointer"
         data-id={id}
         data-name={name}
         data-brand={brand}
         data-price={price}
-        data-phone={whatsappNumber}
+        data-image={image}
+        data-category={category}
+        data-url={productPageUrl}
         id={`buy-${id}`}
       >
-        Pedir
+        {category === 'chaquetas' ? 'Elegir Talla' : '+ Carrito'}
       </button>
     </div>
   </div>
 </article>
 
 <script>
-  // Buy button listeners
-  document.querySelectorAll('.buy-btn').forEach(button => {
+  import { addToCart } from '../lib/cart';
+
+  document.querySelectorAll('.card-buy-btn').forEach(button => {
     button.addEventListener('click', (event) => {
       const target = event.currentTarget as HTMLButtonElement;
+      const category = target.getAttribute('data-category') || '';
+      const url = target.getAttribute('data-url') || '';
+
+      if (category === 'chaquetas' && url) {
+        window.location.href = url;
+        return;
+      }
+
       const id = target.getAttribute('data-id') || '';
       const name = target.getAttribute('data-name') || '';
       const brand = target.getAttribute('data-brand') || '';
       const price = parseFloat(target.getAttribute('data-price') || '0');
-      const phone = target.getAttribute('data-phone') || '';
+      const image = target.getAttribute('data-image') || '';
 
-      const formattedPrice = new Intl.NumberFormat('es-CO', {
-        style: 'decimal',
-        minimumFractionDigits: 0,
-      }).format(price);
-
-      const message = 
-        `*SOLICITUD DE PEDIDO CONTRAENTREGA (PASTO)*\n\n` +
-        `📦 *Producto:* ${name} (${brand})\n` +
-        `🆔 *Código:* ${id}\n` +
-        `💰 *Precio Especial:* $${formattedPrice} COP\n\n` +
-        `📍 _Por favor, indícame tu nombre y dirección en Pasto para coordinar la entrega hoy mismo._`;
-
-      const encodedMessage = encodeURIComponent(message);
-      const whatsAppUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
-
-      if (typeof window !== 'undefined' && (window as any).fbq) {
-        (window as any).fbq('track', 'InitiateCheckout', {
-          content_ids: [id],
-          content_type: 'product',
-          content_name: name,
-          value: price,
-          currency: 'COP'
-        }, { eventID: `evt-${id}-${Date.now()}` });
-      }
-
-      setTimeout(() => {
-        window.open(whatsAppUrl, '_blank');
-      }, 300);
+      addToCart({
+        id,
+        productId: id,
+        name,
+        brand,
+        category,
+        price,
+        image,
+        quantity: 1,
+      });
     });
   });
 </script>

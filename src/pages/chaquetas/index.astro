@@ -4,10 +4,10 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
-import { fetchJacketsFromNotion } from '../../lib/notion';
+import { fetchJacketsFromERP } from '../../lib/erpApi';
 import { getUniqueColors, getUniqueSizes } from '../../data/products';
 
-const jackets = await fetchJacketsFromNotion();
+const jackets = await fetchJacketsFromERP();
 const colors = getUniqueColors(jackets);
 const sizes = getUniqueSizes(jackets);
 const availableCount = jackets.filter(j => j.status === 'disponible').length;

@@ -1,15 +1,15 @@
 ---
 /**
  * /chaquetas/[slug].astro — Product page individual de chaqueta
- * Genera una página estática por cada color de chaqueta desde Notion.
+ * Genera una página estática por cada color de chaqueta desde el ERP de Estilo Nórdico.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductPage from '../../components/ProductPage.astro';
 import ProductCard from '../../components/ProductCard.astro';
-import { fetchJacketsFromNotion } from '../../lib/notion';
+import { fetchJacketsFromERP } from '../../lib/erpApi';
 
 export async function getStaticPaths() {
-  const jackets = await fetchJacketsFromNotion();
+  const jackets = await fetchJacketsFromERP();
   return jackets.map(jacket => ({
     params: { slug: jacket.slug },
     props: { jacket, allJackets: jackets },

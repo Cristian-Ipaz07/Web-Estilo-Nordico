@@ -1,0 +1,360 @@
+---
+/**
+ * CartDrawer.astro — Drawer lateral de Carrito Multi-Producto con Checkout a WhatsApp.
+ * Estilo Dark Mode Streetwear con toques de dorado nórdico.
+ */
+import { STORE_CONFIG } from '../config/store';
+
+const whatsappPhone = STORE_CONFIG.whatsapp.number;
+---
+
+<!-- Trigger Flotante del Carrito -->
+<button
+  id="floating-cart-btn"
+  class="fixed bottom-24 right-5 z-40 bg-[#0B0B0C] text-white hover:bg-[#1A1A1D] border-2 border-[#C9A962] p-3.5 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-110 group cursor-pointer"
+  aria-label="Abrir carrito de compras"
+>
+  <svg class="w-6 h-6 text-[#C9A962] group-hover:text-white transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+  </svg>
+  <!-- Badge contador de prendas -->
+  <span
+    id="cart-floating-badge"
+    class="absolute -top-1.5 -right-1.5 bg-[#C9A962] text-black text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center shadow-md scale-0 transition-transform duration-300"
+  >
+    0
+  </span>
+</button>
+
+<!-- Backdrop Overlay -->
+<div
+  id="cart-backdrop"
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"
+></div>
+
+<!-- Drawer Panel Lateral -->
+<aside
+  id="cart-drawer"
+  class="fixed top-0 right-0 bottom-0 w-full max-w-md bg-[#0B0B0C] border-l border-[#262626] text-white z-50 flex flex-col shadow-2xl transform translate-x-full transition-transform duration-300 ease-in-out"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Carrito de compras"
+>
+  <!-- Header del Drawer -->
+  <header class="p-5 border-b border-[#262626] flex items-center justify-between bg-[#121214]">
+    <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-md bg-[#1A1A1D] border border-[#333] flex items-center justify-center text-[#C9A962]">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+        </svg>
+      </div>
+      <div>
+        <h2 class="text-sm font-black uppercase tracking-wider font-title">Tu Carrito Nórdico</h2>
+        <p class="text-[10px] text-[#A3A3A3] uppercase tracking-widest mt-0.5" id="cart-items-summary">0 artículos</p>
+      </div>
+    </div>
+    
+    <button
+      id="cart-close-btn"
+      class="w-8 h-8 rounded-md bg-[#1A1A1D] hover:bg-white/10 text-zinc-400 hover:text-white border border-[#333] flex items-center justify-center transition-colors cursor-pointer"
+      aria-label="Cerrar carrito"
+    >
+      ✕
+    </button>
+  </header>
+
+  <!-- Banner de Beneficio / Confianza -->
+  <div class="bg-[#C9A962]/10 border-b border-[#C9A962]/20 px-4 py-2 flex items-center justify-between text-[10px]">
+    <span class="text-[#C9A962] font-black uppercase tracking-wider flex items-center gap-1.5">
+      <span>⚡</span> Envío gratis y pago al recibir en Pasto
+    </span>
+    <span class="text-zinc-400">Contraentrega</span>
+  </div>
+
+  <!-- Contenedor de Artículos (Scrollable) -->
+  <div class="flex-1 overflow-y-auto p-4 space-y-3" id="cart-items-list">
+    <!-- Se llena dinámicamente con JavaScript -->
+  </div>
+
+  <!-- Estado Vacío -->
+  <div id="cart-empty-state" class="flex-1 flex flex-col items-center justify-center p-8 text-center hidden">
+    <div class="w-16 h-16 rounded-full bg-[#1A1A1D] border border-[#262626] flex items-center justify-center text-3xl mb-4 text-[#A3A3A3]">
+      🛒
+    </div>
+    <h3 class="text-sm font-black uppercase tracking-widest text-white mb-1">Tu carrito está vacío</h3>
+    <p class="text-xs text-[#A3A3A3] mb-6 max-w-xs font-light leading-relaxed">
+      Agrega chaquetas impermeables, perfumes originales o relojes para armar tu pedido en un solo mensaje.
+    </p>
+    <a
+      href="/chaquetas"
+      id="cart-empty-explore-btn"
+      class="bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] px-6 py-3 rounded-md text-[11px] font-black uppercase tracking-widest transition-all cursor-pointer shadow-lg"
+    >
+      Explorar Chaquetas →
+    </a>
+  </div>
+
+  <!-- Footer con Checkout -->
+  <footer class="p-5 border-t border-[#262626] bg-[#121214] space-y-4" id="cart-footer">
+    <!-- Selector de Ciudad -->
+    <div class="space-y-1.5">
+      <label class="block text-[10px] font-black text-zinc-300 uppercase tracking-widest">
+        Ciudad de Entrega:
+      </label>
+      <div class="grid grid-cols-2 gap-2">
+        <button
+          type="button"
+          class="city-option-btn py-2 px-3 rounded-md text-[11px] font-black uppercase tracking-wider border transition-all text-center cursor-pointer bg-[#C9A962]/10 border-[#C9A962] text-[#C9A962]"
+          data-city="Pasto"
+        >
+          📍 Pasto (Hoy)
+        </button>
+        <button
+          type="button"
+          class="city-option-btn py-2 px-3 rounded-md text-[11px] font-black uppercase tracking-wider border border-[#333] bg-[#1A1A1D] text-zinc-400 hover:text-white transition-all text-center cursor-pointer"
+          data-city="Nacional"
+        >
+          🇨🇴 Otra Ciudad
+        </button>
+      </div>
+      <input
+        type="text"
+        id="cart-address-input"
+        placeholder="Dirección o barrio (opcional)"
+        class="w-full mt-2 px-3 py-2 bg-[#1A1A1D] border border-[#333] rounded-md text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-[#C9A962]"
+      />
+    </div>
+
+    <!-- Desglose de Precios -->
+    <div class="space-y-1.5 pt-2 border-t border-[#262626] text-xs">
+      <div class="flex justify-between text-zinc-400">
+        <span>Subtotal</span>
+        <span class="font-semibold text-white" id="cart-subtotal-text">$0 COP</span>
+      </div>
+      <div class="flex justify-between text-zinc-400">
+        <span>Envío / Domicilio</span>
+        <span class="text-emerald-400 font-bold" id="cart-shipping-text">Gratis en Pasto</span>
+      </div>
+      <div class="flex justify-between items-baseline pt-2 border-t border-[#262626]">
+        <span class="text-sm font-black uppercase tracking-wider">Total Pedido:</span>
+        <span class="text-xl font-black text-emerald-400 font-title" id="cart-total-text">$0 COP</span>
+      </div>
+    </div>
+
+    <!-- Botón Principal: Checkout WhatsApp -->
+    <button
+      id="cart-checkout-whatsapp-btn"
+      class="w-full py-4 px-6 rounded-md bg-[#25D366] hover:bg-[#1DA851] text-white font-black text-xs sm:text-sm uppercase tracking-widest flex items-center justify-center gap-2.5 shadow-xl transition-all duration-300 hover:scale-[1.02] cursor-pointer"
+      data-phone={whatsappPhone}
+    >
+      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.006c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.044c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.1.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.159.57 4.184 1.564 5.946l-1.564 5.854 6.001-1.574c1.714.943 3.684 1.474 5.799 1.474 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/>
+      </svg>
+      <span>Comprar pedido por WhatsApp</span>
+    </button>
+  </footer>
+</aside>
+
+<script>
+  import {
+    getCart,
+    removeFromCart,
+    updateQuantity,
+    getCartCount,
+    getCartTotal,
+    formatCOP,
+    buildWhatsAppCheckoutUrl,
+  } from '../lib/cart';
+
+  const drawer = document.getElementById('cart-drawer');
+  const backdrop = document.getElementById('cart-backdrop');
+  const closeBtn = document.getElementById('cart-close-btn');
+  const floatingBtn = document.getElementById('floating-cart-btn');
+  const floatingBadge = document.getElementById('cart-floating-badge');
+  const itemsList = document.getElementById('cart-items-list');
+  const emptyState = document.getElementById('cart-empty-state');
+  const footer = document.getElementById('cart-footer');
+  const itemsSummary = document.getElementById('cart-items-summary');
+  const subtotalText = document.getElementById('cart-subtotal-text');
+  const totalText = document.getElementById('cart-total-text');
+  const checkoutBtn = document.getElementById('cart-checkout-whatsapp-btn');
+  const cityButtons = document.querySelectorAll('.city-option-btn');
+  const addressInput = document.getElementById('cart-address-input') as HTMLInputElement;
+
+  let selectedCity = 'Pasto';
+
+  // Control de apertura y cierre
+  function openDrawer() {
+    if (!drawer || !backdrop) return;
+    renderCart();
+    drawer.classList.remove('translate-x-full');
+    backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    backdrop.classList.add('opacity-100');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeDrawer() {
+    if (!drawer || !backdrop) return;
+    drawer.classList.add('translate-x-full');
+    backdrop.classList.remove('opacity-100');
+    backdrop.classList.add('opacity-0', 'pointer-events-none');
+    document.body.style.overflow = '';
+  }
+
+  // Event Listeners globales
+  floatingBtn?.addEventListener('click', openDrawer);
+  closeBtn?.addEventListener('click', closeDrawer);
+  backdrop?.addEventListener('click', closeDrawer);
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeDrawer();
+  });
+
+  window.addEventListener('cart:open', openDrawer);
+  window.addEventListener('cart:close', closeDrawer);
+  window.addEventListener('cart:toggle', () => {
+    if (drawer?.classList.contains('translate-x-full')) {
+      openDrawer();
+    } else {
+      closeDrawer();
+    }
+  });
+
+  window.addEventListener('cart:updated', () => {
+    updateBadge();
+    if (!drawer?.classList.contains('translate-x-full')) {
+      renderCart();
+    }
+  });
+
+  // Selector de Ciudad
+  cityButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      cityButtons.forEach(b => {
+        b.classList.remove('bg-[#C9A962]/10', 'border-[#C9A962]', 'text-[#C9A962]');
+        b.classList.add('border-[#333]', 'bg-[#1A1A1D]', 'text-zinc-400');
+      });
+      btn.classList.remove('border-[#333]', 'bg-[#1A1A1D]', 'text-zinc-400');
+      btn.classList.add('bg-[#C9A962]/10', 'border-[#C9A962]', 'text-[#C9A962]');
+      selectedCity = btn.getAttribute('data-city') === 'Pasto' ? 'Pasto' : 'Otra Ciudad (Nacional)';
+      
+      const shippingLabel = document.getElementById('cart-shipping-text');
+      if (shippingLabel) {
+        shippingLabel.textContent = selectedCity === 'Pasto' ? 'Gratis en Pasto' : 'Contraentrega transportadora';
+      }
+    });
+  });
+
+  // Checkout por WhatsApp
+  checkoutBtn?.addEventListener('click', () => {
+    const notes = addressInput?.value || '';
+    const phone = checkoutBtn.getAttribute('data-phone') || '573218888046';
+    const url = buildWhatsAppCheckoutUrl({
+      city: selectedCity,
+      notes,
+      phone,
+    });
+
+    if (url) {
+      window.open(url, '_blank');
+    }
+  });
+
+  // Renderizar contenido del carrito
+  function renderCart() {
+    const cart = getCart();
+    const count = getCartCount(cart);
+    const total = getCartTotal(cart);
+
+    updateBadge(count);
+
+    if (itemsSummary) {
+      itemsSummary.textContent = `${count} ${count === 1 ? 'artículo' : 'artículos'}`;
+    }
+
+    if (cart.length === 0) {
+      if (itemsList) itemsList.innerHTML = '';
+      emptyState?.classList.remove('hidden');
+      footer?.classList.add('hidden');
+      return;
+    }
+
+    emptyState?.classList.add('hidden');
+    footer?.classList.remove('hidden');
+
+    if (subtotalText) subtotalText.textContent = `$${formatCOP(total)} COP`;
+    if (totalText) totalText.textContent = `$${formatCOP(total)} COP`;
+
+    if (!itemsList) return;
+
+    itemsList.innerHTML = cart.map((item) => `
+      <div class="p-3.5 bg-[#121214] rounded-md border border-[#262626] flex gap-3 items-center group relative" data-item-id="${item.id}">
+        <!-- Thumbnail -->
+        <div class="w-16 h-16 rounded-md bg-[#1A1A1D] border border-[#333] overflow-hidden flex-shrink-0">
+          <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" />
+        </div>
+
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <h4 class="text-xs font-black uppercase tracking-wider text-white truncate font-title">${item.name}</h4>
+          <div class="flex items-center gap-2 mt-1">
+            ${item.size ? `<span class="text-[9px] font-black uppercase tracking-widest bg-white/10 px-1.5 py-0.5 rounded text-zinc-300">Talla: ${item.size}</span>` : ''}
+            ${item.color ? `<span class="text-[9px] text-zinc-400 font-semibold">${item.color}</span>` : ''}
+          </div>
+          <p class="text-xs font-black text-emerald-400 mt-1">$${formatCOP(item.price)} COP</p>
+        </div>
+
+        <!-- Controles de Cantidad -->
+        <div class="flex flex-col items-end gap-2 flex-shrink-0">
+          <button class="cart-remove-item text-zinc-500 hover:text-red-400 p-1 text-xs cursor-pointer transition-colors" data-id="${item.id}" title="Eliminar">
+            ✕
+          </button>
+          <div class="flex items-center border border-[#333] bg-[#1A1A1D] rounded-md overflow-hidden">
+            <button class="cart-qty-minus px-2 py-0.5 text-zinc-300 hover:bg-white/10 text-xs font-black cursor-pointer" data-id="${item.id}">-</button>
+            <span class="px-2 py-0.5 text-xs font-black text-white min-w-[20px] text-center">${item.quantity}</span>
+            <button class="cart-qty-plus px-2 py-0.5 text-zinc-300 hover:bg-white/10 text-xs font-black cursor-pointer" data-id="${item.id}">+</button>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Listeners para botones de ítems
+    itemsList.querySelectorAll('.cart-qty-plus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+        if (id) updateQuantity(id, 1);
+      });
+    });
+
+    itemsList.querySelectorAll('.cart-qty-minus').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+        if (id) updateQuantity(id, -1);
+      });
+    });
+
+    itemsList.querySelectorAll('.cart-remove-item').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        const id = (e.currentTarget as HTMLElement).getAttribute('data-id');
+        if (id) removeFromCart(id);
+      });
+    });
+  }
+
+  function updateBadge(precalculatedCount?: number) {
+    const count = precalculatedCount !== undefined ? precalculatedCount : getCartCount();
+    if (!floatingBadge) return;
+
+    floatingBadge.textContent = String(count);
+    if (count > 0) {
+      floatingBadge.classList.remove('scale-0');
+      floatingBadge.classList.add('scale-100');
+    } else {
+      floatingBadge.classList.remove('scale-100');
+      floatingBadge.classList.add('scale-0');
+    }
+  }
+
+  // Inicializar contador al cargar la página
+  updateBadge();
+</script>

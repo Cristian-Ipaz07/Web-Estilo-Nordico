@@ -52,7 +52,7 @@ export interface Product {
   hook?: boolean;
   
   // Fuente de datos
-  source?: 'static' | 'notion';
+  source?: 'static' | 'notion' | 'erp';
 }
 
 export interface ProductVariant {

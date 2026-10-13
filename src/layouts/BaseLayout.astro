@@ -9,6 +9,7 @@ import '../styles/global.css';
 import Navbar from '../components/Navbar.astro';
 import Footer from '../components/Footer.astro';
 import WhatsAppFloat from '../components/WhatsAppFloat.astro';
+import CartDrawer from '../components/CartDrawer.astro';
 import PromoBar from '../components/PromoBar.astro';
 import { STORE_CONFIG } from '../config/store';
 
@@ -79,5 +80,6 @@ const pixelEnabled = STORE_CONFIG.metaPixel.enabled;
     
     <Footer />
     <WhatsAppFloat />
+    <CartDrawer />
   </body>
 </html>
