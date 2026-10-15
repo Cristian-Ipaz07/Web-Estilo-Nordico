@@ -36,3 +36,19 @@
 
 ## 🎯 PROMPT DE INICIO RÁPIDO PARA JARVIS:
 > *"Jarvis, lee `PLAN_FASE_WEB.md` y `STATUS.md`. El backend de `estilo-nordico-app` ya está 100% listo en http://localhost:8000 con la API pública y las imágenes WebP de la Ref 5080. Vamos a implementar `src/lib/erpApi.ts`, el carrito multi-producto con checkout a WhatsApp y migrar la página de chaquetas para desacoplar Notion. Comienza por `src/lib/erpApi.ts`."*
+
+---
+
+## 🚀 FASE 3: OPTIMIZACIÓN CRO, SOBREPEDIDO Y VENTAS AL POR MAYOR (Actualizado 2026-10-15)
+- [x] **Selector de Tallas Estándar Ref 5080**: Normalizado estrictamente a `M`, `L`, `XL`, `XXL`. Se filtró el registro padre nulo/vacío eliminando la aparición errónea de "Única Sobrepedido".
+- [x] **Flujo Guiado de Sobrepedido (3 a 5 Días)**:
+  - Cuando el usuario toca una talla agotada, la interfaz muestra dinámicamente un banner informativo dorado indicando que la confección en taller tarda **de 3 a 5 días hábiles** en llegar a su puerta (con Domicilio Gratis en Pasto o envíos nacionales).
+  - La pantalla realiza un desplazamiento suave (`scrollIntoView`) hacia el botón de WhatsApp abajo y ejecuta una animación de movimiento/sacudida (`animate-shake`) para que el cliente entienda de inmediato el cambio de estado.
+  - Al seleccionar una talla disponible con stock físico, el aviso desaparece automáticamente.
+  - El mensaje predeterminado de WhatsApp detalla el tiempo estimado de 3 a 5 días hábiles y el encargo de fábrica.
+- [x] **Módulo de Ventas al Por Mayor (Exclusivo Chaqueta 5080)**:
+  - Tarjeta oscura con detalles dorados y badge *"Ventas Mayoristas • Desde 6 unidades"*.
+  - Botón CTA directo a WhatsApp con mensaje pre-rellenado para solicitar catálogo mayorista, cantidades mínimas y condiciones de envío para tiendas/revendedores.
+- [x] **Sincronización en la Nube (GitHub)**:
+  - Repositorio oficial creado y publicado en `https://github.com/Cristian-Ipaz07/Web-Estilo-Nordico`.
+  - Rama `main` sincronizada con `origin/main` (340 objetos subidos).
