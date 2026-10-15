@@ -528,6 +528,21 @@ const faqs = product.category === 'perfumes'
           </button>
         </div>
 
+        <!-- Noticia Dinámica de Sobrepedido (Aparece únicamente cuando se selecciona talla agotada) -->
+        <div id="sobrepedido-notice" class="hidden mt-3 p-3.5 bg-amber-50/90 border border-amber-300 rounded-md text-amber-950 shadow-xs transition-all duration-300">
+          <div class="flex items-start gap-2.5">
+            <span class="text-lg leading-none shrink-0">⏱️</span>
+            <div>
+              <p class="text-[11px] font-black uppercase tracking-wider text-amber-950 flex items-center gap-1.5">
+                <span>Talla en Sobrepedido / Confección de Fábrica</span>
+              </p>
+              <p class="text-[11px] text-amber-900 font-light mt-0.5 leading-relaxed">
+                Esta talla se solicita directamente con nuestro taller nacional y tarda <strong>de 3 a 5 días hábiles</strong> en llegar a tu puerta (con <strong>Domicilio Gratis en Pasto</strong> o envíos a todo el país). Haz clic en el botón naranja de arriba para apartarla por WhatsApp.
+              </p>
+            </div>
+          </div>
+        </div>
+
         <!-- Sticky Mobile Bottom Bar (Bershka / ASOS / Tienda Urban CRO Benchmark) -->
         <div class="fixed bottom-0 left-0 right-0 z-40 bg-[#0B0B0C]/95 backdrop-blur-md border-t border-[#262626] p-2.5 px-4 shadow-2xl flex items-center justify-between gap-3 md:hidden">
           <div class="flex flex-col min-w-[95px]">
@@ -582,7 +597,7 @@ const faqs = product.category === 'perfumes'
           </div>
           <div class="flex flex-col items-center">
             <span class="text-[10px] font-black text-text-main uppercase tracking-widest">
-              {product.category === 'chaquetas' && 'Premium'}
+              {product.category === 'chaquetas' && 'Nacional'}
               {product.category === 'perfumes' && 'Original'}
               {product.category === 'relojes' && 'Nórdico'}
             </span>
@@ -593,6 +608,44 @@ const faqs = product.category === 'perfumes'
             </span>
           </div>
         </div>
+
+        <!-- Bloque de Venta al Por Mayor (Exclusivo Chaqueta 5080) -->
+        {product.category === 'chaquetas' && (
+          <div class="mt-6 p-4.5 bg-[#121214] border border-[#2E2E33] hover:border-[#C9A962]/50 rounded-md text-white transition-all duration-300 shadow-md">
+            <div class="flex items-start gap-3">
+              <div class="w-9 h-9 rounded-md bg-[#1A1A1D] border border-[#333] flex items-center justify-center text-[#C9A962] shrink-0 text-base shadow-xs">
+                💼
+              </div>
+              <div class="flex-1">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="text-[9px] font-black uppercase tracking-widest text-[#C9A962] bg-[#C9A962]/10 px-2 py-0.5 rounded border border-[#C9A962]/20">
+                    Ventas Mayoristas
+                  </span>
+                  <span class="text-[9px] text-[#A3A3A3] font-semibold">Desde 6 unidades</span>
+                </div>
+                <h4 class="text-xs font-black uppercase tracking-wider text-white font-title">
+                  ¿Deseas comprar esta chaqueta al por mayor?
+                </h4>
+                <p class="text-[11px] text-[#A3A3A3] font-light mt-1 leading-relaxed">
+                  Ofrecemos precios especiales para tiendas, revendedores y dotaciones en Pasto y toda Colombia. Solicita nuestro catálogo mayorista y escalas de descuento directo por WhatsApp.
+                </p>
+                <a
+                  href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(
+                    `*SOLICITUD DE PRECIOS AL POR MAYOR* 💼\n\n` +
+                    `🧥 *Prenda de Interés:* Chaqueta Impermeable Ref 5080 (${product.name})\n` +
+                    `📦 *Modalidad:* Compra al por mayor (desde 6 unidades)\n\n` +
+                    `📍 _Hola Estilo Nórdico, me interesa adquirir chaquetas al por mayor para mi tienda/negocio. Por favor, compártanme la lista de precios mayoristas, cantidades mínimas y condiciones de envío. Mi nombre es:_`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-3 inline-flex items-center gap-2 border border-[#C9A962] bg-[#C9A962]/15 hover:bg-[#C9A962] text-[#C9A962] hover:text-black px-4 py-2.5 rounded-md text-[10px] font-black uppercase tracking-widest transition-all duration-200 cursor-pointer shadow-sm active:scale-95"
+                >
+                  <span>💬 Solicitar Información al Por Mayor</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        )}
 
         <!-- Callout Banner for Direct Distributor request (for Perfumes/Watches only - High Contrast Dark Card with Gentle Bounce Button) -->
         {product.category !== 'chaquetas' && (
@@ -1000,7 +1053,10 @@ const faqs = product.category === 'perfumes'
       
       isSobrepedido = !isAvailable;
 
+      const sobrepedidoNotice = document.getElementById('sobrepedido-notice');
+
       if (!isSobrepedido) {
+        if (sobrepedidoNotice) sobrepedidoNotice.classList.add('hidden');
         if (sizeInfo) {
           sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles (Entrega Inmediata)`;
           sizeInfo.className = 'mt-2 text-[10px] text-emerald-700 font-black uppercase tracking-wider';
@@ -1009,12 +1065,26 @@ const faqs = product.category === 'perfumes'
           mobileStickySize.textContent = `Talla: ${selectedSize}`;
         }
       } else {
+        if (sobrepedidoNotice) sobrepedidoNotice.classList.remove('hidden');
         if (sizeInfo) {
-          sizeInfo.textContent = `Talla ${selectedSize} seleccionada (Sobrepedido) — Se encarga a fábrica para entrega rápida`;
+          sizeInfo.textContent = `Talla ${selectedSize} (Sobrepedido) — Demora de 3 a 5 días hábiles de fábrica`;
           sizeInfo.className = 'mt-2 text-[10px] text-amber-700 font-black uppercase tracking-wider';
         }
         if (mobileStickySize) {
           mobileStickySize.textContent = `Talla: ${selectedSize} (Sobrepedido)`;
+        }
+
+        // Redirigir suavemente hacia el botón de compra abajo con animación para guiar al usuario
+        if (window.innerWidth >= 768 && buyBtn) {
+          buyBtn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          buyBtn.classList.add('animate-shake');
+          setTimeout(() => buyBtn.classList.remove('animate-shake'), 600);
+        } else if (window.innerWidth < 768) {
+          const mobileBuy = document.getElementById('mobile-sticky-buy-btn');
+          if (mobileBuy) {
+            mobileBuy.classList.add('animate-shake');
+            setTimeout(() => mobileBuy.classList.remove('animate-shake'), 600);
+          }
         }
       }
 
@@ -1163,8 +1233,9 @@ const faqs = product.category === 'perfumes'
         sizeText +
         `\n🆔 *Código Base:* ${id}\n` +
         `💰 *Valor Total:* $${formattedPrice} COP\n` +
-        `🚚 *Beneficio:* ¡DOMICILIO GRATIS EN PASTO! (Exclusivo Chaquetas 5080)\n\n` +
-        `📍 _Hola Estilo Nórdico, veo que esta talla está para encargo de fábrica. Deseo solicitarla con domicilio gratis en Pasto / envío nacional. ¿Cuánto tiempo tarda en llegar y cómo la aparto? Mi nombre es:_`;
+        `🚚 *Beneficio:* ¡DOMICILIO GRATIS EN PASTO!\n` +
+        `⏱️ *Tiempo Estimado de Entrega:* 3 a 5 días hábiles a tu puerta\n\n` +
+        `📍 _Hola Estilo Nórdico, deseo encargar la talla ${selectedSize} en sobrepedido de fábrica (3 a 5 días hábiles con Domicilio Gratis en Pasto). Por favor, indíquenme cómo la aparto. Mi nombre es:_`;
     } else {
       message = 
         `*SOLICITUD DE PEDIDO CONTRAENTREGA* 🛵\n\n` +

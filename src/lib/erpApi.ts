@@ -295,14 +295,17 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
     const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = variants.some(v => (v.stock || 0) > 0);
 
-    // Mapear variantes existentes a ProductVariant
+    // Mapear variantes existentes a ProductVariant (ignorando registros padre sin talla)
     const brand = variants[0]?.brand || 'The North Face';
     const existingMap = new Map<string, ProductVariant>();
     variants.forEach(v => {
       const s = (v.size || '').toUpperCase().trim();
+      if (!s || s === 'ÚNICA' || s === 'UNICA' || s === 'NONE' || s === 'NULL') {
+        return; // Ignorar el registro base padre
+      }
       existingMap.set(s, {
         id: String(v.id),
-        talla: s || 'ÚNICA',
+        talla: s,
         color: colorName,
         stock: v.stock || 0,
         status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
@@ -310,8 +313,7 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       });
     });
 
-    // Para la Chaqueta 5080, garantizar que siempre estén visibles las 4 tallas estándar (M, L, XL, XXL)
-    // Las que no tengan inventario físico quedan como "agotado" listas para sobrepedido/encargo
+    // Para la Chaqueta 5080, las tallas válidas son estrictamente M, L, XL, XXL
     const STANDARD_SIZES = ['M', 'L', 'XL', 'XXL'];
     const productVariants: ProductVariant[] = [];
 
@@ -330,12 +332,10 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       }
     });
 
-    // Añadir tallas adicionales no estándar si existieran en DB (ej. XXXL)
-    existingMap.forEach((v, sz) => {
-      if (!STANDARD_SIZES.includes(sz)) {
-        productVariants.push(v);
-      }
-    });
+    // Añadir talla XXXL únicamente si está explícitamente en la base de datos
+    if (existingMap.has('XXXL')) {
+      productVariants.push(existingMap.get('XXXL')!);
+    }
 
     // Buscar la mejor imagen WebP
     const firstImg = variants.find(v => v.images && v.images.length > 0)?.images?.[0];
