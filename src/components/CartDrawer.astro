@@ -349,12 +349,40 @@ const whatsappPhone = STORE_CONFIG.whatsapp.number;
     if (count > 0) {
       floatingBadge.classList.remove('scale-0');
       floatingBadge.classList.add('scale-100');
+      floatingBtn?.classList.add('animate-cart-attention');
     } else {
       floatingBadge.classList.remove('scale-100');
       floatingBadge.classList.add('scale-0');
+      floatingBtn?.classList.remove('animate-cart-attention');
     }
   }
 
   // Inicializar contador al cargar la página
   updateBadge();
 </script>
+
+<style>
+  @keyframes cartWobble {
+    0%, 75%, 100% {
+      transform: scale(1) rotate(0deg);
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4), 0 0 0 0 rgba(201, 169, 98, 0);
+    }
+    80% {
+      transform: scale(1.14) rotate(-10deg);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px 2px rgba(201, 169, 98, 0.6);
+    }
+    85% {
+      transform: scale(1.14) rotate(10deg);
+      box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.5), 0 0 15px 2px rgba(201, 169, 98, 0.6);
+    }
+    90% {
+      transform: scale(1.08) rotate(-5deg);
+    }
+    95% {
+      transform: scale(1.04) rotate(3deg);
+    }
+  }
+  .animate-cart-attention {
+    animation: cartWobble 4.5s infinite ease-in-out;
+  }
+</style>

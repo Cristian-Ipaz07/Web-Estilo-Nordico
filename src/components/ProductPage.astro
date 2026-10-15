@@ -220,7 +220,7 @@ const faqs = product.category === 'perfumes'
       <div>
         <!-- Brand & Rating header -->
         <div class="flex items-center gap-2 mb-2">
-          <span class="text-[9px] font-black text-text-main bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-widest">Calidad Premium</span>
+          <span class="text-[9px] font-black text-text-main bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-widest">Calidad Nacional</span>
           <div class="flex items-center text-gold text-xs font-semibold gap-1">
             <span>★★★★★</span>
             <span class="text-text-muted text-[10px] font-medium ml-1">4.7 (48)</span>
@@ -231,6 +231,40 @@ const faqs = product.category === 'perfumes'
         <h1 class="text-xl sm:text-2xl font-black text-text-main uppercase tracking-wider leading-tight mb-2 font-title" id="product-title">
           {product.name}
         </h1>
+
+        <!-- Urgencia / Escasez y Domicilio Gratis Pasto (Exclusivo Chaqueta 5080) -->
+        {product.category === 'chaquetas' && (
+          <div class="mb-4 space-y-2">
+            <!-- Barra de Urgencia / Últimas Unidades -->
+            <div class="flex items-center justify-between p-2.5 bg-red-50 border border-red-200 rounded-md shadow-xs">
+              <div class="flex items-center gap-2">
+                <span class="flex h-2.5 w-2.5 relative">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                </span>
+                <span class="text-[10px] font-black text-red-700 uppercase tracking-wider">
+                  🔥 ¡ÚLTIMAS UNIDADES EN BODEGA! ALTA DEMANDA
+                </span>
+              </div>
+              <span class="text-[9px] font-bold text-red-600 bg-white px-2 py-0.5 rounded border border-red-200 uppercase tracking-widest">
+                Pasto y Nacional
+              </span>
+            </div>
+
+            <!-- Banner Exclusivo Domicilio Gratis en Pasto -->
+            <div class="flex items-center gap-2.5 p-2.5 bg-emerald-50 border border-emerald-200 rounded-md shadow-xs">
+              <span class="text-base leading-none">🚚</span>
+              <div class="leading-tight">
+                <span class="text-[10px] font-black text-emerald-800 uppercase tracking-wider block">
+                  ¡DOMICILIO GRATIS EN PASTO! (Pagas al recibir en casa)
+                </span>
+                <span class="text-[9px] text-emerald-700 font-medium">
+                  Beneficio exclusivo Chaquetas Ref 5080 hoy
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
 
         <!-- Price Anchoring Comparison Block -->
         <div class="p-4 bg-[#F9F9FB] rounded-md mb-6 border border-[#E5E7EB] shadow-sm">
@@ -291,29 +325,38 @@ const faqs = product.category === 'perfumes'
               <span class="text-[9px] text-text-main font-black bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-wider">Horma reducida 😉</span>
             </div>
             <div class="flex flex-wrap gap-2" id="size-options">
-              {product.variants!.map((v) => (
-                <button
-                  class:list={[
-                    'size-btn px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-widest border transition-all duration-200 shadow-sm flex items-center gap-1.5',
-                    v.status === 'disponible'
-                      ? 'border-[#E5E7EB] hover:border-text-main cursor-pointer bg-white text-text-main'
-                      : 'border-[#F3F4F6] text-text-light line-through cursor-not-allowed opacity-40 bg-[#F9F9FB]'
-                  ]}
-                  data-talla={v.talla}
-                  data-stock={v.stock}
-                  data-ref={v.referencia}
-                  data-variant-id={v.id}
-                  data-available={v.status === 'disponible' ? 'true' : 'false'}
-                  disabled={v.status !== 'disponible'}
-                >
-                  {v.talla}
-                  {v.status === 'disponible' && (
-                    <span class="text-[9px] text-text-muted font-black bg-[#F9F9FB] border border-[#E5E7EB] px-1.5 py-0.5 rounded-sm">({v.stock})</span>
-                  )}
-                </button>
-              ))}
+              {product.variants!.map((v) => {
+                const isDisponible = v.status === 'disponible' && v.stock > 0;
+                return (
+                  <button
+                    type="button"
+                    class:list={[
+                      'size-btn px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-widest border transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer relative',
+                      isDisponible
+                        ? 'border-[#E5E7EB] bg-white text-[#0B0B0C] hover:border-[#0B0B0C]'
+                        : 'border-dashed border-amber-300 bg-amber-50/60 text-[#0B0B0C] hover:border-amber-500'
+                    ]}
+                    data-talla={v.talla}
+                    data-stock={v.stock}
+                    data-ref={v.referencia}
+                    data-variant-id={v.id}
+                    data-available={isDisponible ? 'true' : 'false'}
+                    data-status={isDisponible ? 'disponible' : 'agotado'}
+                  >
+                    <span class="size-letter font-black">{v.talla}</span>
+                    <span class:list={[
+                      "size-badge font-black px-1.5 py-0.5 rounded-sm border",
+                      isDisponible
+                        ? "text-[9px] bg-[#F3F4F6] text-[#6B7280] border-[#E5E7EB]"
+                        : "text-[8px] bg-amber-100 text-amber-800 border-amber-200"
+                    ]}>
+                      {isDisponible ? `(${v.stock})` : 'Sobrepedido'}
+                    </span>
+                  </button>
+                );
+              })}
             </div>
-            <p class="mt-2 text-[10px] text-text-muted uppercase tracking-wider" id="selected-size-info">Selecciona una talla para pedir</p>
+            <p class="mt-2 text-[10px] text-text-muted uppercase tracking-wider" id="selected-size-info">Selecciona una talla para pedir (Entrega inmediata o sobrepedido)</p>
 
             {product.status === 'agotado' && (
               <div class="my-3.5 p-3.5 bg-amber-50 border border-amber-200 rounded-md text-amber-900 text-xs flex gap-2.5 items-start text-left">
@@ -366,7 +409,7 @@ const faqs = product.category === 'perfumes'
 
               <!-- Pack 2 -->
               <button 
-                class="pack-option border border-[#E5E7EB] hover:border-neutral-500 bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
+                class="pack-option border-2 border-[#C9A962] promo-highlight bg-white rounded-md p-4 text-left flex justify-between items-center transition-all cursor-pointer relative"
                 data-pack-id="2"
                 data-pack-name="Pack 2 Duo Estilo"
                 data-pack-price={Math.round(product.price * 2 - 20000)}
@@ -464,7 +507,7 @@ const faqs = product.category === 'perfumes'
           <button
             id="product-buy-btn"
             class:list={[
-              "w-full py-3.5 px-4 rounded-md text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-md flex items-center justify-center gap-2",
+              "w-full py-3.5 px-4 rounded-md text-xs font-black tracking-widest uppercase transition-all duration-300 cursor-pointer border-2 shadow-md flex items-center justify-center gap-2 animate-wpp-btn",
               product.status === 'agotado'
                 ? "bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-[#C9A962]"
                 : "bg-[#25D366] hover:bg-[#1DA851] text-white border-[#25D366]"
@@ -511,7 +554,7 @@ const faqs = product.category === 'perfumes'
             <button
               id="mobile-sticky-buy-btn"
               type="button"
-              class="flex-1 py-3 px-3 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-md text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 shadow-lg cursor-pointer active:scale-95 transition-transform"
+              class="flex-1 py-3 px-3 bg-[#25D366] hover:bg-[#1DA851] text-white rounded-md text-[11px] font-black uppercase tracking-wider flex items-center justify-center gap-1 shadow-lg cursor-pointer active:scale-95 transition-transform animate-wpp-btn"
             >
               <span>🟢 Pedir Contraentrega Pasto</span>
             </button>
@@ -705,6 +748,7 @@ const faqs = product.category === 'perfumes'
 
 <script>
   import { addToCart } from '../lib/cart';
+  import { ERP_API_BASE_URL } from '../lib/erpApi';
 
   // Size selector and WhatsApp button logic
   const sizeButtons = document.querySelectorAll('.size-btn');
@@ -725,7 +769,7 @@ const faqs = product.category === 'perfumes'
   // Sincronización instantánea de precios, packs y stock en vivo con el ERP
   async function syncProductWithLiveERP() {
     try {
-      const res = await fetch('http://localhost:8000/api/public/products');
+      const res = await fetch(`${ERP_API_BASE_URL}/api/public/products`);
       if (!res.ok) return;
       const products: any[] = await res.json();
       
@@ -806,27 +850,34 @@ const faqs = product.category === 'perfumes'
         if (mobileStickyPrice) mobileStickyPrice.textContent = `$${new Intl.NumberFormat('es-CO').format(selectedPackPrice)} COP`;
       }
 
-      // Sincronizar tallas y stock
+      // Sincronizar tallas y stock en vivo (permitiendo sobrepedido para las agotadas)
       sizeButtons.forEach(btn => {
         const buttonEl = btn as HTMLButtonElement;
         const talla = buttonEl.getAttribute('data-talla')?.toUpperCase();
         const variantLive = matchingVariants.find((v: any) => v.size?.toUpperCase() === talla);
-        if (variantLive) {
-          const liveStock = variantLive.stock || 0;
-          buttonEl.setAttribute('data-stock', String(liveStock));
-          buttonEl.setAttribute('data-available', liveStock > 0 ? 'true' : 'false');
-          buttonEl.setAttribute('data-variant-id', String(variantLive.id));
-          buttonEl.disabled = liveStock <= 0;
+        buttonEl.disabled = false; // NUNCA deshabilitar para permitir sobrepedido
 
-          const badge = buttonEl.querySelector('span');
-          if (liveStock > 0) {
-            buttonEl.classList.remove('line-through', 'opacity-40', 'cursor-not-allowed', 'border-[#F3F4F6]');
-            buttonEl.classList.add('border-[#E5E7EB]', 'hover:border-text-main', 'cursor-pointer');
-            if (badge) badge.textContent = `(${liveStock})`;
-          } else {
-            buttonEl.classList.add('line-through', 'opacity-40', 'cursor-not-allowed', 'border-[#F3F4F6]');
-            buttonEl.classList.remove('border-[#E5E7EB]', 'hover:border-text-main', 'cursor-pointer');
-            if (badge) badge.textContent = '(0)';
+        const badge = buttonEl.querySelector('.size-badge');
+        if (variantLive && (variantLive.stock || 0) > 0) {
+          const liveStock = variantLive.stock;
+          buttonEl.setAttribute('data-stock', String(liveStock));
+          buttonEl.setAttribute('data-available', 'true');
+          buttonEl.setAttribute('data-variant-id', String(variantLive.id));
+          
+          buttonEl.classList.remove('border-dashed', 'border-amber-300', 'bg-amber-50/60');
+          buttonEl.classList.add('border-[#E5E7EB]', 'bg-white');
+          if (badge) {
+            badge.textContent = `(${liveStock})`;
+            badge.className = 'size-badge text-[9px] font-black px-1.5 py-0.5 rounded-sm bg-[#F3F4F6] text-[#6B7280] border border-[#E5E7EB]';
+          }
+        } else {
+          buttonEl.setAttribute('data-stock', '0');
+          buttonEl.setAttribute('data-available', 'false');
+          buttonEl.classList.remove('border-[#E5E7EB]', 'bg-white');
+          buttonEl.classList.add('border-dashed', 'border-amber-300', 'bg-amber-50/60');
+          if (badge) {
+            badge.textContent = 'Sobrepedido';
+            badge.className = 'size-badge text-[8px] font-black px-1.5 py-0.5 rounded-sm bg-amber-100 text-amber-800 border border-amber-200';
           }
         }
       });
@@ -861,7 +912,7 @@ const faqs = product.category === 'perfumes'
   async function verifyVariantStockInLive(variantId: string, buttonEl: HTMLButtonElement) {
     if (!variantId || isNaN(Number(variantId))) return;
     try {
-      const res = await fetch(`http://localhost:8000/api/public/stock-check/${variantId}`);
+      const res = await fetch(`${ERP_API_BASE_URL}/api/public/stock-check/${variantId}`);
       if (res.ok) {
         const data = await res.json();
         if (!data.available || data.stock <= 0) {
@@ -926,33 +977,45 @@ const faqs = product.category === 'perfumes'
     });
   });
 
-  // Handle size selections
+  let isSobrepedido = false;
+
+  // Handle size selections (Permite tanto stock físico como Sobrepedido)
   sizeButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const buttonEl = btn as HTMLButtonElement;
-      if (buttonEl.getAttribute('data-available') !== 'true' || buttonEl.disabled) return;
       
       // Deselect all
       sizeButtons.forEach(b => {
-        b.classList.remove('bg-text-main', 'text-white', 'border-text-main');
-        b.classList.add('border-[#E5E7EB]');
+        b.classList.remove('is-selected');
       });
       
-      // Select this one
-      buttonEl.classList.remove('border-[#E5E7EB]');
-      buttonEl.classList.add('bg-text-main', 'text-white', 'border-text-main');
+      // Select this button (con estilos persistentes que jamás ocultan la letra)
+      buttonEl.classList.add('is-selected');
       
       selectedSize = buttonEl.getAttribute('data-talla') || '';
       selectedRef = buttonEl.getAttribute('data-ref') || '';
       selectedVariantId = buttonEl.getAttribute('data-variant-id') || '';
-      const stock = buttonEl.getAttribute('data-stock') || '0';
+      const stock = parseInt(buttonEl.getAttribute('data-stock') || '0', 10);
+      const isAvailable = buttonEl.getAttribute('data-available') === 'true' && stock > 0;
       
-      if (sizeInfo) {
-        sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles`;
-        sizeInfo.className = 'mt-2 text-[10px] text-text-main font-black uppercase tracking-wider';
-      }
-      if (mobileStickySize) {
-        mobileStickySize.textContent = `Talla: ${selectedSize}`;
+      isSobrepedido = !isAvailable;
+
+      if (!isSobrepedido) {
+        if (sizeInfo) {
+          sizeInfo.textContent = `Talla ${selectedSize} seleccionada — ${stock} unidades disponibles (Entrega Inmediata)`;
+          sizeInfo.className = 'mt-2 text-[10px] text-emerald-700 font-black uppercase tracking-wider';
+        }
+        if (mobileStickySize) {
+          mobileStickySize.textContent = `Talla: ${selectedSize}`;
+        }
+      } else {
+        if (sizeInfo) {
+          sizeInfo.textContent = `Talla ${selectedSize} seleccionada (Sobrepedido) — Se encarga a fábrica para entrega rápida`;
+          sizeInfo.className = 'mt-2 text-[10px] text-amber-700 font-black uppercase tracking-wider';
+        }
+        if (mobileStickySize) {
+          mobileStickySize.textContent = `Talla: ${selectedSize} (Sobrepedido)`;
+        }
       }
 
       // Clear any validation highlight
@@ -963,8 +1026,8 @@ const faqs = product.category === 'perfumes'
       
       updateCheckoutButton();
 
-      // Micro-chequeo en vivo
-      if (selectedVariantId) {
+      // Micro-chequeo en vivo solo si tiene ID numérico de variante
+      if (selectedVariantId && !selectedVariantId.includes('sp')) {
         verifyVariantStockInLive(selectedVariantId, buttonEl);
       }
     });
@@ -973,8 +1036,8 @@ const faqs = product.category === 'perfumes'
   function updateCheckoutButton() {
     if (!buyBtnText) return;
     
-    const isAgotado = buyBtn ? buyBtn.getAttribute('data-status') === 'agotado' : false;
-    if (isAgotado) {
+    const isAgotadoTotal = buyBtn ? buyBtn.getAttribute('data-status') === 'agotado' : false;
+    if (isAgotadoTotal) {
       buyBtnText.textContent = 'Encargar para Próximo Pedido';
       return;
     }
@@ -984,15 +1047,42 @@ const faqs = product.category === 'perfumes'
     
     if (hasVariants) {
       if (selectedPack === '1') {
-        text = selectedSize ? `🟢 Pedir Talla ${selectedSize} por WhatsApp` : 'Selecciona una talla para pedir';
+        if (!selectedSize) {
+          text = 'Selecciona una talla para pedir';
+        } else if (isSobrepedido) {
+          text = `🟡 Encargar Talla ${selectedSize} (Sobrepedido Fábrica)`;
+        } else {
+          text = `🟢 Pedir Talla ${selectedSize} (Entrega Inmediata Pasto)`;
+        }
       } else if (selectedPack === '2') {
-        text = '🟢 Pedir Duo Estilo (2 Chaquetas) por WhatsApp';
+        text = isSobrepedido ? '🟡 Encargar Duo Estilo (Sobrepedido)' : '🟢 Pedir Duo Estilo (2 Chaquetas) por WhatsApp';
       } else if (selectedPack === '3') {
-        text = '🟢 Pedir Combo Familiar (3 Chaquetas) por WhatsApp';
+        text = isSobrepedido ? '🟡 Encargar Combo Familiar (Sobrepedido)' : '🟢 Pedir Combo Familiar (3 Chaquetas) por WhatsApp';
       }
     }
 
     buyBtnText.textContent = text;
+    
+    // Ajustar color del botón según disponibilidad o sobrepedido
+    if (buyBtn) {
+      if (isSobrepedido) {
+        buyBtn.classList.remove('bg-[#25D366]', 'hover:bg-[#1DA851]', 'border-[#25D366]');
+        buyBtn.classList.add('bg-amber-600', 'hover:bg-amber-700', 'border-amber-600');
+      } else {
+        buyBtn.classList.remove('bg-amber-600', 'hover:bg-amber-700', 'border-amber-600');
+        buyBtn.classList.add('bg-[#25D366]', 'hover:bg-[#1DA851]', 'border-[#25D366]');
+      }
+    }
+
+    // Actualizar botón sticky móvil
+    const mobileBuyText = document.querySelector('#mobile-sticky-buy-btn span');
+    if (mobileBuyText) {
+      if (isSobrepedido) {
+        mobileBuyText.textContent = '🟡 Encargar Sobrepedido';
+      } else {
+        mobileBuyText.textContent = '🟢 Pedir Contraentrega Pasto';
+      }
+    }
   }
 
   buyBtn?.addEventListener('click', () => {
@@ -1058,20 +1148,34 @@ const faqs = product.category === 'perfumes'
     let sizeText = '';
 
     if (selectedPack === '1') {
-      sizeText = `\n👕 *Talla:* ${selectedSize}`;
+      sizeText = `\n👕 *Talla:* ${selectedSize}${isSobrepedido ? ' *(SOBREPEDIDO / ENCARGO FÁBRICA)*' : ''}`;
       if (selectedRef) sizeText += ` (Ref: ${selectedRef})`;
     } else {
-      sizeText = `\n👕 *Talla Solicitada de Referencia:* ${selectedSize}\n📝 _(Coordinaré las tallas de las otras chaquetas del combo contigo en este chat)_`;
+      sizeText = `\n👕 *Talla Solicitada de Referencia:* ${selectedSize}${isSobrepedido ? ' *(SOBREPEDIDO)*' : ''}\n📝 _(Coordinaré las tallas y colores de las otras chaquetas del combo contigo en este chat)_`;
     }
 
-    const message = 
-      `*SOLICITUD DE PEDIDO CONTRAENTREGA*\n\n` +
-      `🧥 *Producto:* ${name} (${brand})` +
-      `\n${orderDetailText}` +
-      sizeText +
-      `\n🆔 *Código Base:* ${id}\n` +
-      `💰 *Valor Total:* $${formattedPrice} COP\n\n` +
-      `📍 _Por favor, indícame tu nombre, ciudad (Pasto o envío nacional) y dirección para coordinar el envío hoy mismo._`;
+    let message = '';
+    if (isSobrepedido) {
+      message = 
+        `*SOLICITUD DE SOBREPEDIDO / ENCARGO DE FÁBRICA* 🏭\n\n` +
+        `🧥 *Producto:* ${name} (${brand})\n` +
+        `${orderDetailText}` +
+        sizeText +
+        `\n🆔 *Código Base:* ${id}\n` +
+        `💰 *Valor Total:* $${formattedPrice} COP\n` +
+        `🚚 *Beneficio:* ¡DOMICILIO GRATIS EN PASTO! (Exclusivo Chaquetas 5080)\n\n` +
+        `📍 _Hola Estilo Nórdico, veo que esta talla está para encargo de fábrica. Deseo solicitarla con domicilio gratis en Pasto / envío nacional. ¿Cuánto tiempo tarda en llegar y cómo la aparto? Mi nombre es:_`;
+    } else {
+      message = 
+        `*SOLICITUD DE PEDIDO CONTRAENTREGA* 🛵\n\n` +
+        `🧥 *Producto:* ${name} (${brand})\n` +
+        `${orderDetailText}` +
+        sizeText +
+        `\n🆔 *Código Base:* ${id}\n` +
+        `💰 *Valor Total:* $${formattedPrice} COP\n` +
+        `🚚 *Beneficio:* ¡DOMICILIO GRATIS EN PASTO! (Pagas al recibir en casa)\n\n` +
+        `📍 _Por favor, indícame tu nombre, ciudad (Pasto o envío nacional) y dirección para coordinar el envío hoy mismo._`;
+    }
 
     const encodedMessage = encodeURIComponent(message);
     const whatsAppUrl = `https://api.whatsapp.com/send?phone=${phone}&text=${encodedMessage}`;
@@ -1147,5 +1251,52 @@ const faqs = product.category === 'perfumes'
   }
   .animate-shake {
     animation: shake 0.4s ease-in-out;
+  }
+
+  /* Estado seleccionado permanente y visible (la letra jamás desaparece) */
+  :global(.size-btn.is-selected) {
+    background-color: #0B0B0C !important;
+    border-color: #C9A962 !important;
+    border-style: solid !important;
+    box-shadow: 0 0 0 2px rgba(201, 169, 98, 0.4), 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+    transform: scale(1.04);
+  }
+  :global(.size-btn.is-selected .size-letter) {
+    color: #FFFFFF !important;
+  }
+  :global(.size-btn.is-selected .size-badge) {
+    background-color: rgba(201, 169, 98, 0.25) !important;
+    color: #C9A962 !important;
+    border-color: #C9A962 !important;
+  }
+
+  /* Animación pulsante atractiva en botón de WhatsApp */
+  @keyframes wppGlow {
+    0%, 100% {
+      box-shadow: 0 0 0 0 rgba(37, 211, 102, 0.6), 0 4px 12px rgba(0, 0, 0, 0.15);
+      transform: translateY(0);
+    }
+    50% {
+      box-shadow: 0 0 0 8px rgba(37, 211, 102, 0), 0 6px 18px rgba(37, 211, 102, 0.35);
+      transform: translateY(-2px);
+    }
+  }
+  .animate-wpp-btn {
+    animation: wppGlow 2.5s infinite ease-in-out;
+  }
+
+  /* Animación de la mejor oferta / Pack 2 Más Vendido */
+  @keyframes goldHeartbeat {
+    0%, 100% {
+      border-color: #C9A962;
+      box-shadow: 0 0 0 0 rgba(201, 169, 98, 0.4);
+    }
+    50% {
+      border-color: #ecd79b;
+      box-shadow: 0 0 12px 2px rgba(201, 169, 98, 0.35);
+    }
+  }
+  .promo-highlight {
+    animation: goldHeartbeat 2.8s infinite ease-in-out;
   }
 </style>

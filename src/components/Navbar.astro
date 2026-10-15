@@ -1,60 +1,125 @@
 ---
 /**
  * Navbar.astro — Barra de navegación principal multirubro (Koaj / Mattelsa / Bershka Style)
- * Incluye Mega-Menú dropdown en desktop, acordeón en móvil y CategoryChips táctiles deslizables.
+ * Totalmente sincronizada con el ERP de Estilo Nórdico:
+ * Los menús desplegables solo muestran categorías con productos PUBLICADOS y CON STOCK REAL (>0).
+ * Cuando se agota una categoría en el ERP o se desactiva, desaparece automáticamente de la web.
  */
 import { STORE_CONFIG } from '../config/store';
 import CategoryChips from './CategoryChips.astro';
+import { fetchNavigationFromERP } from '../lib/erpApi';
 
 const currentPath = Astro.url.pathname;
+const navData = await fetchNavigationFromERP();
 
-const navMenu = [
-  {
+// Diccionario de metadatos estéticos para subcategorías del ERP
+const SUBCAT_META: Record<string, { label: string; href: string }> = {
+  'CHAQUETA': { label: 'Chaquetas Impermeables', href: '/chaquetas' },
+  'CAMISETA': { label: 'Camisetas Streetwear', href: '/chaquetas?tipo=camiseta' },
+  'BUSO': { label: 'Busos & Sacos', href: '/chaquetas?tipo=buso' },
+  'PANTALON': { label: 'Pantalones & Joggers', href: '/chaquetas?tipo=pantalon' },
+  'JEANS': { label: 'Jeans & Denim', href: '/chaquetas?tipo=jeans' },
+  'BERMUDA': { label: 'Bermudas Algodón', href: '/chaquetas?tipo=bermuda' },
+  'BLUSAS': { label: 'Blusas & Tops', href: '/chaquetas?tipo=blusas' },
+  'BODY': { label: 'Bodys', href: '/chaquetas?tipo=body' },
+  'CONJUNTO': { label: 'Conjuntos', href: '/chaquetas?tipo=conjunto' },
+  'SUDADERA': { label: 'Sudaderas', href: '/chaquetas?tipo=sudadera' },
+  'LICRA': { label: 'Licras Deportivas', href: '/chaquetas?tipo=licra' },
+};
+
+function formatSubcategory(code: string, rawName: string) {
+  const norm = code.toUpperCase().trim();
+  if (SUBCAT_META[norm]) return SUBCAT_META[norm];
+  return {
+    label: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : norm,
+    href: `/chaquetas?tipo=${norm.toLowerCase()}`
+  };
+}
+
+const rawHombre = navData.departments['HOMBRE'] || [];
+const rawMujer = navData.departments['MUJER'] || [];
+
+const hombreItems = rawHombre.map(item => formatSubcategory(item.code, item.name));
+const mujerItems = rawMujer.map(item => formatSubcategory(item.code, item.name));
+
+interface NavMenuItem {
+  label: string;
+  href: string;
+  badge: string | null;
+  items: Array<{ label: string; href: string; badge?: string }>;
+}
+
+const navMenu: NavMenuItem[] = [];
+
+// 1. Departamento Hombre (Sincronizado con inventario activo y publicado)
+if (hombreItems.length > 0) {
+  navMenu.push({
     label: 'Hombre',
     href: '/chaquetas',
     badge: null,
     items: [
       { label: 'Ver Todo Hombre', href: '/chaquetas' },
-      { label: 'Chaquetas Impermeables', href: '/chaquetas' },
-      { label: 'Camisetas Streetwear', href: '/chaquetas' },
-      { label: 'Busos & Sacos', href: '/chaquetas' },
-      { label: 'Pantalones & Jeans', href: '/chaquetas' },
-      { label: 'Bermudas Algodón', href: '/chaquetas' },
+      ...hombreItems
     ]
-  },
-  {
-    label: 'Mujer',
+  });
+} else {
+  navMenu.push({
+    label: 'Hombre',
     href: '/chaquetas',
     badge: null,
     items: [
-      { label: 'Ver Todo Mujer', href: '/chaquetas' },
-      { label: 'Chaquetas Impermeables', href: '/chaquetas' },
-      { label: 'Blusas & Tops', href: '/chaquetas' },
-      { label: 'Jeans & Pantalones', href: '/chaquetas' },
-      { label: 'Busos & Sacos', href: '/chaquetas' },
+      { label: 'Ver Todo Hombre', href: '/chaquetas' },
+      { label: 'Chaquetas Impermeables', href: '/chaquetas' }
     ]
-  },
-  {
-    label: 'Perfumes & Accesorios',
-    href: '/perfumes',
+  });
+}
+
+// 2. Departamento Mujer (Sincronizado: solo muestra lo publicado desde la app)
+if (mujerItems.length > 0) {
+  navMenu.push({
+    label: 'Mujer',
+    href: '/chaquetas?cat=mujer',
     badge: null,
     items: [
-      { label: 'Perfumes Yanbal (Ohm, Solo, Zentro)', href: '/perfumes' },
-      { label: 'Ésika, Cyzone & L\'Bel', href: '/perfumes' },
-      { label: 'Relojes Nórdicos Curren & Skmei', href: '/relojes' },
+      { label: 'Ver Todo Mujer', href: '/chaquetas?cat=mujer' },
+      ...mujerItems
     ]
-  },
-  {
-    label: 'Combos 🔥',
-    href: '/#combos',
-    badge: 'Ahorra 25%',
+  });
+} else {
+  // Cuando aún no se han publicado prendas de mujer desde la app, no se muestran opciones vacías
+  navMenu.push({
+    label: 'Mujer',
+    href: '/#coleccion-mujer',
+    badge: 'Pronto',
     items: [
-      { label: 'Chaqueta + Camiseta ($130.000)', href: '/#combos' },
-      { label: 'Chaqueta + Perfume ($135.000)', href: '/#combos' },
-      { label: 'Pack Dúo 2 Chaquetas ($160.000)', href: '/chaquetas' },
+      { label: 'Colección Mujer (Próximamente en Tienda)', href: '/#coleccion-mujer' }
     ]
-  }
-];
+  });
+}
+
+// 3. Perfumes & Accesorios
+navMenu.push({
+  label: 'Perfumes & Accesorios',
+  href: '/perfumes',
+  badge: null,
+  items: [
+    { label: 'Perfumes Yanbal (Ohm, Solo, Zentro)', href: '/perfumes' },
+    { label: 'Ésika, Cyzone & L\'Bel', href: '/perfumes' },
+    { label: 'Relojes Nórdicos Curren & Skmei', href: '/relojes' },
+  ]
+});
+
+// 4. Combos y Promociones
+navMenu.push({
+  label: 'Combos 🔥',
+  href: '/#combos',
+  badge: 'Ahorra 25%',
+  items: [
+    { label: 'Chaqueta + Camiseta ($130.000)', href: '/#combos' },
+    { label: 'Chaqueta + Perfume ($135.000)', href: '/#combos' },
+    { label: 'Pack Dúo 2 Chaquetas ($160.000)', href: '/chaquetas' },
+  ]
+});
 ---
 
 <header class="sticky top-0 z-40 bg-[#0B0B0C] border-b border-[#262626]">
@@ -96,7 +161,7 @@ const navMenu = [
             </a>
 
             <!-- Dropdown Menu -->
-            <div class="absolute top-full left-0 w-60 bg-[#121214] border border-[#262626] rounded-md shadow-2xl p-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
+            <div class="absolute top-full left-0 w-64 bg-[#121214] border border-[#262626] rounded-md shadow-2xl p-2 opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto transition-all duration-200 transform translate-y-2 group-hover:translate-y-0 z-50">
               {menu.items.map((sub) => (
                 <a
                   href={sub.href}
@@ -189,7 +254,7 @@ const navMenu = [
     </div>
   </nav>
 
-  <!-- Barra táctil horizontal para móvil (Chips táctiles deslizables) -->
+  <!-- Barra táctil horizontal para móvil (Chips táctiles dinámicos sincronizados con ERP) -->
   <CategoryChips />
 </header>
 
@@ -222,9 +287,11 @@ const navMenu = [
     if (count > 0) {
       navCartBadge.classList.remove('scale-0');
       navCartBadge.classList.add('scale-100');
+      navCartBtn?.classList.add('animate-cart-attention');
     } else {
       navCartBadge.classList.remove('scale-100');
       navCartBadge.classList.add('scale-0');
+      navCartBtn?.classList.remove('animate-cart-attention');
     }
   });
 
@@ -241,3 +308,26 @@ const navMenu = [
     }
   } catch (_) {}
 </script>
+
+<style>
+  @keyframes cartWobbleNav {
+    0%, 75%, 100% {
+      transform: scale(1) rotate(0deg);
+    }
+    80% {
+      transform: scale(1.15) rotate(-10deg);
+    }
+    85% {
+      transform: scale(1.15) rotate(10deg);
+    }
+    90% {
+      transform: scale(1.08) rotate(-5deg);
+    }
+    95% {
+      transform: scale(1.04) rotate(3deg);
+    }
+  }
+  .animate-cart-attention {
+    animation: cartWobbleNav 4.5s infinite ease-in-out;
+  }
+</style>

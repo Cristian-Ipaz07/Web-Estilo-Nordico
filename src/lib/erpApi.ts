@@ -14,7 +14,7 @@ import type { Product, ProductVariant } from '../data/products';
 export const ERP_API_BASE_URL = (
   (typeof process !== 'undefined' && process.env?.PUBLIC_ERP_API_URL) ||
   (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_ERP_API_URL) ||
-  'http://localhost:8000'
+  'https://estilo-nordico-app.onrender.com'
 ).replace(/\/$/, '');
 
 // ─── Interfaces del Backend ERP ─────────────────────────────
@@ -295,25 +295,46 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
     const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = variants.some(v => (v.stock || 0) > 0);
 
-    // Mapear variantes a ProductVariant
-    const productVariants: ProductVariant[] = variants.map(v => ({
-      id: String(v.id),
-      talla: v.size?.toUpperCase() || 'ÚNICA',
-      color: colorName,
-      stock: v.stock || 0,
-      status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
-      referencia: v.ref,
-    }));
+    // Mapear variantes existentes a ProductVariant
+    const brand = variants[0]?.brand || 'The North Face';
+    const existingMap = new Map<string, ProductVariant>();
+    variants.forEach(v => {
+      const s = (v.size || '').toUpperCase().trim();
+      existingMap.set(s, {
+        id: String(v.id),
+        talla: s || 'ÚNICA',
+        color: colorName,
+        stock: v.stock || 0,
+        status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
+        referencia: v.ref,
+      });
+    });
 
-    // Ordenar tallas estándar M -> L -> XL -> XXL
-    const sizeOrder = ['M', 'L', 'XL', 'XXL', 'XXXL'];
-    productVariants.sort((a, b) => {
-      const idxA = sizeOrder.indexOf(a.talla);
-      const idxB = sizeOrder.indexOf(b.talla);
-      if (idxA === -1 && idxB === -1) return a.talla.localeCompare(b.talla);
-      if (idxA === -1) return 1;
-      if (idxB === -1) return -1;
-      return idxA - idxB;
+    // Para la Chaqueta 5080, garantizar que siempre estén visibles las 4 tallas estándar (M, L, XL, XXL)
+    // Las que no tengan inventario físico quedan como "agotado" listas para sobrepedido/encargo
+    const STANDARD_SIZES = ['M', 'L', 'XL', 'XXL'];
+    const productVariants: ProductVariant[] = [];
+
+    STANDARD_SIZES.forEach(sz => {
+      if (existingMap.has(sz)) {
+        productVariants.push(existingMap.get(sz)!);
+      } else {
+        productVariants.push({
+          id: `erp-5080-${normKey}-${sz.toLowerCase()}-sp`,
+          talla: sz,
+          color: colorName,
+          stock: 0,
+          status: 'agotado',
+          referencia: `5080-${brand.toUpperCase().replace(/\s+/g, '-')}-${normKey.toUpperCase()}-${sz}`,
+        });
+      }
+    });
+
+    // Añadir tallas adicionales no estándar si existieran en DB (ej. XXXL)
+    existingMap.forEach((v, sz) => {
+      if (!STANDARD_SIZES.includes(sz)) {
+        productVariants.push(v);
+      }
     });
 
     // Buscar la mejor imagen WebP
@@ -337,7 +358,6 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
 
     const price = variants[0]?.price_sale || DEFAULT_JACKET_PRICE;
     const anchorPrice = variants[0]?.compare_price || DEFAULT_JACKET_ANCHOR;
-    const brand = variants[0]?.brand || 'The North Face';
 
     products.push({
       id: `erp-5080-${normKey.replace(/\s+/g, '-')}`,
@@ -380,69 +400,103 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
   return products;
 }
 
+// ─── Navegación Dinámica según Inventario Activo del ERP ───
+
+export interface NavigationSubcategory {
+  name: string;
+  code: string;
+  product_count: number;
+  total_stock: number;
+}
+
+export interface NavigationResponse {
+  departments: Record<string, NavigationSubcategory[]>;
+  active_subcategories: string[];
+}
+
+export async function fetchNavigationFromERP(): Promise<NavigationResponse> {
+  try {
+    const res = await fetch(`${ERP_API_BASE_URL}/api/public/navigation`);
+    if (!res.ok) throw new Error(`Status ${res.status}`);
+    return await res.json();
+  } catch (_) {
+    return {
+      departments: {
+        'HOMBRE': [{ name: 'Chaqueta', code: 'CHAQUETA', product_count: 17, total_stock: 33 }]
+      },
+      active_subcategories: ['CHAQUETA']
+    };
+  }
+}
+
 // ─── Fallback Estático en Caso de Desconexión ────────────────
 
 function getFallbackJackets(): Product[] {
-  return [
-    {
-      id: 'erp-fallback-negro',
-      slug: 'chaqueta-impermeable-negro',
-      name: 'Chaqueta Impermeable Negro',
-      brand: 'The North Face',
-      category: 'chaquetas',
-      tags: ['impermeable', 'urbana', 'negro', 'the north face'],
-      price: 85000,
-      anchorPrice: 120000,
-      image: '/assets/products/5080/5080-the-north-face-negro.webp',
-      description: 'Chaqueta impermeable térmica color Negro con logo bordado The North Face.',
-      features: [
-        'Acolchado térmico (retiene calor corporal)',
-        'Gorro / Capucha extraíble',
-        'Forro térmico interno protector',
-        'Tela cortaviento ultra resistente',
-        'Color: Negro',
-      ],
-      variants: [
-        { id: '304', talla: 'M', color: 'Negro', stock: 1, status: 'disponible', referencia: '5080-THE-NORTH-FACE-NEGRO-M' },
-        { id: '305', talla: 'L', color: 'Negro', stock: 3, status: 'disponible', referencia: '5080-THE-NORTH-FACE-NEGRO-L' },
-        { id: '306', talla: 'XL', color: 'Negro', stock: 2, status: 'disponible', referencia: '5080-THE-NORTH-FACE-NEGRO-XL' },
-        { id: '307', talla: 'XXL', color: 'Negro', stock: 1, status: 'disponible', referencia: '5080-THE-NORTH-FACE-NEGRO-XXL' },
-      ],
-      stock: 7,
-      status: 'disponible',
-      featured: true,
-      hook: true,
-      source: 'static',
-      colorHex: '#1a1a1a',
-    },
-    {
-      id: 'erp-fallback-azul',
-      slug: 'chaqueta-impermeable-azul',
-      name: 'Chaqueta Impermeable Azul',
-      brand: 'The North Face',
-      category: 'chaquetas',
-      tags: ['impermeable', 'urbana', 'azul', 'the north face'],
-      price: 85000,
-      anchorPrice: 120000,
-      image: '/assets/products/5080/5080-the-north-face-azul.webp',
-      description: 'Chaqueta impermeable térmica color Azul The North Face.',
-      features: [
-        'Acolchado térmico (retiene calor corporal)',
-        'Gorro / Capucha extraíble',
-        'Forro térmico interno protector',
-        'Tela cortaviento ultra resistente',
-        'Color: Azul',
-      ],
-      variants: [
-        { id: '308', talla: 'M', color: 'Azul', stock: 2, status: 'disponible', referencia: '5080-THE-NORTH-FACE-AZUL-M' },
-        { id: '309', talla: 'XL', color: 'Azul', stock: 1, status: 'disponible', referencia: '5080-THE-NORTH-FACE-AZUL-XL' },
-      ],
-      stock: 3,
-      status: 'disponible',
-      featured: true,
-      hook: true,
-      source: 'static',
-      colorHex: '#2b5aa7',
-    },
+  const SIZES = ['M', 'L', 'XL', 'XXL'];
+  const baseColors = [
+    { name: 'Negro', slug: 'chaqueta-impermeable-negro', hex: '#1a1a1a', img: '5080-the-north-face-negro.webp', brand: 'The North Face', stockMap: { 'M': { id: '304', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-M' }, 'L': { id: '305', stock: 3, ref: '5080-THE-NORTH-FACE-NEGRO-L' }, 'XL': { id: '306', stock: 2, ref: '5080-THE-NORTH-FACE-NEGRO-XL' }, 'XXL': { id: '307', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-XXL' } } },
+    { name: 'Azul', slug: 'chaqueta-impermeable-azul', hex: '#2b5aa7', img: '5080-the-north-face-azul.webp', brand: 'The North Face', stockMap: { 'M': { id: '308', stock: 2, ref: '5080-THE-NORTH-FACE-AZUL-M' }, 'XL': { id: '309', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-XL' } } },
+    { name: 'Azul Cobalto', slug: 'chaqueta-impermeable-azul-cobalto', hex: '#0047ab', img: '5080-the-north-face-azul-cobalto.webp', brand: 'The North Face', stockMap: { 'XL': { id: '310', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-COBALTO-XL' } } },
+    { name: 'Beige', slug: 'chaqueta-impermeable-beige', hex: '#cbb894', img: '5080-the-north-face-beige.webp', brand: 'The North Face', stockMap: { 'XXL': { id: '311', stock: 1, ref: '5080-THE-NORTH-FACE-BEIGE-XXL' } } },
+    { name: 'Gris Claro', slug: 'chaqueta-impermeable-gris-claro', hex: '#b0b3b8', img: '5080-the-north-face-gris-claro.webp', brand: 'The North Face', stockMap: { 'M': { id: '319', stock: 1, ref: '5080-GRIS-CLARO-M' }, 'XXL': { id: '312', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-CLARO-XXL' } } },
+    { name: 'Gris Raton', slug: 'chaqueta-impermeable-gris-raton', hex: '#6e6e6e', img: '5080-the-north-face-gris-raton.webp', brand: 'The North Face', stockMap: { 'M': { id: '313', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-M' }, 'XXL': { id: '314', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-XXL' } } },
+    { name: 'Rojo', slug: 'chaqueta-impermeable-rojo', hex: '#b3282d', img: '5080-the-north-face-rojo.webp', brand: 'The North Face', stockMap: { 'XXL': { id: '315', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-XXL' } } },
+    { name: 'Rojo Franja', slug: 'chaqueta-impermeable-rojo-franja', hex: '#991b1e', img: '5080-the-north-face-rojo-franja.webp', brand: 'The North Face', stockMap: { 'M': { id: '316', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-FRANJA-M' }, 'L': { id: '318', stock: 1, ref: '5080-COLUMBIA-ROJO-FRANJA-L' }, 'XL': { id: '317', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-FRANJA-XL' } } },
   ];
+
+  return baseColors.map(c => {
+    const vars: ProductVariant[] = SIZES.map(sz => {
+      const entry = (c.stockMap as Record<string, any>)[sz];
+      if (entry) {
+        return {
+          id: entry.id,
+          talla: sz,
+          color: c.name,
+          stock: entry.stock,
+          status: 'disponible' as const,
+          referencia: entry.ref,
+        };
+      }
+      return {
+        id: `fb-5080-${c.slug}-${sz.toLowerCase()}-sp`,
+        talla: sz,
+        color: c.name,
+        stock: 0,
+        status: 'agotado' as const,
+        referencia: `5080-${c.brand.toUpperCase().replace(/\s+/g, '-')}-${sz}`,
+      };
+    });
+
+    const totalStock = vars.reduce((sum, v) => sum + v.stock, 0);
+    return {
+      id: `erp-5080-${c.name.toLowerCase().replace(/\s+/g, '-')}`,
+      slug: c.slug,
+      name: `Chaqueta Impermeable ${c.name}`,
+      brand: c.brand,
+      category: 'chaquetas' as const,
+      subcategory: 'Chaqueta Impermeable Térmica',
+      gender: 'hombre' as const,
+      tags: ['impermeable', 'urbana', 'térmica', c.name.toLowerCase()],
+      price: 90000,
+      anchorPrice: 120000,
+      image: `/assets/products/5080/${c.img}`,
+      images: [`/assets/products/5080/${c.img}`],
+      description: `Chaqueta impermeable térmica premium color ${c.name} (${c.brand}). Confección nacional de alta resistencia con forro térmico acolchado, gorro extraíble y protección cortaviento ideal para Pasto y clima frío.`,
+      features: [
+        'Acolchado térmico (retiene calor corporal)',
+        'Gorro / Capucha extraíble con ajuste',
+        'Forro térmico interno protector',
+        'Tela cortaviento semi-impermeable (soporta llovizna)',
+        `Marca destacada: ${c.brand}`,
+        `Color: ${c.name}`,
+      ],
+      variants: vars,
+      stock: totalStock,
+      status: totalStock > 0 ? ('disponible' as const) : ('agotado' as const),
+      featured: true,
+      hook: c.name === 'Negro' || c.name === 'Azul',
+      source: 'erp' as const,
+      colorHex: c.hex,
+    };
+  });
 }

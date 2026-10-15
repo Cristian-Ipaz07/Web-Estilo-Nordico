@@ -167,11 +167,12 @@ const isAvailable = status !== 'agotado';
 
 <script>
   import { addToCart } from '../lib/cart';
+  import { ERP_API_BASE_URL } from '../lib/erpApi';
 
   // Sincronización instantánea de precios y stock en vivo con el ERP
   async function syncCardsWithLiveERP() {
     try {
-      const res = await fetch('http://localhost:8000/api/public/products');
+      const res = await fetch(`${ERP_API_BASE_URL}/api/public/products`);
       if (!res.ok) return;
       const products = await res.json();
       

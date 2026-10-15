@@ -1,24 +1,40 @@
 ---
 /**
  * CategoryChips.astro — Barra táctil horizontal deslizable para navegación móvil ágil (Mattelsa / Bershka CRO)
- * Permite explorar y filtrar categorías en 1 toque con el pulgar sin abrir menús.
+ * Sincronizado en tiempo real con el ERP:
+ * Solo muestra chips de categorías activas, publicadas y con stock disponible (>0).
  */
+import { fetchNavigationFromERP } from '../lib/erpApi';
+
 interface Props {
   activeCategory?: string;
 }
 
 const { activeCategory = 'all' } = Astro.props;
 
-const categories = [
-  { id: 'all', label: '🔥 Todo', href: '/' },
-  { id: 'chaquetas', label: '🧥 Chaquetas', href: '/chaquetas' },
-  { id: 'camisetas', label: '👕 Camisetas', href: '/chaquetas' },
-  { id: 'busos', label: '🧥 Busos & Sacos', href: '/chaquetas' },
-  { id: 'jeans', label: '👖 Jeans & Pants', href: '/chaquetas' },
-  { id: 'perfumes', label: '🧴 Perfumes', href: '/perfumes' },
-  { id: 'relojes', label: '⌚ Relojes', href: '/relojes' },
-  { id: 'combos', label: '💥 Combos Look', href: '/#combos' },
+const navData = await fetchNavigationFromERP();
+const activeSubs = new Set((navData.active_subcategories || []).map(s => s.toUpperCase().trim()));
+
+// Definición de chips con su correspondiente subcategoría del ERP
+const chipDefinitions = [
+  { id: 'all', label: '🔥 Todo', href: '/', always: true },
+  { id: 'chaquetas', code: 'CHAQUETA', label: '🧥 Chaquetas', href: '/chaquetas' },
+  { id: 'camisetas', code: 'CAMISETA', label: '👕 Camisetas', href: '/chaquetas?tipo=camiseta' },
+  { id: 'busos', code: 'BUSO', label: '🧥 Busos & Sacos', href: '/chaquetas?tipo=buso' },
+  { id: 'jeans', code: 'JEANS', label: '👖 Jeans & Denim', href: '/chaquetas?tipo=jeans' },
+  { id: 'pantalones', code: 'PANTALON', label: '👖 Pantalones', href: '/chaquetas?tipo=pantalon' },
+  { id: 'bermudas', code: 'BERMUDA', label: '🩳 Bermudas', href: '/chaquetas?tipo=bermuda' },
+  { id: 'blusas', code: 'BLUSAS', label: '👚 Blusas & Tops', href: '/chaquetas?tipo=blusas' },
+  { id: 'perfumes', label: '🧴 Perfumes', href: '/perfumes', always: true },
+  { id: 'relojes', label: '⌚ Relojes', href: '/relojes', always: true },
+  { id: 'combos', label: '💥 Combos Look', href: '/#combos', always: true },
 ];
+
+// Filtrar únicamente los chips activos
+const categories = chipDefinitions.filter(chip => {
+  if (chip.always) return true;
+  return chip.code && activeSubs.has(chip.code);
+});
 ---
 
 <div class="w-full bg-[#0B0B0C] border-b border-[#262626] py-2 px-3 md:hidden sticky top-16 z-30 shadow-md">
