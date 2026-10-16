@@ -184,17 +184,20 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
   const emptyState = document.getElementById('empty-state');
   const items = document.querySelectorAll('.product-item');
 
-  // Soporte de Parámetros URL (ej: /chaquetas?talla=XL o /chaquetas?talla=XL,32)
+  // Soporte de Parámetros URL (ej: /chaquetas?talla=XL,32&color=Negro,Azul)
   const urlParams = new URLSearchParams(window.location.search);
   const paramTallas = (urlParams.get('talla') || urlParams.get('tallas') || urlParams.get('size') || '')
     .split(',')
     .map(s => s.trim().toUpperCase())
     .filter(Boolean);
-  const paramColor = (urlParams.get('color') || '').trim();
+  const paramColors = (urlParams.get('color') || urlParams.get('colores') || '')
+    .split(',')
+    .map(c => c.trim().toUpperCase())
+    .filter(Boolean);
 
-  if (paramColor && filterColor) {
+  if (paramColors.length === 1 && filterColor) {
     for (let i = 0; i < filterColor.options.length; i++) {
-      if (filterColor.options[i].value.toLowerCase() === paramColor.toLowerCase()) {
+      if (filterColor.options[i].value.toUpperCase() === paramColors[0]) {
         filterColor.selectedIndex = i;
         break;
       }
@@ -225,7 +228,13 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
       let show = true;
 
-      if (color !== 'all' && !colors.includes(color.toUpperCase())) show = false;
+      // Filtro por color del select o por colores pasados por URL
+      if (color !== 'all') {
+        if (!colors.includes(color.toUpperCase())) show = false;
+      } else if (paramColors.length > 0) {
+        const matchesAnyColor = paramColors.some(pc => colors.includes(pc));
+        if (!matchesAnyColor) show = false;
+      }
       
       // Filtrar por talla seleccionada en el select o por las tallas pasadas por URL
       if (size !== 'all') {
@@ -245,8 +254,11 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
     if (filterCount) {
       let countText = `${visible} producto${visible !== 1 ? 's' : ''}`;
-      if (paramTallas.length > 0 && size === 'all') {
-        countText += ` · Filtrado por talla(s): ${paramTallas.join(', ')}`;
+      const filterLabels = [];
+      if (paramTallas.length > 0 && size === 'all') filterLabels.push(`Talla: ${paramTallas.join(', ')}`);
+      if (paramColors.length > 0 && color === 'all') filterLabels.push(`Color: ${paramColors.join(', ')}`);
+      if (filterLabels.length > 0) {
+        countText += ` · ${filterLabels.join(' | ')}`;
       }
       filterCount.textContent = countText;
     }
