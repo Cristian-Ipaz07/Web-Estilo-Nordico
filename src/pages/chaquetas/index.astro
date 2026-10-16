@@ -184,6 +184,32 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
   const emptyState = document.getElementById('empty-state');
   const items = document.querySelectorAll('.product-item');
 
+  // Soporte de Parámetros URL (ej: /chaquetas?talla=XL o /chaquetas?talla=XL,32)
+  const urlParams = new URLSearchParams(window.location.search);
+  const paramTallas = (urlParams.get('talla') || urlParams.get('tallas') || urlParams.get('size') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+  const paramColor = (urlParams.get('color') || '').trim();
+
+  if (paramColor && filterColor) {
+    for (let i = 0; i < filterColor.options.length; i++) {
+      if (filterColor.options[i].value.toLowerCase() === paramColor.toLowerCase()) {
+        filterColor.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  if (paramTallas.length === 1 && filterSize) {
+    for (let i = 0; i < filterSize.options.length; i++) {
+      if (filterSize.options[i].value.toUpperCase() === paramTallas[0]) {
+        filterSize.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
   function applyFilters() {
     const color = filterColor.value;
     const size = filterSize.value;
@@ -192,41 +218,59 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
     items.forEach((item) => {
       const el = item as HTMLElement;
-      const colors = el.dataset.colors?.split(',') || [];
-      const sizes = el.dataset.sizes?.split(',') || [];
-      const availableSizes = el.dataset.availableSizes?.split(',') || [];
+      const colors = (el.dataset.colors || '').toUpperCase().split(',').filter(Boolean);
+      const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
+      const availableSizes = (el.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
       const itemStatus = el.dataset.status || '';
 
       let show = true;
 
-      if (color !== 'all' && !colors.includes(color)) show = false;
+      if (color !== 'all' && !colors.includes(color.toUpperCase())) show = false;
+      
+      // Filtrar por talla seleccionada en el select o por las tallas pasadas por URL
       if (size !== 'all') {
-        if (status === 'disponible') {
-          if (!availableSizes.includes(size)) show = false;
-        } else {
-          if (!sizes.includes(size)) show = false;
-        }
+        const checkSizes = status === 'disponible' ? availableSizes : sizes;
+        if (!checkSizes.includes(size.toUpperCase())) show = false;
+      } else if (paramTallas.length > 0) {
+        const checkSizes = status === 'disponible' ? availableSizes : sizes;
+        const matchesAny = paramTallas.some(pt => checkSizes.includes(pt));
+        if (!matchesAny) show = false;
       }
+
       if (status !== 'all' && itemStatus !== status) show = false;
 
       el.style.display = show ? '' : 'none';
       if (show) visible++;
     });
 
-    if (filterCount) filterCount.textContent = `${visible} producto${visible !== 1 ? 's' : ''}`;
+    if (filterCount) {
+      let countText = `${visible} producto${visible !== 1 ? 's' : ''}`;
+      if (paramTallas.length > 0 && size === 'all') {
+        countText += ` · Filtrado por talla(s): ${paramTallas.join(', ')}`;
+      }
+      filterCount.textContent = countText;
+    }
     if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
   }
 
-  filterColor?.addEventListener('change', applyFilters);
-  filterSize?.addEventListener('change', applyFilters);
+  filterColor?.addEventListener('change', () => {
+    applyFilters();
+  });
+  filterSize?.addEventListener('change', () => {
+    applyFilters();
+  });
   filterStatus?.addEventListener('change', applyFilters);
   filterReset?.addEventListener('click', () => {
     filterColor.value = 'all';
     filterSize.value = 'all';
     filterStatus.value = 'all';
+    // Clear URL params without full page reload
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
     applyFilters();
   });
 
-  // Initial filter
+  // Initial filter run
   applyFilters();
 </script>
