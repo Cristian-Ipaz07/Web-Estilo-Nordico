@@ -10,10 +10,24 @@ import { fetchJacketsFromERP } from '../../lib/erpApi';
 
 export async function getStaticPaths() {
   const jackets = await fetchJacketsFromERP();
-  return jackets.map(jacket => ({
+  const paths = jackets.map(jacket => ({
     params: { slug: jacket.slug },
     props: { jacket, allJackets: jackets },
   }));
+
+  // Alias para retrocompatibilidad con links del ERP y directos
+  const defaultJacket = jackets.find(j => j.slug === 'chaqueta-impermeable-negro') || jackets[0];
+  if (defaultJacket) {
+    const aliases = ['5080-impermeable', '5080', 'chaqueta-impermeable', '5080-the-north-face'];
+    aliases.forEach(alias => {
+      paths.push({
+        params: { slug: alias },
+        props: { jacket: defaultJacket, allJackets: jackets },
+      });
+    });
+  }
+
+  return paths;
 }
 
 const { jacket, allJackets } = Astro.props;
