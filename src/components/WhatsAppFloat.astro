@@ -2,21 +2,23 @@
 /**
  * WhatsAppFloat.astro — Botón flotante de WhatsApp inteligente
  * Siempre visible en esquina inferior derecha con animación y tooltip recurrente inteligente.
+ * El mensaje aparece durante un lapso de tiempo llamando la atención con animación bailable y se oculta automáticamente.
+ * Se reactiva cada vez que el usuario ingresa a una nueva página o producto.
  */
 import { STORE_CONFIG } from '../config/store';
 
 const whatsappNumber = STORE_CONFIG.whatsapp.number;
 ---
 
-<!-- Contenedor Flotante de WhatsApp y Tooltip (Ubicado a la izquierda del botón de WhatsApp, sin tapar ni ser tapado por el carrito) -->
+<!-- Contenedor Flotante de WhatsApp y Tooltip (A la izquierda de WhatsApp, libre del carrito) -->
 <div class="fixed bottom-5 right-5 z-40 flex items-center">
-  <!-- Tooltip conversacional llamativo y bailable -->
+  <!-- Tooltip conversacional llamativo y bailable con auto-ocultamiento -->
   <a
     href={`https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodeURIComponent(STORE_CONFIG.whatsapp.defaultMessage)}`}
     target="_blank"
     rel="noopener noreferrer"
     id="whatsapp-tooltip"
-    class="mr-3 bg-white text-text-main rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.18)] p-3 max-w-[210px] sm:max-w-[240px] transition-all duration-500 opacity-0 translate-x-4 border border-[#E5E7EB] hover:border-[#25D366] flex items-center gap-2 cursor-pointer group pointer-events-none relative select-none"
+    class="mr-3 bg-white text-text-main rounded-2xl shadow-[0_10px_30px_rgba(0,0,0,0.18)] p-3 max-w-[210px] sm:max-w-[245px] transition-all duration-700 opacity-0 translate-x-4 border border-[#E5E7EB] hover:border-[#25D366] flex items-center gap-2 cursor-pointer group pointer-events-none relative select-none"
     aria-label="Abrir chat de WhatsApp con asesor"
   >
     <!-- Flecha indicadora apuntando hacia el botón de WhatsApp (a la derecha) -->
@@ -27,7 +29,7 @@ const whatsappNumber = STORE_CONFIG.whatsapp.number;
       <span class="leading-tight text-[11px] sm:text-xs">¿Tienes alguna duda? <b>¡Escríbenos!</b></span>
     </div>
 
-    <!-- Botón cerrar para no ser invasivo -->
+    <!-- Botón cerrar manual -->
     <button
       type="button"
       id="close-tooltip-btn"
@@ -59,65 +61,87 @@ const whatsappNumber = STORE_CONFIG.whatsapp.number;
 </div>
 
 <script define:vars={{ whatsappNumber }}>
-  // Detección contextual inteligente de mensajes y textos
-  const path = window.location.pathname;
-  const pageTitle = (document.title || '').toLowerCase();
-  const floatBtn = document.getElementById('whatsapp-float');
-  const tooltip = document.getElementById('whatsapp-tooltip');
-  const tooltipText = document.getElementById('tooltip-text');
-  const closeBtn = document.getElementById('close-tooltip-btn');
-  
-  let customMsg = '¡Hola! Me gustaría hacer una consulta general sobre la tienda.';
+  function initSmartTooltip() {
+    const path = window.location.pathname;
+    const pageTitle = (document.title || '').toLowerCase();
+    const floatBtn = document.getElementById('whatsapp-float');
+    const tooltip = document.getElementById('whatsapp-tooltip');
+    const tooltipText = document.getElementById('tooltip-text');
+    const closeBtn = document.getElementById('close-tooltip-btn');
+    
+    let customMsg = '¡Hola! Me gustaría hacer una consulta general sobre la tienda.';
 
-  const isWallet = path.includes('billetera') || pageTitle.includes('billetera');
-  const isPerfume = path.includes('/perfumes/') || pageTitle.includes('perfume') || pageTitle.includes('loción') || pageTitle.includes('fragancia');
-  const isWatch = path.includes('/relojes/') || pageTitle.includes('reloj');
-  const isJacket = (path.includes('/chaquetas/') || pageTitle.includes('chaqueta')) && !isWallet;
+    const isWallet = path.includes('billetera') || pageTitle.includes('billetera');
+    const isBuso = path.includes('buso') || pageTitle.includes('buso') || pageTitle.includes('capucha') || pageTitle.includes('saco');
+    const isPerfume = path.includes('/perfumes/') || pageTitle.includes('perfume') || pageTitle.includes('loción') || pageTitle.includes('fragancia');
+    const isWatch = path.includes('/relojes/') || pageTitle.includes('reloj');
+    const isJacket = (path.includes('/chaquetas/') || pageTitle.includes('chaqueta')) && !isWallet && !isBuso;
 
-  if (isWallet) {
-    customMsg = '¡Hola! Estoy viendo las billeteras de Estilo Nórdico y tengo una duda sobre los modelos disponibles...';
-    if (tooltipText) {
-      tooltipText.innerHTML = '<span class="text-base shrink-0">👛</span> <span class="leading-tight text-[11px] sm:text-xs">¿Dudas con tu modelo o diseño? <b>¡Escríbenos!</b></span>';
+    if (isWallet) {
+      customMsg = '¡Hola! Estoy viendo las billeteras de Estilo Nórdico y tengo una duda sobre los modelos disponibles...';
+      if (tooltipText) {
+        tooltipText.innerHTML = '<span class="text-base shrink-0">👛</span> <span class="leading-tight text-[11px] sm:text-xs">¿Dudas con tu modelo o diseño? <b>¡Escríbenos!</b></span>';
+      }
+    } else if (isBuso) {
+      customMsg = '¡Hola! Estoy viendo los busos y sacos de Estilo Nórdico y tengo dudas sobre tallas y estampados disponibles...';
+      if (tooltipText) {
+        tooltipText.innerHTML = '<span class="text-base shrink-0">👕</span> <span class="leading-tight text-[11px] sm:text-xs">¿Dudas con tu estampado o talla? <b>¡Escríbenos!</b></span>';
+      }
+    } else if (isJacket) {
+      customMsg = '¡Hola! Estoy viendo las chaquetas premium y se me presentó una duda con mi talla o pedido...';
+      if (tooltipText) {
+        tooltipText.innerHTML = '<span class="text-base shrink-0">🧥</span> <span class="leading-tight text-[11px] sm:text-xs">¿Dudas con tu talla? <b>¡Te asesoramos ya!</b></span>';
+      }
+    } else if (isPerfume) {
+      customMsg = '¡Hola! Estoy viendo los perfumes originales y me gustaría recibir asesoría...';
+      if (tooltipText) {
+        tooltipText.innerHTML = '<span class="text-base shrink-0">🧴</span> <span class="leading-tight text-[11px] sm:text-xs">¿Buscas una fragancia especial? <b>¡Escríbenos!</b></span>';
+      }
+    } else if (isWatch) {
+      customMsg = '¡Hola! Estoy viendo los relojes de catálogo y quisiera consultar sobre entrega y garantía...';
+      if (tooltipText) {
+        tooltipText.innerHTML = '<span class="text-base shrink-0">⌚</span> <span class="leading-tight text-[11px] sm:text-xs">¿Garantía y entrega del reloj? <b>¡Pregúntanos!</b></span>';
+      }
     }
-  } else if (isJacket) {
-    customMsg = '¡Hola! Estoy viendo las chaquetas premium y se me presentó una duda con mi talla o pedido...';
-    if (tooltipText) {
-      tooltipText.innerHTML = '<span class="text-base shrink-0">🧥</span> <span class="leading-tight text-[11px] sm:text-xs">¿Dudas con tu talla? <b>¡Te asesoramos ya!</b></span>';
+
+    const encodedMsg = encodeURIComponent(customMsg);
+    if (floatBtn) {
+      floatBtn.href = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMsg}`;
     }
-  } else if (isPerfume) {
-    customMsg = '¡Hola! Estoy viendo los perfumes originales y me gustaría recibir asesoría...';
-    if (tooltipText) {
-      tooltipText.innerHTML = '<span class="text-base shrink-0">🧴</span> <span class="leading-tight text-[11px] sm:text-xs">¿Buscas una fragancia especial? <b>¡Escríbenos!</b></span>';
+    if (tooltip) {
+      tooltip.href = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMsg}`;
     }
-  } else if (isWatch) {
-    customMsg = '¡Hola! Estoy viendo los relojes de catálogo y quisiera consultar sobre entrega y garantía...';
-    if (tooltipText) {
-      tooltipText.innerHTML = '<span class="text-base shrink-0">⌚</span> <span class="leading-tight text-[11px] sm:text-xs">¿Garantía y entrega del reloj? <b>¡Pregúntanos!</b></span>';
+
+    // 1. Mostrar con animación bailable tras 1.8 segundos
+    if (tooltip) {
+      // Limpiar timers previos si los hubiere
+      if (window.__wppShowTimer) clearTimeout(window.__wppShowTimer);
+      if (window.__wppHideTimer) clearTimeout(window.__wppHideTimer);
+
+      window.__wppShowTimer = setTimeout(() => {
+        tooltip.classList.remove('opacity-0', 'translate-x-4', 'pointer-events-none');
+        tooltip.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto', 'animate-dance-wobble');
+
+        // 2. Ocultar suavemente después de 8 segundos para no ser molesto ni obstaculizar la vista
+        window.__wppHideTimer = setTimeout(() => {
+          tooltip.classList.remove('opacity-100', 'translate-x-0', 'animate-dance-wobble');
+          tooltip.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
+        }, 8000);
+      }, 1800);
+
+      closeBtn?.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.__wppHideTimer) clearTimeout(window.__wppHideTimer);
+        tooltip.classList.remove('opacity-100', 'translate-x-0', 'animate-dance-wobble');
+        tooltip.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
+      });
     }
   }
 
-  const encodedMsg = encodeURIComponent(customMsg);
-  if (floatBtn) {
-    floatBtn.href = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMsg}`;
-  }
-  if (tooltip) {
-    tooltip.href = `https://api.whatsapp.com/send?phone=${whatsappNumber}&text=${encodedMsg}`;
-  }
-
-  // Animación bailable y visibilidad garantizada sin interferir con el carrito
-  if (tooltip) {
-    setTimeout(() => {
-      tooltip.classList.remove('opacity-0', 'translate-x-4', 'pointer-events-none');
-      tooltip.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto', 'animate-dance-wobble');
-    }, 1200);
-
-    closeBtn?.addEventListener('click', (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      tooltip.classList.remove('opacity-100', 'translate-x-0', 'animate-dance-wobble');
-      tooltip.classList.add('opacity-0', 'translate-x-4', 'pointer-events-none');
-    });
-  }
+  // Ejecutar en carga inicial y reactivar cada vez que se navegue entre páginas
+  initSmartTooltip();
+  document.addEventListener('astro:page-load', initSmartTooltip);
 </script>
 
 <style>

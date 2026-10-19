@@ -81,5 +81,17 @@ const pixelEnabled = STORE_CONFIG.metaPixel.enabled;
     <Footer />
     <WhatsAppFloat />
     <CartDrawer />
+    <!-- Registro de Service Worker para PWA, caché local y navegación offline instantánea -->
+    <script is:inline>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js').then(() => {
+            console.log('[PWA] Service Worker activo y catálogo local disponible offline.');
+          }).catch((err) => {
+            console.warn('[PWA] Error en registro SW:', err);
+          });
+        });
+      }
+    </script>
   </body>
 </html>
