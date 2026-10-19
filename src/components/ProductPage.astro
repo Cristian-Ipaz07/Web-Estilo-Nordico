@@ -258,16 +258,25 @@ const faqs = [
         )}
       </div>
       
-      {/* Visual thumbnails */}
+      {/* Visual thumbnails sincronizados con el selector de modelos */}
       {product.images && product.images.length > 1 && (
         <div class="grid grid-cols-5 gap-2" id="thumbnail-gallery">
           {product.images.map((img, i) => (
             <button 
               type="button"
-              class="rounded-md overflow-hidden border border-[#E5E7EB] hover:border-black transition-all aspect-square thumbnail-btn cursor-pointer bg-[#F9F9FB]" 
+              class:list={[
+                "rounded-md overflow-hidden border transition-all aspect-square thumbnail-btn cursor-pointer bg-[#F9F9FB] relative group",
+                i === 0 ? "border-[#0B0B0C] ring-2 ring-[#0B0B0C] shadow-sm is-active" : "border-[#E5E7EB] hover:border-black"
+              ]}
               data-img={img}
+              data-index={i}
+              title={`Vista / Modelo ${i + 1}`}
             >
-              <img src={img} alt={`${product.name} vista ${i + 1}`} class="w-full h-full object-cover" loading="lazy" />
+              <img src={img} alt={`${product.name} vista ${i + 1}`} class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105" loading="lazy" />
+              <span class:list={[
+                "thumb-active-indicator absolute bottom-0 inset-x-0 h-1 bg-[#C9A962] transition-opacity duration-200",
+                i === 0 ? "opacity-100" : "opacity-0"
+              ]}></span>
             </button>
           ))}
         </div>
@@ -410,6 +419,7 @@ const faqs = [
                   data-brand={v.brand || ''}
                   data-ref={v.referencia}
                   data-stock={v.stock}
+                  data-index={i}
                 >
                   {v.image && (
                     <img src={v.image} alt={v.color} class="w-5 h-5 rounded object-cover border border-white/20 shrink-0" />
@@ -884,56 +894,103 @@ const faqs = [
   let selectedPackName = 'Pack 1 Individual';
   let selectedPackDesc = buyBtn?.getAttribute('data-unit-name') || 'Prenda';
 
-  // Cambio de miniatura / galería
-  thumbnailBtns.forEach((btn) => {
+  // Sincronización visual de miniatura activa
+  function setActiveThumbnail(imgUrl: string, index?: number) {
+    thumbnailBtns.forEach((tBtn, idx) => {
+      const tImg = tBtn.getAttribute('data-img');
+      const isMatch = (tImg && imgUrl && tImg === imgUrl) || (index !== undefined && idx === index);
+      const indicator = tBtn.querySelector('.thumb-active-indicator');
+      if (isMatch) {
+        tBtn.classList.remove('border-[#E5E7EB]', 'hover:border-black');
+        tBtn.classList.add('border-[#0B0B0C]', 'ring-2', 'ring-[#0B0B0C]', 'shadow-sm', 'is-active');
+        indicator?.classList.remove('opacity-0');
+        indicator?.classList.add('opacity-100');
+      } else {
+        tBtn.classList.remove('border-[#0B0B0C]', 'ring-2', 'ring-[#0B0B0C]', 'shadow-sm', 'is-active');
+        tBtn.classList.add('border-[#E5E7EB]', 'hover:border-black');
+        indicator?.classList.remove('opacity-100');
+        indicator?.classList.add('opacity-0');
+      }
+    });
+  }
+
+  // Activar un modelo/diseño y mantener sincronía total bidireccional
+  function activateModel(btn: HTMLElement, syncThumb = true) {
+    modelBtns.forEach(b => {
+      b.classList.remove('border-[#C9A962]', 'bg-[#0B0B0C]', 'text-white', 'is-active', 'ring-2', 'ring-[#C9A962]/40');
+      b.classList.add('border-[#E5E7EB]', 'bg-white', 'text-text-main');
+    });
+
+    btn.classList.remove('border-[#E5E7EB]', 'bg-white', 'text-text-main');
+    btn.classList.add('border-[#C9A962]', 'bg-[#0B0B0C]', 'text-white', 'is-active', 'ring-2', 'ring-[#C9A962]/40');
+
+    const vImg = btn.getAttribute('data-image');
+    const vColor = btn.getAttribute('data-color') || '';
+    const vBrand = btn.getAttribute('data-brand') || '';
+    const modelIndex = parseInt(btn.getAttribute('data-index') || '-1', 10);
+    selectedVariantId = btn.getAttribute('data-variant-id') || '';
+    selectedRef = btn.getAttribute('data-ref') || '';
+    selectedModelName = vBrand && vBrand !== 'Estilo Nórdico' ? `${vBrand} - ${vColor}` : vColor;
+
+    if (vImg && mainImage) {
+      mainImage.src = vImg;
+    }
+
+    if (selectedModelText) {
+      selectedModelText.innerHTML = `Modelo seleccionado: <span class="font-bold text-text-main">${selectedModelName}</span>`;
+    }
+
+    if (mobileStickySize) {
+      mobileStickySize.textContent = `Mod: ${selectedModelName}`;
+    }
+
+    if (syncThumb && vImg) {
+      setActiveThumbnail(vImg, modelIndex >= 0 ? modelIndex : undefined);
+    }
+  }
+
+  // Click en selector de modelos (derecha)
+  modelBtns.forEach((btn, idx) => {
+    btn.setAttribute('data-index', String(idx));
     btn.addEventListener('click', () => {
-      const imgUrl = btn.getAttribute('data-img');
+      activateModel(btn as HTMLElement, true);
+    });
+  });
+
+  // Click en miniaturas de galería (abajo): selecciona el modelo y la imagen
+  thumbnailBtns.forEach((tBtn, idx) => {
+    tBtn.addEventListener('click', () => {
+      const imgUrl = tBtn.getAttribute('data-img') || '';
+
       if (imgUrl && mainImage) {
         mainImage.src = imgUrl;
       }
-    });
-  });
+      setActiveThumbnail(imgUrl, idx);
 
-  // Selector interactivo de modelos / diseños (ej. Billeteras Lacoste, Nike, etc.)
-  modelBtns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      modelBtns.forEach(b => {
-        b.classList.remove('border-[#C9A962]', 'bg-[#0B0B0C]', 'text-white', 'is-active', 'ring-2', 'ring-[#C9A962]/40');
-        b.classList.add('border-[#E5E7EB]', 'bg-white', 'text-text-main');
-      });
+      // Si el producto tiene modelos/diseños, sincronizarlo de inmediato
+      if (modelBtns.length > 0) {
+        let targetModel = Array.from(modelBtns).find(m => {
+          const mImg = m.getAttribute('data-image');
+          return mImg && imgUrl && mImg === imgUrl;
+        });
 
-      btn.classList.remove('border-[#E5E7EB]', 'bg-white', 'text-text-main');
-      btn.classList.add('border-[#C9A962]', 'bg-[#0B0B0C]', 'text-white', 'is-active', 'ring-2', 'ring-[#C9A962]/40');
+        if (!targetModel && modelBtns[idx]) {
+          targetModel = modelBtns[idx];
+        }
 
-      const vImg = btn.getAttribute('data-image');
-      const vColor = btn.getAttribute('data-color') || '';
-      const vBrand = btn.getAttribute('data-brand') || '';
-      selectedVariantId = btn.getAttribute('data-variant-id') || '';
-      selectedRef = btn.getAttribute('data-ref') || '';
-      selectedModelName = vBrand && vBrand !== 'Estilo Nórdico' ? `${vBrand} - ${vColor}` : vColor;
-
-      if (vImg && mainImage) {
-        mainImage.src = vImg;
-      }
-
-      if (selectedModelText) {
-        selectedModelText.innerHTML = `Modelo seleccionado: <span class="font-bold text-text-main">${selectedModelName}</span>`;
-      }
-
-      if (mobileStickySize) {
-        mobileStickySize.textContent = `Mod: ${selectedModelName}`;
+        if (targetModel) {
+          activateModel(targetModel as HTMLElement, false);
+        }
       }
     });
   });
 
-  // Si hay modelos, inicializar el primero
+  // Inicializar estado del primer modelo si existe
   if (modelBtns.length > 0) {
-    const firstModel = modelBtns[0];
-    selectedVariantId = firstModel.getAttribute('data-variant-id') || '';
-    selectedRef = firstModel.getAttribute('data-ref') || '';
-    const vColor = firstModel.getAttribute('data-color') || '';
-    const vBrand = firstModel.getAttribute('data-brand') || '';
-    selectedModelName = vBrand && vBrand !== 'Estilo Nórdico' ? `${vBrand} - ${vColor}` : vColor;
+    activateModel(modelBtns[0] as HTMLElement, true);
+  } else if (thumbnailBtns.length > 0) {
+    const firstImg = thumbnailBtns[0].getAttribute('data-img') || '';
+    setActiveThumbnail(firstImg, 0);
   }
 
   // Selector de tallas (solo cuando aplique)
