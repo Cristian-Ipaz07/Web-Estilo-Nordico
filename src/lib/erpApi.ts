@@ -245,27 +245,133 @@ export async function getCategories(): Promise<CategoryCount[]> {
  * 
  * Desacopla 100% a Notion y se conecta al inventario real de 20 prendas físicas.
  */
-export async function fetchJacketsFromERP(): Promise<Product[]> {
-  try {
-    const rawProducts = await getProducts({
-      limit: 100,
+/**
+ * Agrupa productos y variantes de cualquier prenda (Busos, Camisetas, Chaquetas, Bermudas)
+ * para la tienda web a partir del catálogo público del ERP.
+ */
+export function groupERPClothing(items: ERPProductPublic[]): Product[] {
+  const groups = new Map<string, ERPProductPublic[]>();
+
+  for (const item of items) {
+    const subcat = (item.subcategory || 'Prenda').trim();
+    const color = (item.color || 'Unicolor').trim();
+    const refBase = item.ref.split('-')[0] || item.ref;
+    const groupKey = `${refBase}_${color}`.toLowerCase();
+
+    const g = groups.get(groupKey) || [];
+    g.push(item);
+    groups.set(groupKey, g);
+  }
+
+  const products: Product[] = [];
+
+  for (const [key, variants] of groups) {
+    const first = variants[0];
+    const subcat = first.subcategory || 'Ropa';
+    const cleanColor = capitalizeWords(first.color || 'Unicolor');
+    const brand = first.brand || 'Estilo Nórdico';
+    const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    const hasAvailable = variants.some(v => (v.stock || 0) > 0);
+
+    const refBase = first.ref.split('-')[0] || first.ref;
+    const slug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase}-${cleanColor.toLowerCase().replace(/\s+/g, '-')}`;
+
+    const productVariants: ProductVariant[] = variants
+      .filter(v => v.size && !['ÚNICA', 'UNICA', 'NONE', 'NULL'].includes(v.size.toUpperCase().trim()))
+      .map(v => ({
+        id: String(v.id),
+        talla: v.size || 'M',
+        color: cleanColor,
+        stock: v.stock || 0,
+        status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
+        referencia: v.ref,
+      }));
+
+    const allImages: string[] = [];
+    variants.forEach(v => {
+      if (Array.isArray(v.images)) {
+        v.images.forEach(img => {
+          if (img && !allImages.includes(img)) allImages.push(img);
+        });
+      }
     });
 
-    // Filtrar prendas que son chaquetas (Ref 5080 o subcategoría CHAQUETA)
+    const fallbackImg = first.product_type === 'CHAQUETA' 
+      ? '/assets/products/5080/5080-the-north-face-negro.webp'
+      : '/assets/products/chaqueta-impermeable.png';
+    const resolvedImage = allImages[0] || fallbackImg;
+
+    products.push({
+      id: `erp-${key}`,
+      slug,
+      name: `${subcat} ${first.name.replace(/^[A-Z0-9-]+\s*/, '')} ${cleanColor}`.trim(),
+      brand,
+      category: 'chaquetas', // Mapeo a layout existente compatible
+      subcategory: subcat,
+      gender: (first.category?.toLowerCase() || 'hombre') as any,
+      tags: [subcat.toLowerCase(), cleanColor.toLowerCase(), brand.toLowerCase()],
+      price: first.price_sale || 85000,
+      anchorPrice: first.compare_price || 120000,
+      image: resolvedImage,
+      images: allImages.length > 0 ? allImages : [resolvedImage],
+      description: first.description || `${subcat} premium confección nacional de alta calidad, comodidad y diseño exclusivo Estilo Nórdico.`,
+      features: [
+        'Confección premium de alta durabilidad',
+        'Corte ergonómico moderno',
+        `Marca destacada: ${brand}`,
+        `Color: ${cleanColor}`,
+      ],
+      variants: productVariants,
+      stock: totalStock,
+      status: hasAvailable ? 'disponible' : 'agotado',
+      featured: true,
+      source: 'erp',
+      colorHex: COLOR_HEX_MAP[normalizeColorKey(cleanColor)] || '#333333',
+    });
+  }
+
+  products.sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'disponible' ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  return products;
+}
+
+export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<Product[]> {
+  try {
+    const rawProducts = await getProducts({ limit: 200 });
+
+    // Chaquetas 5080
     const jacketItems = rawProducts.filter(p => 
       p.ref.startsWith('5080') || 
       p.subcategory?.toUpperCase() === 'CHAQUETA' ||
       p.product_type?.toUpperCase() === 'CHAQUETA'
     );
 
-    if (jacketItems.length === 0) {
-      console.warn('⚠️ No se encontraron chaquetas publicadas en ERP, usando fallback local.');
-      return getFallbackJackets();
+    // Otras prendas publicadas (Busos, Camisetas, Bermudas, etc.)
+    const otherClothing = rawProducts.filter(p => 
+      !p.ref.startsWith('5080') &&
+      p.subcategory?.toUpperCase() !== 'CHAQUETA' &&
+      p.product_type?.toUpperCase() !== 'CHAQUETA'
+    );
+
+    const jacketsList = jacketItems.length > 0 ? groupERPJacketsByColor(jacketItems) : getFallbackJackets();
+    const otherList = otherClothing.length > 0 ? groupERPClothing(otherClothing) : [];
+
+    const allApparel = [...jacketsList, ...otherList];
+
+    if (subcategoryFilter) {
+      const targetSub = subcategoryFilter.toUpperCase().trim();
+      return allApparel.filter(p => 
+        p.subcategory?.toUpperCase().trim() === targetSub ||
+        (targetSub === 'BUSO' && (p.name.toUpperCase().includes('BUSO') || p.subcategory?.toUpperCase().includes('BUSO')))
+      );
     }
 
-    return groupERPJacketsByColor(jacketItems);
+    return allApparel;
   } catch (error) {
-    console.error('❌ Error conectando al ERP (http://localhost:8000), usando fallback local:', error);
+    console.error('❌ Error conectando al ERP, usando fallback local:', error);
     return getFallbackJackets();
   }
 }

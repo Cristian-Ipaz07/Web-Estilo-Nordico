@@ -1,6 +1,6 @@
 ---
 /**
- * /chaquetas/index.astro — Catálogo de chaquetas (Estilo Dark Mode Streetwear)
+ * /chaquetas/index.astro — Catálogo de chaquetas y prendas del ERP (Estilo Dark Mode Streetwear)
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
@@ -11,17 +11,30 @@ const jackets = await fetchJacketsFromERP();
 const colors = getUniqueColors(jackets);
 const sizes = getUniqueSizes(jackets);
 const availableCount = jackets.filter(j => j.status === 'disponible').length;
+
+// Tipos de prendas disponibles en el catálogo
+const apparelTypes = Array.from(new Set(jackets.map(j => {
+  const sub = (j.subcategory || '').toUpperCase();
+  const name = (j.name || '').toUpperCase();
+  if (sub.includes('CHAQUETA')) return 'CHAQUETA';
+  if (sub.includes('BUSO') || name.includes('BUSO') || name.includes('CAPUCHA')) return 'BUSO';
+  if (sub.includes('CAMISETA')) return 'CAMISETA';
+  if (sub.includes('BERMUDA')) return 'BERMUDA';
+  if (sub.includes('JEAN')) return 'JEANS';
+  if (sub.includes('PANTALON')) return 'PANTALON';
+  return sub || 'PRENDA';
+}))).filter(Boolean).sort();
 ---
 
-<BaseLayout title="Chaquetas Impermeables" description="Chaquetas impermeables de Confección Premium Colombiana con stock real. Filtros por color y talla. Paga al recibir en Pasto y envíos a todo el país.">
+<BaseLayout title="Chaquetas & Moda Streetwear" description="Prendas de Confección Premium Colombiana con stock real. Filtros por prenda, color y talla. Paga al recibir en Pasto y envíos a todo el país.">
   
-  <!-- Page Header (Premium Jackets Banner with bottom white fade) -->
+  <!-- Page Header (Premium Banner with bottom white fade) -->
   <section class="relative w-full h-[70vh] sm:h-[80vh] flex items-end overflow-hidden bg-black" id="chaquetas-hero">
     <!-- Image Background -->
     <div class="absolute inset-0 z-0">
       <img 
         src="/assets/baner cha.png" 
-        alt="Colección Chaquetas Estilo Nórdico" 
+        alt="Colección Estilo Nórdico" 
         class="w-full h-full object-cover brightness-[0.75]"
         style="object-position: 80% center;"
         loading="eager"
@@ -86,6 +99,18 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
       <!-- Filter Bar (Light Theme) -->
       <div class="mb-8 p-5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]" id="filter-bar">
         <div class="flex flex-wrap gap-4 items-end">
+          {apparelTypes.length > 1 && (
+            <div class="flex-1 min-w-[130px]">
+              <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Prenda</label>
+              <select id="filter-type" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+                <option value="all" selected>Todas</option>
+                {apparelTypes.map(t => (
+                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <!-- Color filter -->
           <div class="flex-1 min-w-[140px]">
             <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Color</label>
@@ -125,37 +150,51 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
       <!-- Products Grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="products-grid">
-        {jackets.map((product) => (
-          <div 
-            class="product-item"
-            data-colors={product.variants?.map(v => v.color).join(',')}
-            data-sizes={product.variants?.map(v => v.talla).join(',')}
-            data-status={product.status}
-            data-available-sizes={product.variants?.filter(v => v.status === 'disponible').map(v => v.talla).join(',')}
-          >
-            <ProductCard
-              id={product.id}
-              slug={product.slug}
-              name={product.name}
-              brand={product.brand}
-              price={product.price}
-              anchorPrice={product.anchorPrice}
-              image={product.image}
-              description={product.description}
-              category="chaquetas"
-              stock={product.stock}
-              status={product.status}
-              colorHex={product.colorHex}
-              variants={product.variants}
-            />
-          </div>
-        ))}
+        {jackets.map((product) => {
+          const rawSub = (product.subcategory || '').toUpperCase();
+          const rawName = (product.name || '').toUpperCase();
+          const normalizedType = rawSub.includes('CHAQUETA') ? 'CHAQUETA'
+            : (rawSub.includes('BUSO') || rawName.includes('BUSO') || rawName.includes('CAPUCHA')) ? 'BUSO'
+            : rawSub.includes('CAMISETA') ? 'CAMISETA'
+            : rawSub.includes('BERMUDA') ? 'BERMUDA'
+            : rawSub.includes('JEAN') ? 'JEANS'
+            : rawSub.includes('PANTALON') ? 'PANTALON'
+            : rawSub || 'PRENDA';
+          return (
+            <div 
+              class="product-item"
+              data-type={normalizedType}
+              data-subcategory={rawSub}
+              data-name={rawName}
+              data-colors={product.variants?.map(v => v.color).join(',')}
+              data-sizes={product.variants?.map(v => v.talla).join(',')}
+              data-status={product.status}
+              data-available-sizes={product.variants?.filter(v => v.status === 'disponible').map(v => v.talla).join(',')}
+            >
+              <ProductCard
+                id={product.id}
+                slug={product.slug}
+                name={product.name}
+                brand={product.brand}
+                price={product.price}
+                anchorPrice={product.anchorPrice}
+                image={product.image}
+                description={product.description}
+                category="chaquetas"
+                stock={product.stock}
+                status={product.status}
+                colorHex={product.colorHex}
+                variants={product.variants}
+              />
+            </div>
+          );
+        })}
       </div>
 
       <!-- Empty state -->
       <div id="empty-state" class="hidden text-center py-16">
         <span class="text-3xl mb-4 block">🔍</span>
-        <p class="text-sm font-black text-text-main uppercase tracking-widest">No hay chaquetas con estos filtros</p>
+        <p class="text-sm font-black text-text-main uppercase tracking-widest">No hay prendas con estos filtros</p>
         <p class="text-xs text-text-muted mt-1 uppercase tracking-wider">Intenta cambiar la combinación de filtros</p>
       </div>
     </div>
@@ -166,7 +205,7 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
     <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
       <h2 class="text-2xl font-title font-black uppercase tracking-widest mb-3">¿Y si le sumas un perfume?</h2>
       <p class="text-xs sm:text-sm text-[#A3A3A3] mb-6 max-w-lg mx-auto font-light leading-relaxed">
-        Combo chaqueta + perfume original desde <strong>$130.000 COP</strong> con entrega inmediata hoy mismo en Pasto.
+        Combo prenda + perfume original desde <strong>$130.000 COP</strong> con entrega inmediata hoy mismo en Pasto.
       </p>
       <a href="/perfumes" class="inline-flex items-center gap-2 border border-white hover:bg-white hover:text-[#0B0B0C] font-black text-[10px] sm:text-xs uppercase tracking-widest px-6 py-3 rounded-md transition-all duration-300">
         Ver perfumes →
@@ -176,16 +215,53 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
 </BaseLayout>
 
 <script>
-  const filterColor = document.getElementById('filter-color') as HTMLSelectElement;
-  const filterSize = document.getElementById('filter-size') as HTMLSelectElement;
-  const filterStatus = document.getElementById('filter-status') as HTMLSelectElement;
+  const filterType = document.getElementById('filter-type') as HTMLSelectElement | null;
+  const filterColor = document.getElementById('filter-color') as HTMLSelectElement | null;
+  const filterSize = document.getElementById('filter-size') as HTMLSelectElement | null;
+  const filterStatus = document.getElementById('filter-status') as HTMLSelectElement | null;
   const filterReset = document.getElementById('filter-reset');
   const filterCount = document.getElementById('filter-count');
   const emptyState = document.getElementById('empty-state');
   const items = document.querySelectorAll('.product-item');
 
-  // Soporte de Parámetros URL (ej: /chaquetas?talla=XL,32&color=Negro,Azul)
+  // Soporte de Parámetros URL (ej: /chaquetas?tipo=buso&talla=XL&color=Negro)
   const urlParams = new URLSearchParams(window.location.search);
+  const rawParamTipo = (urlParams.get('tipo') || urlParams.get('categoria') || '').trim().toUpperCase();
+  const paramTipo = rawParamTipo.includes('BUSO') ? 'BUSO'
+    : rawParamTipo.includes('CAMISETA') ? 'CAMISETA'
+    : rawParamTipo.includes('BERMUDA') ? 'BERMUDA'
+    : rawParamTipo.includes('JEAN') ? 'JEANS'
+    : rawParamTipo.includes('CHAQUETA') ? 'CHAQUETA'
+    : rawParamTipo;
+
+  // Actualizar hero si viene por tipo específico
+  if (paramTipo) {
+    const heroTitle = document.querySelector('#chaquetas-hero h1');
+    const heroSlogan = document.querySelector('#chaquetas-hero p');
+    if (paramTipo === 'BUSO') {
+      if (heroTitle) heroTitle.textContent = 'Busos & Hoodies';
+      if (heroSlogan) heroSlogan.textContent = 'Comodidad, abrigo y estilo urbano con confección de alta calidad.';
+      document.title = 'Busos & Hoodies | Estilo Nórdico';
+    } else if (paramTipo === 'CAMISETA') {
+      if (heroTitle) heroTitle.textContent = 'Camisetas';
+      if (heroSlogan) heroSlogan.textContent = 'Diseños streetwear exclusivos con acabados de primera.';
+      document.title = 'Camisetas | Estilo Nórdico';
+    } else if (paramTipo === 'BERMUDA') {
+      if (heroTitle) heroTitle.textContent = 'Bermudas';
+      if (heroSlogan) heroSlogan.textContent = 'Comodidad y frescura para tu estilo diario.';
+      document.title = 'Bermudas | Estilo Nórdico';
+    }
+
+    if (filterType) {
+      for (let i = 0; i < filterType.options.length; i++) {
+        if (filterType.options[i].value.toUpperCase() === paramTipo) {
+          filterType.selectedIndex = i;
+          break;
+        }
+      }
+    }
+  }
+
   const paramTallas = (urlParams.get('talla') || urlParams.get('tallas') || urlParams.get('size') || '')
     .split(',')
     .map(s => s.trim().toUpperCase())
@@ -214,19 +290,26 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
   }
 
   function applyFilters() {
-    const color = filterColor.value;
-    const size = filterSize.value;
-    const status = filterStatus.value;
+    const selectedType = filterType ? filterType.value : (paramTipo || 'all');
+    const color = filterColor ? filterColor.value : 'all';
+    const size = filterSize ? filterSize.value : 'all';
+    const status = filterStatus ? filterStatus.value : 'all';
     let visible = 0;
 
     items.forEach((item) => {
       const el = item as HTMLElement;
+      const itemType = (el.dataset.type || '').toUpperCase();
       const colors = (el.dataset.colors || '').toUpperCase().split(',').filter(Boolean);
       const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
       const availableSizes = (el.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
       const itemStatus = el.dataset.status || '';
 
       let show = true;
+
+      // Filtro por tipo de prenda
+      if (selectedType !== 'all' && itemType !== selectedType) {
+        show = false;
+      }
 
       // Filtro por color del select o por colores pasados por URL
       if (color !== 'all') {
@@ -255,6 +338,7 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
     if (filterCount) {
       let countText = `${visible} producto${visible !== 1 ? 's' : ''}`;
       const filterLabels = [];
+      if (selectedType !== 'all') filterLabels.push(`Prenda: ${selectedType}`);
       if (paramTallas.length > 0 && size === 'all') filterLabels.push(`Talla: ${paramTallas.join(', ')}`);
       if (paramColors.length > 0 && color === 'all') filterLabels.push(`Color: ${paramColors.join(', ')}`);
       if (filterLabels.length > 0) {
@@ -265,17 +349,15 @@ const availableCount = jackets.filter(j => j.status === 'disponible').length;
     if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
   }
 
-  filterColor?.addEventListener('change', () => {
-    applyFilters();
-  });
-  filterSize?.addEventListener('change', () => {
-    applyFilters();
-  });
+  filterType?.addEventListener('change', applyFilters);
+  filterColor?.addEventListener('change', applyFilters);
+  filterSize?.addEventListener('change', applyFilters);
   filterStatus?.addEventListener('change', applyFilters);
   filterReset?.addEventListener('click', () => {
-    filterColor.value = 'all';
-    filterSize.value = 'all';
-    filterStatus.value = 'all';
+    if (filterType) filterType.value = 'all';
+    if (filterColor) filterColor.value = 'all';
+    if (filterSize) filterSize.value = 'all';
+    if (filterStatus) filterStatus.value = 'all';
     // Clear URL params without full page reload
     if (window.location.search) {
       window.history.replaceState({}, '', window.location.pathname);
