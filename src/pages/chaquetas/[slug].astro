@@ -15,6 +15,18 @@ export async function getStaticPaths() {
     props: { jacket, allJackets: jackets },
   }));
 
+  // Alias para retrocompatibilidad con busos
+  const defaultBuso = jackets.find(j => j.id.includes('30861') || j.slug.includes('30861') || (j.name || '').toUpperCase().includes('BUSO'));
+  if (defaultBuso) {
+    const busoAliases = ['buso-30861', 'buso-30861-capucha', '30861'];
+    busoAliases.forEach(alias => {
+      paths.push({
+        params: { slug: alias },
+        props: { jacket: defaultBuso, allJackets: jackets },
+      });
+    });
+  }
+
   // Alias para retrocompatibilidad con links del ERP y directos
   const defaultJacket = jackets.find(j => j.slug === 'chaqueta-impermeable-negro') || jackets[0];
   if (defaultJacket) {

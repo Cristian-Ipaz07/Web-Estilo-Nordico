@@ -88,6 +88,16 @@ function normalizeColorKey(color: string): string {
     .trim();
 }
 
+
+function slugify(text: string): string {
+  if (!text) return '';
+  return text
+    .toLowerCase()
+    .normalize("NFD").replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)+/g, '');
+}
+
 function capitalizeWords(str: string): string {
   if (!str) return '';
   return str
@@ -189,13 +199,106 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
     const rawVariants = groupItems.filter(i => i.ref.trim().toUpperCase() !== refBase);
     const effectiveVariants = rawVariants.length > 0 ? rawVariants : [parentItem];
 
+    // Verificar si las variantes son prendas con tallas reales de confección (S, M, L, XL, XXL, etc.)
+    const hasSizedVariants = effectiveVariants.some(v => {
+      const sz = (v.size || '').trim().toUpperCase();
+      return sz && !['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(sz);
+    });
+
+    // Detectar si son prendas con piezas únicas de catálogo (busos, lotes de confección donde cada variante tiene foto, marca y talla única)
+    const isUniqueClothingGroup = hasSizedVariants && (
+      (parentItem.product_type || '').toUpperCase() === 'ROPA' ||
+      (parentItem.subcategory || '').toUpperCase().includes('BUSO') ||
+      (parentItem.subcategory || '').toUpperCase().includes('CAMISETA') ||
+      (parentItem.subcategory || '').toUpperCase().includes('BERMUDA') ||
+      (parentItem.name || '').toUpperCase().includes('BUSO') ||
+      effectiveVariants.some(v => v.stock === 1)
+    );
+
+    // Si son piezas únicas (ej: Busos 30861), cada variante es un PRODUCTO INDIVIDUAL con su foto real y su talla exacta
+    if (isUniqueClothingGroup) {
+      for (const v of effectiveVariants) {
+        const vBrand = (v.brand && v.brand !== 'Estilo Nórdico' ? v.brand : parentItem.brand) || 'Estilo Nórdico';
+        const vColor = capitalizeWords((v.color || 'Unicolor').trim());
+        const vTalla = (v.size || 'ÚNICA').trim().toUpperCase();
+        const vStock = v.stock || 0;
+        const isAvailable = vStock > 0;
+
+        const vImg = (Array.isArray(v.images) && v.images.length > 0 && v.images[0])
+          ? v.images[0]
+          : (allImages[0] || '/assets/logo estilo nordico.png');
+
+        const vAllImages = Array.isArray(v.images) && v.images.length > 0
+          ? v.images
+          : [vImg];
+
+        const subcat = (v.subcategory || parentItem.subcategory || 'BUSO').trim();
+        const cleanSubcat = capitalizeWords(subcat);
+
+        // Nombre exacto y vendedor: "Buso Mónaco · Tommy Amarillo"
+        const displayName = `${cleanSubcat} Mónaco · ${capitalizeWords(vBrand)} ${vColor}`;
+        const vSlug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}-${slugify(vBrand)}-${slugify(vColor)}-${slugify(vTalla)}`;
+
+        const price = v.price_sale || parentItem.price_sale || 60000;
+        const anchorPrice = v.compare_price || parentItem.compare_price || Math.round(price * 1.4);
+
+        const vProductVariants: ProductVariant[] = [{
+          id: String(v.id),
+          talla: vTalla,
+          color: vColor,
+          stock: vStock,
+          status: isAvailable ? 'disponible' : 'agotado',
+          referencia: v.ref,
+          image: vImg,
+          brand: vBrand,
+        }];
+
+        products.push({
+          id: `erp-${v.ref.toLowerCase().replace(/\s+/g, '-')}`,
+          slug: vSlug,
+          name: displayName,
+          brand: vBrand,
+          category: 'chaquetas',
+          subcategory: subcat,
+          gender: (v.category?.toLowerCase() || parentItem.category?.toLowerCase() || 'hombre') as any,
+          tags: [
+            subcat.toLowerCase(),
+            vBrand.toLowerCase(),
+            vColor.toLowerCase(),
+            vTalla.toLowerCase(),
+            refBase.toLowerCase(),
+            'urbano',
+            'streetwear'
+          ],
+          price,
+          anchorPrice,
+          image: vImg,
+          images: vAllImages,
+          description: v.description || `${cleanSubcat} de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`,
+          features: [
+            `Pieza única disponible en Talla ${vTalla}`,
+            `Diseño y marca: ${capitalizeWords(vBrand)} (${vColor})`,
+            'Materiales de alta durabilidad y excelente confección',
+            `Referencia exacta: ${v.ref}`,
+            'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
+          ],
+          variants: vProductVariants,
+          stock: vStock,
+          status: isAvailable ? 'disponible' : 'agotado',
+          featured: true,
+          source: 'erp',
+          colorHex: COLOR_HEX_MAP[normalizeColorKey(v.color || '')] || '#333333',
+        });
+      }
+      continue;
+    }
+
+    // Si es un producto multi-diseño sin tallas (ej: Billeteras 8270), se agrupa con selector de modelos
     const subcat = (parentItem.subcategory || groupItems[0].subcategory || 'Prenda').trim();
     const cleanSubcat = capitalizeWords(subcat);
     const brand = (parentItem.brand && parentItem.brand !== 'Estilo Nórdico' ? parentItem.brand : groupItems[0].brand) || 'Estilo Nórdico';
 
-    // Generar nombre descriptivo de la prenda
     let baseName = parentItem.name || groupItems[0].name || cleanSubcat;
-    // Remover la referencia inicial si viene en el nombre (ej: "8270 EC MULTIMARCA" -> "EC MULTIMARCA")
     baseName = baseName.replace(new RegExp(`^${refBase}\\s*[-_]?\\s*`, 'i'), '').trim();
     if (!baseName.toUpperCase().includes(subcat.toUpperCase())) {
       baseName = `${cleanSubcat} ${baseName}`;
@@ -204,7 +307,6 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
     const totalStock = effectiveVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = effectiveVariants.some(v => (v.stock || 0) > 0);
 
-    // Mapear cada variante con su foto, color, marca y stock
     const productVariants: ProductVariant[] = effectiveVariants.map(v => {
       const vColor = capitalizeWords((v.color || 'Unicolor').trim());
       const vTalla = (v.size || '').trim().toUpperCase();
@@ -237,7 +339,7 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
       slug,
       name: capitalizeWords(baseName),
       brand,
-      category: 'chaquetas', // Mapeo a layout existente
+      category: 'chaquetas',
       subcategory: subcat,
       gender: (parentItem.category?.toLowerCase() || 'hombre') as any,
       tags: [subcat.toLowerCase(), brand.toLowerCase(), refBase.toLowerCase()],

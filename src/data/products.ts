@@ -882,9 +882,21 @@ export function getUniqueSizes(products: Product[]): string[] {
   const sizes = new Set<string>();
   for (const p of products) {
     if (p.variants) {
-      for (const v of p.variants) sizes.add(v.talla);
+      for (const v of p.variants) {
+        const t = (v.talla || '').trim().toUpperCase();
+        if (t && !['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(t)) {
+          sizes.add(t);
+        }
+      }
     }
   }
-  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-  return [...sizes].sort((a, b) => sizeOrder.indexOf(a) - sizeOrder.indexOf(b));
+  const sizeOrder = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL', '28', '30', '32', '34', '36', '38'];
+  return [...sizes].sort((a, b) => {
+    const idxA = sizeOrder.indexOf(a);
+    const idxB = sizeOrder.indexOf(b);
+    if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+    if (idxA !== -1) return -1;
+    if (idxB !== -1) return 1;
+    return a.localeCompare(b);
+  });
 }

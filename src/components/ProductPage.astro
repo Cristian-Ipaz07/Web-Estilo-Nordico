@@ -439,7 +439,7 @@ const faqs = [
         {hasSizes && (
           <div class="mb-6" id="variant-selector">
             <div class="flex items-center justify-between mb-2">
-              <label class="block text-xs font-black text-text-main uppercase tracking-widest">Talla:</label>
+              <label class="block text-xs font-black text-text-main uppercase tracking-widest">{rawVariants.length === 1 ? 'Talla de esta pieza única:' : 'Talla:'}</label>
               {isJacket && (
                 <span class="text-[9px] text-text-main font-black bg-[#F9F9FB] border border-[#E5E7EB] px-2.5 py-1 rounded-md uppercase tracking-wider">Horma reducida 😉</span>
               )}
@@ -991,6 +991,23 @@ const faqs = [
   } else if (thumbnailBtns.length > 0) {
     const firstImg = thumbnailBtns[0].getAttribute('data-img') || '';
     setActiveThumbnail(firstImg, 0);
+  }
+
+  // Auto-seleccionar talla si es pieza única (1 sola talla disponible)
+  if (sizeBtns.length === 1) {
+    const singleBtn = sizeBtns[0] as HTMLElement;
+    singleBtn.classList.add('is-selected');
+    selectedSize = singleBtn.getAttribute('data-talla') || '';
+    selectedRef = singleBtn.getAttribute('data-ref') || '';
+    selectedVariantId = singleBtn.getAttribute('data-variant-id') || '';
+    const stock = parseInt(singleBtn.getAttribute('data-stock') || '0', 10);
+    if (sizeInfo) {
+      sizeInfo.textContent = `Talla única disponible: ${selectedSize} (${stock} disponible)`;
+      sizeInfo.className = 'mt-2 text-[10px] text-emerald-600 font-black uppercase tracking-wider';
+    }
+    if (mobileStickySize) {
+      mobileStickySize.textContent = `Talla: ${selectedSize}`;
+    }
   }
 
   // Selector de tallas (solo cuando aplique)

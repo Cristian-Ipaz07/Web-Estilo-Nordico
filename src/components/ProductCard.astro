@@ -29,6 +29,20 @@ const { id, slug, name, brand, price, anchorPrice, image, description, category,
 const discount = getDiscount(price, anchorPrice);
 const productPageUrl = `/${category}/${slug}`;
 const isAvailable = status !== 'agotado';
+
+// Deduplicar variantes por talla para evitar botones repetidos y soportar piezas únicas
+const uniqueVariantsMap = new Map<string, typeof variants[0]>();
+if (variants) {
+  variants.forEach(v => {
+    const sz = (v.talla || '').trim().toUpperCase();
+    if (!sz || ['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(sz)) return;
+    if (!uniqueVariantsMap.has(sz) || (v.status === 'disponible' && uniqueVariantsMap.get(sz)?.status !== 'disponible')) {
+      uniqueVariantsMap.set(sz, v);
+    }
+  });
+}
+const uniqueVariantsList = Array.from(uniqueVariantsMap.values());
+const isSingleSizePiece = uniqueVariantsList.length === 1;
 ---
 
 <article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] hover:border-[#C9A962] transition-colors flex flex-col group relative shadow-sm" id={`product-${id}`}>
@@ -106,20 +120,24 @@ const isAvailable = status !== 'agotado';
     </div>
 
     <!-- Quick Size Selector (Mattelsa CRO Benchmark) -->
-    {variants && variants.length > 0 && isAvailable && (
+    {uniqueVariantsList.length > 0 && isAvailable && (
       <div class="mb-2.5 pt-1.5 border-t border-[#E5E7EB]">
         <div class="flex items-center justify-between mb-1">
-          <span class="text-[8px] font-black text-text-muted uppercase tracking-widest">Talla rápida:</span>
+          <span class="text-[8px] font-black text-text-muted uppercase tracking-widest">
+            {isSingleSizePiece ? 'Talla pieza única:' : 'Talla rápida:'}
+          </span>
           <span class="text-[8px] text-emerald-600 font-bold uppercase tracking-wider">Hoy en Pasto</span>
         </div>
         <div class="flex flex-wrap gap-1">
-          {variants.map((v) => (
+          {uniqueVariantsList.map((v) => (
             <button
               type="button"
               class:list={[
-                "card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-pointer border",
+                "card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-pointer border flex items-center gap-1",
                 v.status === 'disponible'
-                  ? "border-[#E5E7EB] hover:border-black bg-[#F9F9FB] hover:bg-black hover:text-white text-text-main shadow-sm"
+                  ? (isSingleSizePiece
+                      ? "border-[#0B0B0C] bg-[#0B0B0C] text-white hover:bg-neutral-800 shadow-xs"
+                      : "border-[#E5E7EB] hover:border-black bg-[#F9F9FB] hover:bg-black hover:text-white text-text-main shadow-xs")
                   : "border-[#F3F4F6] text-neutral-300 line-through cursor-not-allowed opacity-40"
               ]}
               data-product-id={id}
@@ -133,7 +151,10 @@ const isAvailable = status !== 'agotado';
               disabled={v.status !== 'disponible'}
               title={v.status === 'disponible' ? `Talla ${v.talla} (${v.stock} disp) — Clic para agregar directo` : 'Agotada'}
             >
-              {v.talla}
+              <span>{isSingleSizePiece ? `TALLA ${v.talla}` : v.talla}</span>
+              {isSingleSizePiece && (
+                <span class="text-[8px] text-emerald-400 font-bold">({v.stock} un.)</span>
+              )}
             </button>
           ))}
         </div>
@@ -157,9 +178,12 @@ const isAvailable = status !== 'agotado';
         data-image={image}
         data-category={category}
         data-url={productPageUrl}
+        data-is-single-size={isSingleSizePiece ? 'true' : 'false'}
+        data-single-size={isSingleSizePiece ? uniqueVariantsList[0]?.talla : ''}
+        data-single-variant-id={isSingleSizePiece ? uniqueVariantsList[0]?.id : ''}
         id={`buy-${id}`}
       >
-        {category === 'chaquetas' ? 'Elegir Talla' : '+ Carrito'}
+        {(category === 'chaquetas' && !isSingleSizePiece) ? 'Elegir Talla' : '+ Carrito'}
       </button>
     </div>
   </div>
@@ -288,8 +312,9 @@ const isAvailable = status !== 'agotado';
       const target = event.currentTarget as HTMLButtonElement;
       const category = target.getAttribute('data-category') || '';
       const url = target.getAttribute('data-url') || '';
+      const isSingleSize = target.getAttribute('data-is-single-size') === 'true';
 
-      if (category === 'chaquetas' && url) {
+      if (category === 'chaquetas' && !isSingleSize && url) {
         window.location.href = url;
         return;
       }
@@ -299,15 +324,20 @@ const isAvailable = status !== 'agotado';
       const brand = target.getAttribute('data-brand') || '';
       const price = parseFloat(target.getAttribute('data-price') || '0');
       const image = target.getAttribute('data-image') || '';
+      const size = target.getAttribute('data-single-size') || undefined;
+      const variantId = target.getAttribute('data-single-variant-id') || undefined;
 
       addToCart({
-        id,
+        id: size ? `${id}-${size}` : id,
         productId: id,
+        variantId,
         name,
         brand,
         category,
         price,
         image,
+        size,
+        color: name.includes('·') ? name.split('·')[1].trim() : name.replace('Chaqueta Impermeable ', '').trim(),
         quantity: 1,
       });
 

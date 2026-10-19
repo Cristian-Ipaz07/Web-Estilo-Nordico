@@ -22,6 +22,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   if (sub.includes('BERMUDA')) return 'BERMUDA';
   if (sub.includes('JEAN')) return 'JEANS';
   if (sub.includes('PANTALON')) return 'PANTALON';
+  if (sub.includes('BILLETERA')) return 'BILLETERA';
   return sub || 'PRENDA';
 }))).filter(Boolean).sort();
 ---
@@ -105,7 +106,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
               <select id="filter-type" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
                 <option value="all" selected>Todas</option>
                 {apparelTypes.map(t => (
-                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t}</option>
+                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t === 'BILLETERA' ? 'Billeteras' : t}</option>
                 ))}
               </select>
             </div>
@@ -231,6 +232,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     : rawParamTipo.includes('CAMISETA') ? 'CAMISETA'
     : rawParamTipo.includes('BERMUDA') ? 'BERMUDA'
     : rawParamTipo.includes('JEAN') ? 'JEANS'
+    : rawParamTipo.includes('BILLETERA') ? 'BILLETERA'
     : rawParamTipo.includes('CHAQUETA') ? 'CHAQUETA'
     : rawParamTipo;
 
@@ -240,7 +242,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     const heroSlogan = document.querySelector('#chaquetas-hero p');
     if (paramTipo === 'BUSO') {
       if (heroTitle) heroTitle.textContent = 'Busos & Hoodies';
-      if (heroSlogan) heroSlogan.textContent = 'Comodidad, abrigo y estilo urbano con confección de alta calidad.';
+      if (heroSlogan) heroSlogan.textContent = 'Piezas únicas y exclusivas en confección premium. Selecciona tu talla exacta.';
       document.title = 'Busos & Hoodies | Estilo Nórdico';
     } else if (paramTipo === 'CAMISETA') {
       if (heroTitle) heroTitle.textContent = 'Camisetas';
