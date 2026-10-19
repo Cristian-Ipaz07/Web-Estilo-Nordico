@@ -1,5 +1,5 @@
 # ESTADO EN VIVO: NODO TIENDA WEB (ESTILO NÓRDICO)
-> Última actualización: 2026-10-13 | Backend ERP Listo, Imágenes WebP Desplegadas y Ref 5080 Publicada
+> Última actualización: 2026-10-19 | Ficha Universal Omnicanal (Billeteras, Busos, Chaquetas) + Promo Domicilio Gratis (2+ Prendas)
 
 ## 📊 RESUMEN EJECUTIVO
 * **Rol**: Catálogo público, captación con Meta Ads, carrito multi-prenda y checkout consolidado por WhatsApp.
@@ -25,6 +25,27 @@
 
 ---
 
+## 🚀 HITOS RECIENTES (SESIÓN 19 OCTUBRE 2026)
+### 1. Ficha de Producto Universal y Dinámica (`ProductPage.astro`)
+- **Adaptabilidad a Toda Prenda o Accesorio**: La plantilla se desacopló del diseño rígido de Chaquetas. Detecta dinámicamente si el producto es Chaqueta, Billetera, Buso, Camiseta, Gorra, Perfume o Reloj.
+- **Nomenclatura Dinámica de Unidades y Packs**:
+  - `1 Unidad` / `1 Billetera` / `1 Chaqueta` (con precio individual).
+  - `2 Unidades` / `2 Billeteras` (Dúo con **¡DOMICILIO GRATIS EN PASTO!**).
+  - `3 Unidades` / `3 Billeteras` (Ahorro Máximo + Domicilio Gratis).
+- **Selector de Diseños y Modelos**: Para referencias con variantes de marca o diseño (ej. Billetera 8270: Lacoste, Nike, Puma, Tommy, Adidas), el cliente puede seleccionar el diseño directamente en píldoras visuales y la foto principal cambia en tiempo real a la foto exacta del diseño.
+- **Limpieza de Tallas para Accesorios**: Productos sin tallas (billeteras, correas, relojes) ya no muestran advertencias de "Horma reducida 😉", tablas de medidas `63x53 cm` ni bloqueos de formulario al agregar al carrito o pedir por WhatsApp.
+- **Garantías y Reseñas Reales**: Reseñas verificadas adaptadas a la categoría y respaldo en punto físico de Pasto (Calle 18 Centro Histórico).
+
+### 2. Política de Envíos y Domicilio Gratis (Pasto y Nacional)
+- **Chaquetas Ref 5080**: Conservan su beneficio exclusivo de Domicilio Gratis en Pasto desde 1 unidad.
+- **Demás Productos (Billeteras, Busos, Camisetas, etc.)**: 1 unidad tiene envío estándar contraentrega en Pasto, y a partir de **2 o más unidades se activa automáticamente la promoción de DOMICILIO GRATIS EN PASTO**.
+- **Mensaje de WhatsApp Enriquecido**: Especifica con total precisión el producto, modelo elegido, pack seleccionado y el beneficio de envío aplicable.
+
+### 3. Agrupación Inteligente por Referencia (`erpApi.ts`)
+- **Unificación de Variantes y Fotos**: Las variantes del ERP se asocian bajo la referencia base (`refBase`), reuniendo todas las fotos subidas a las variantes en una sola galería de alta calidad alojada en Supabase Storage.
+- **Alias de Slugs**: Soporte para `/chaquetas/billetera-8270` y retrocompatibilidad con `/chaquetas/billetera-8270-unicolor`.
+
+---
 ## 🛠️ OBJETIVOS DE EJECUCIÓN EN ESTE PROYECTO
 - [x] **Paso 1:** Crear cliente `src/lib/erpApi.ts` con tipado TypeScript para conectar a la API del ERP. (✅ 100% Funcional y probado con Ref 5080 y WebP)
 - [x] **Paso 2:** Crear componente de Carrito Multi-Producto con checkout directo a WhatsApp (+573218888046) y Meta Pixel `InitiateCheckout`. (✅ `CartDrawer.astro` + `src/lib/cart.ts` con persistencia en localStorage)

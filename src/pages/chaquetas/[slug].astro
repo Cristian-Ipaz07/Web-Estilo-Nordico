@@ -1,7 +1,7 @@
 ---
 /**
- * /chaquetas/[slug].astro — Product page individual de chaqueta
- * Genera una página estática por cada color de chaqueta desde el ERP de Estilo Nórdico.
+ * /chaquetas/[slug].astro — Product page individual del catálogo de confección y accesorios
+ * Genera una página estática por cada producto y variante desde el ERP de Estilo Nórdico.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductPage from '../../components/ProductPage.astro';
@@ -27,22 +27,37 @@ export async function getStaticPaths() {
     });
   }
 
+  // Alias para billeteras u otros slugs con -unicolor
+  jackets.forEach(j => {
+    if (j.slug.startsWith('billetera-8270')) {
+      paths.push({
+        params: { slug: 'billetera-8270-unicolor' },
+        props: { jacket: j, allJackets: jackets },
+      });
+    }
+  });
+
   return paths;
 }
 
 const { jacket, allJackets } = Astro.props;
 
-// Related products (other colors, max 3)
+const isJacket = (jacket.subcategory || '').toUpperCase().includes('CHAQUETA') || jacket.id.includes('5080');
+const categoryLabel = isJacket ? 'Chaquetas' : (jacket.subcategory ? `${jacket.subcategory.charAt(0).toUpperCase()}${jacket.subcategory.slice(1).toLowerCase()}` : 'Prendas');
+const categoryHref = isJacket ? '/chaquetas' : `/chaquetas?tipo=${encodeURIComponent((jacket.subcategory || '').toLowerCase())}`;
+
+// Related products
 const related = allJackets
   .filter((j: any) => j.id !== jacket.id && j.status === 'disponible')
   .slice(0, 3);
+const relatedTitle = isJacket ? 'Otros Colores Disponibles' : 'Otras Opciones Disponibles';
 ---
 
 <BaseLayout title={jacket.name} description={jacket.description}>
   <ProductPage 
     product={jacket} 
-    categoryLabel="Chaquetas" 
-    categoryHref="/chaquetas" 
+    categoryLabel={categoryLabel} 
+    categoryHref={categoryHref} 
     allProducts={allJackets}
   />
 
@@ -50,7 +65,7 @@ const related = allJackets
   {related.length > 0 && (
     <section class="py-12 sm:py-16 bg-bg">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 class="text-xl sm:text-2xl font-black text-text-main mb-6 text-center">Otros Colores Disponibles</h2>
+        <h2 class="text-xl sm:text-2xl font-black text-text-main mb-6 text-center">{relatedTitle}</h2>
         <div class="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 max-w-3xl mx-auto">
           {related.map((product: any) => (
             <ProductCard

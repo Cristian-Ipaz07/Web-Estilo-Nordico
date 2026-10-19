@@ -1,112 +1,94 @@
-/**
- * Cliente de conexión a la API Pública del ERP de Estilo Nórdico.
- * 
- * Consume datos en tiempo real de http://localhost:8000/api/public/
- * - Sin autenticación (solo lectura de catálogo público)
- * - Sin costos ni datos financieros expuestos
- * - Soporte para SSG con fallback y optimización de WebP
- */
-
 import type { Product, ProductVariant } from '../data/products';
 
-// ─── Configuración de URL Base ──────────────────────────────
+// URL base del backend ERP (FastAPI en producción)
+export const ERP_API_BASE_URL = 
+  import.meta.env.PUBLIC_ERP_API_URL || 
+  import.meta.env.VITE_API_URL || 
+  'https://estilo-nordico-app.onrender.com';
 
-export const ERP_API_BASE_URL = (
-  (typeof process !== 'undefined' && process.env?.PUBLIC_ERP_API_URL) ||
-  (typeof import.meta !== 'undefined' && import.meta.env?.PUBLIC_ERP_API_URL) ||
-  'https://estilo-nordico-app.onrender.com'
-).replace(/\/$/, '');
-
-// ─── Interfaces del Backend ERP ─────────────────────────────
+// ─── Tipos del ERP ──────────────────────────────────────────
 
 export interface ERPProductPublic {
   id: number;
   ref: string;
   name: string;
-  category?: string | null;
-  subcategory?: string | null;
-  brand?: string | null;
-  color?: string | null;
-  size?: string | null;
-  product_type: string; // 'CHAQUETA' | 'PERFUME' | 'RELOJ' | 'ROPA' | 'ACCESORIO'
-  slug?: string | null;
-  description?: string | null;
-  images?: string[] | null;
-  price_sale?: number | null;
-  compare_price?: number | null;
-  stock?: number | null;
-  is_active: boolean;
-  updated_at?: string | null;
-}
-
-export interface GetProductsFilters {
-  product_type?: string;
-  category?: string;
-  subcategory?: string;
-  brand?: string;
-  in_stock?: boolean;
-  search?: string;
-  limit?: number;
-  offset?: number;
-}
-
-export interface StockCheckResult {
-  id: number;
+  category: string;
+  subcategory: string;
+  brand: string;
+  color: string;
+  size: string;
+  product_type: string;
+  slug: string;
+  description: string;
+  images: string[];
+  price_sale: number;
+  compare_price?: number;
   stock: number;
-  available: boolean;
+  is_active: boolean;
+  updated_at: string;
 }
 
-export interface CategoryCount {
-  type: string;
-  count: number;
-}
+// ─── Mapeos de Color para la Chaqueta 5080 ──────────────────
 
-// ─── Mapeos de Colores y Recursos WebP Locales ──────────────
+const COLOR_MAP: Record<string, string> = {
+  'negro': 'Negro',
+  'azul': 'Azul',
+  'azul cobalto': 'Azul Cobalto',
+  'beige': 'Beige',
+  'gris claro': 'Gris Claro',
+  'gris raton': 'Gris Raton',
+  'gris ratón': 'Gris Raton',
+  'rojo': 'Rojo',
+  'rojo franja': 'Rojo Franja',
+  'verde': 'Verde',
+};
 
-export const COLOR_HEX_MAP: Record<string, string> = {
+const COLOR_IMAGE_MAP: Record<string, string> = {
+  'negro': '5080-the-north-face-negro.webp',
+  'azul': '5080-the-north-face-azul.webp',
+  'azul cobalto': '5080-the-north-face-azul-cobalto.webp',
+  'beige': '5080-the-north-face-beige.webp',
+  'gris claro': '5080-the-north-face-gris-claro.webp',
+  'gris raton': '5080-the-north-face-gris-raton.webp',
+  'rojo': '5080-the-north-face-rojo.webp',
+  'rojo franja': '5080-the-north-face-rojo-franja.webp',
+  'verde': '5080-the-north-face-verde.webp',
+};
+
+const COLOR_HEX_MAP: Record<string, string> = {
   'negro': '#1a1a1a',
   'azul': '#2b5aa7',
   'azul cobalto': '#0047ab',
-  'azul rey': '#1c39bb',
   'beige': '#cbb894',
   'gris claro': '#b0b3b8',
   'gris raton': '#6e6e6e',
-  'gris ratón': '#6e6e6e',
   'rojo': '#b3282d',
   'rojo franja': '#991b1e',
-  'verde': '#3d6b4f',
-  'verde militar': '#3d6b4f',
+  'verde': '#2e5a36',
+  'camel': '#c19a6b',
+  'amarillo': '#f4d03f',
+  'blanco': '#f8f9fa',
+  'cafe': '#6f4e37',
+  'cafe claro': '#a0785a',
+  'cafe oscuro': '#4a3525',
+  'lila': '#c8a2c8',
+  'salmon': '#fa8072',
+  'rosado': '#ffb6c1',
 };
 
-export const COLOR_LOCAL_WEBP: Record<string, string> = {
-  'negro': '/assets/products/5080/5080-the-north-face-negro.webp',
-  'azul': '/assets/products/5080/5080-the-north-face-azul.webp',
-  'azul cobalto': '/assets/products/5080/5080-the-north-face-azul-cobalto.webp',
-  'azul rey': '/assets/products/5080/5080-the-north-face-azul-rey.webp',
-  'beige': '/assets/products/5080/5080-the-north-face-beige.webp',
-  'gris claro': '/assets/products/5080/5080-the-north-face-gris-claro.webp',
-  'gris raton': '/assets/products/5080/5080-the-north-face-gris-raton.webp',
-  'gris ratón': '/assets/products/5080/5080-the-north-face-gris-raton.webp',
-  'rojo': '/assets/products/5080/5080-the-north-face-rojo.webp',
-  'rojo franja': '/assets/products/5080/5080-the-north-face-rojo-franja.webp',
-  'verde militar': '/assets/products/5080/5080-the-north-face-verde-militar.webp',
-};
-
+const CANONICAL_SIZES = ['M', 'L', 'XL', 'XXL'];
 const DEFAULT_JACKET_PRICE = 90000;
 const DEFAULT_JACKET_ANCHOR = 120000;
 
-// ─── Utilidades ─────────────────────────────────────────────
-
-function normalizeColorKey(color?: string | null): string {
+function normalizeColorKey(color: string): string {
   if (!color) return '';
   return color
     .toLowerCase()
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
+    .normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .trim();
 }
 
-export function capitalizeWords(str: string): string {
+function capitalizeWords(str: string): string {
   if (!str) return '';
   return str
     .toLowerCase()
@@ -115,218 +97,167 @@ export function capitalizeWords(str: string): string {
     .join(' ');
 }
 
-/**
- * Normaliza la URL de una imagen para que funcione tanto en local como en producción SSG.
- * Si la URL apunta a /static/products/5080/..., la mapea a /assets/products/5080/...
- */
-export function resolveImageUrl(url?: string | null, fallbackColor?: string): string {
-  if (url) {
-    // Si viene del backend en /static/products/5080/
-    if (url.includes('/static/products/5080/')) {
-      const filename = url.split('/').pop();
-      return `/assets/products/5080/${filename}`;
-    }
-    if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
-      return url;
-    }
+function resolveImageUrl(backendImg: string | undefined, colorName: string): string {
+  if (backendImg && backendImg.startsWith('http')) {
+    return backendImg;
   }
-
-  if (fallbackColor) {
-    const key = normalizeColorKey(fallbackColor);
-    if (COLOR_LOCAL_WEBP[key]) {
-      return COLOR_LOCAL_WEBP[key];
-    }
+  const norm = normalizeColorKey(colorName);
+  const localWebp = COLOR_IMAGE_MAP[norm];
+  if (localWebp) {
+    return `/assets/products/5080/${localWebp}`;
   }
-
   return '/assets/products/5080/5080-the-north-face-negro.webp';
 }
 
-// ─── Funciones Core de API ──────────────────────────────────
+// ─── API Client para el ERP ─────────────────────────────────
 
-/**
- * Consulta la lista de productos publicados en el ERP.
- */
-export async function getProducts(filters: GetProductsFilters = {}): Promise<ERPProductPublic[]> {
-  const params = new URLSearchParams();
-  if (filters.product_type) params.set('product_type', filters.product_type);
-  if (filters.category) params.set('category', filters.category);
-  if (filters.subcategory) params.set('subcategory', filters.subcategory);
-  if (filters.brand) params.set('brand', filters.brand);
-  if (filters.in_stock !== undefined) params.set('in_stock', String(filters.in_stock));
-  if (filters.search) params.set('search', filters.search);
-  if (filters.limit) params.set('limit', String(filters.limit));
-  if (filters.offset) params.set('offset', String(filters.offset));
+export async function getProducts(params?: {
+  product_type?: string;
+  category?: string;
+  subcategory?: string;
+  brand?: string;
+  in_stock?: boolean;
+  search?: string;
+  limit?: number;
+  offset?: number;
+}): Promise<ERPProductPublic[]> {
+  try {
+    const url = new URL(`${ERP_API_BASE_URL}/api/public/products`);
+    if (params) {
+      Object.entries(params).forEach(([key, val]) => {
+        if (val !== undefined && val !== null) {
+          url.searchParams.append(key, String(val));
+        }
+      });
+    }
 
-  const query = params.toString();
-  const url = `${ERP_API_BASE_URL}/api/public/products${query ? `?${query}` : ''}`;
+    const res = await fetch(url.toString(), {
+      headers: {
+        'Accept': 'application/json',
+      },
+    });
 
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-  });
+    if (!res.ok) {
+      console.warn(`[ERP API] Fallo al consultar productos: HTTP ${res.status}`);
+      return [];
+    }
 
-  if (!res.ok) {
-    throw new Error(`Error en API ERP (${res.status}): ${await res.text()}`);
+    return await res.json();
+  } catch (err) {
+    console.error('[ERP API] Error de red o conexión al backend:', err);
+    return [];
   }
-
-  return await res.json();
 }
 
-/**
- * Consulta un producto por su slug.
- */
-export async function getProductBySlug(slug: string): Promise<ERPProductPublic | null> {
-  const url = `${ERP_API_BASE_URL}/api/public/products/${encodeURIComponent(slug)}`;
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-  });
-
-  if (res.status === 404) return null;
-  if (!res.ok) {
-    throw new Error(`Error al consultar producto por slug (${res.status}): ${await res.text()}`);
-  }
-
-  return await res.json();
-}
+// ─── Agrupación y Mapeo al Catálogo de la Web ───────────────
 
 /**
- * Consulta un producto por su ID numérico.
- */
-export async function getProductById(id: number): Promise<ERPProductPublic | null> {
-  const url = `${ERP_API_BASE_URL}/api/public/products/id/${id}`;
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-  });
-
-  if (res.status === 404) return null;
-  if (!res.ok) {
-    throw new Error(`Error al consultar producto por ID (${res.status}): ${await res.text()}`);
-  }
-
-  return await res.json();
-}
-
-/**
- * Micro-chequeo de disponibilidad y stock en tiempo real.
- */
-export async function checkStock(productId: number): Promise<StockCheckResult> {
-  const url = `${ERP_API_BASE_URL}/api/public/stock-check/${productId}`;
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Error al verificar stock (${res.status}): ${await res.text()}`);
-  }
-
-  return await res.json();
-}
-
-/**
- * Obtiene las categorías de productos disponibles con conteo.
- */
-export async function getCategories(): Promise<CategoryCount[]> {
-  const url = `${ERP_API_BASE_URL}/api/public/categories`;
-  const res = await fetch(url, {
-    headers: { 'Accept': 'application/json' },
-  });
-
-  if (!res.ok) {
-    throw new Error(`Error al obtener categorías (${res.status}): ${await res.text()}`);
-  }
-
-  return await res.json();
-}
-
-// ─── Adaptador: Agrupación de Chaquetas para la Web ─────────
-
-/**
- * Obtiene las chaquetas publicadas en el ERP agrupadas por color y modelo,
- * listas para ser renderizadas por ProductCard, ProductPage y /chaquetas.
- * 
- * Desacopla 100% a Notion y se conecta al inventario real de 20 prendas físicas.
- */
-/**
- * Agrupa productos y variantes de cualquier prenda (Busos, Camisetas, Chaquetas, Bermudas)
- * para la tienda web a partir del catálogo público del ERP.
+ * Agrupa las prendas del ERP (Busos, Camisetas, Bermudas, Billeteras, Accesorios)
+ * de manera unificada por familia de referencia base para la tienda web.
  */
 export function groupERPClothing(items: ERPProductPublic[]): Product[] {
-  const groups = new Map<string, ERPProductPublic[]>();
+  // Agrupar items por referencia base (ej: '8270', '30861', '7647')
+  const refGroups = new Map<string, ERPProductPublic[]>();
 
   for (const item of items) {
-    const subcat = (item.subcategory || 'Prenda').trim();
-    const color = (item.color || 'Unicolor').trim();
-    const refBase = item.ref.split('-')[0] || item.ref;
-    const groupKey = `${refBase}_${color}`.toLowerCase();
-
-    const g = groups.get(groupKey) || [];
+    const refBase = (item.ref || '').split('-')[0].trim().toUpperCase();
+    if (!refBase) continue;
+    const g = refGroups.get(refBase) || [];
     g.push(item);
-    groups.set(groupKey, g);
+    refGroups.set(refBase, g);
   }
 
   const products: Product[] = [];
 
-  for (const [key, variants] of groups) {
-    const first = variants[0];
-    const subcat = first.subcategory || 'Ropa';
-    const cleanColor = capitalizeWords(first.color || 'Unicolor');
-    const brand = first.brand || 'Estilo Nórdico';
-    const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
-    const hasAvailable = variants.some(v => (v.stock || 0) > 0);
-
-    const refBase = first.ref.split('-')[0] || first.ref;
-    const slug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase}-${cleanColor.toLowerCase().replace(/\s+/g, '-')}`;
-
-    const productVariants: ProductVariant[] = variants
-      .filter(v => v.size && !['ÚNICA', 'UNICA', 'NONE', 'NULL'].includes(v.size.toUpperCase().trim()))
-      .map(v => ({
-        id: String(v.id),
-        talla: v.size || 'M',
-        color: cleanColor,
-        stock: v.stock || 0,
-        status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
-        referencia: v.ref,
-      }));
-
+  for (const [refBase, groupItems] of refGroups) {
+    // Recolectar todas las fotos disponibles de la referencia y sus variantes
     const allImages: string[] = [];
-    variants.forEach(v => {
-      if (Array.isArray(v.images)) {
-        v.images.forEach(img => {
-          if (img && !allImages.includes(img)) allImages.push(img);
+    groupItems.forEach(item => {
+      if (Array.isArray(item.images)) {
+        item.images.forEach(img => {
+          if (img && typeof img === 'string' && img.trim() && !allImages.includes(img.trim())) {
+            allImages.push(img.trim());
+          }
         });
       }
     });
 
-    const fallbackImg = first.product_type === 'CHAQUETA' 
-      ? '/assets/products/5080/5080-the-north-face-negro.webp'
-      : '/assets/products/chaqueta-impermeable.png';
-    const resolvedImage = allImages[0] || fallbackImg;
+    // Identificar el producto padre (ref exacta sin sufijos) o el primer item
+    const parentItem = groupItems.find(i => i.ref.trim().toUpperCase() === refBase) || groupItems[0];
+    
+    // Variantes reales (excluyendo el item padre si este solo agrupa)
+    const rawVariants = groupItems.filter(i => i.ref.trim().toUpperCase() !== refBase);
+    const effectiveVariants = rawVariants.length > 0 ? rawVariants : [parentItem];
+
+    const subcat = (parentItem.subcategory || groupItems[0].subcategory || 'Prenda').trim();
+    const cleanSubcat = capitalizeWords(subcat);
+    const brand = (parentItem.brand && parentItem.brand !== 'Estilo Nórdico' ? parentItem.brand : groupItems[0].brand) || 'Estilo Nórdico';
+
+    // Generar nombre descriptivo de la prenda
+    let baseName = parentItem.name || groupItems[0].name || cleanSubcat;
+    // Remover la referencia inicial si viene en el nombre (ej: "8270 EC MULTIMARCA" -> "EC MULTIMARCA")
+    baseName = baseName.replace(new RegExp(`^${refBase}\\s*[-_]?\\s*`, 'i'), '').trim();
+    if (!baseName.toUpperCase().includes(subcat.toUpperCase())) {
+      baseName = `${cleanSubcat} ${baseName}`;
+    }
+
+    const totalStock = effectiveVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    const hasAvailable = effectiveVariants.some(v => (v.stock || 0) > 0);
+
+    // Mapear cada variante con su foto, color, marca y stock
+    const productVariants: ProductVariant[] = effectiveVariants.map(v => {
+      const vColor = capitalizeWords((v.color || 'Unicolor').trim());
+      const vTalla = (v.size || '').trim().toUpperCase();
+      const isAvailable = (v.stock || 0) > 0;
+      const vImage = (Array.isArray(v.images) && v.images[0]) ? v.images[0] : allImages[0] || '';
+      return {
+        id: String(v.id),
+        talla: (!vTalla || ['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(vTalla)) ? 'ÚNICA' : vTalla,
+        color: vColor,
+        stock: v.stock || 0,
+        status: isAvailable ? 'disponible' : 'agotado',
+        referencia: v.ref,
+        image: vImage,
+        brand: v.brand || brand,
+      };
+    });
+
+    const primaryImage = allImages[0] || (
+      parentItem.product_type === 'CHAQUETA' 
+        ? '/assets/products/5080/5080-the-north-face-negro.webp'
+        : '/assets/logo estilo nordico.png'
+    );
+
+    const slug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}`;
+    const price = parentItem.price_sale || groupItems[0].price_sale || 85000;
+    const anchorPrice = parentItem.compare_price || Math.round(price * 1.4);
 
     products.push({
-      id: `erp-${key}`,
+      id: `erp-${refBase.toLowerCase()}`,
       slug,
-      name: `${subcat} ${first.name.replace(/^[A-Z0-9-]+\s*/, '')} ${cleanColor}`.trim(),
+      name: capitalizeWords(baseName),
       brand,
-      category: 'chaquetas', // Mapeo a layout existente compatible
+      category: 'chaquetas', // Mapeo a layout existente
       subcategory: subcat,
-      gender: (first.category?.toLowerCase() || 'hombre') as any,
-      tags: [subcat.toLowerCase(), cleanColor.toLowerCase(), brand.toLowerCase()],
-      price: first.price_sale || 85000,
-      anchorPrice: first.compare_price || 120000,
-      image: resolvedImage,
-      images: allImages.length > 0 ? allImages : [resolvedImage],
-      description: first.description || `${subcat} premium confección nacional de alta calidad, comodidad y diseño exclusivo Estilo Nórdico.`,
+      gender: (parentItem.category?.toLowerCase() || 'hombre') as any,
+      tags: [subcat.toLowerCase(), brand.toLowerCase(), refBase.toLowerCase()],
+      price,
+      anchorPrice,
+      image: primaryImage,
+      images: allImages.length > 0 ? allImages : [primaryImage],
+      description: parentItem.description || `${cleanSubcat} de confección seleccionada, alta resistencia y diseño moderno. Garantía directa en punto físico Pasto y envíos nacionales.`,
       features: [
-        'Confección premium de alta durabilidad',
-        'Corte ergonómico moderno',
+        'Materiales de alta durabilidad y excelente confección',
+        `Referencia de catálogo: ${refBase}`,
         `Marca destacada: ${brand}`,
-        `Color: ${cleanColor}`,
+        'Garantía directa en punto físico Pasto (Calle 18 Centro)',
       ],
       variants: productVariants,
       stock: totalStock,
       status: hasAvailable ? 'disponible' : 'agotado',
       featured: true,
       source: 'erp',
-      colorHex: COLOR_HEX_MAP[normalizeColorKey(cleanColor)] || '#333333',
+      colorHex: COLOR_HEX_MAP[normalizeColorKey(productVariants[0]?.color || '')] || '#333333',
     });
   }
 
@@ -349,7 +280,7 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
       p.product_type?.toUpperCase() === 'CHAQUETA'
     );
 
-    // Otras prendas publicadas (Busos, Camisetas, Bermudas, etc.)
+    // Otras prendas publicadas (Busos, Camisetas, Bermudas, Billeteras, etc.)
     const otherClothing = rawProducts.filter(p => 
       !p.ref.startsWith('5080') &&
       p.subcategory?.toUpperCase() !== 'CHAQUETA' &&
@@ -365,7 +296,8 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
       const targetSub = subcategoryFilter.toUpperCase().trim();
       return allApparel.filter(p => 
         p.subcategory?.toUpperCase().trim() === targetSub ||
-        (targetSub === 'BUSO' && (p.name.toUpperCase().includes('BUSO') || p.subcategory?.toUpperCase().includes('BUSO')))
+        (targetSub === 'BUSO' && (p.name.toUpperCase().includes('BUSO') || p.subcategory?.toUpperCase().includes('BUSO'))) ||
+        (targetSub === 'BILLETERA' && (p.name.toUpperCase().includes('BILLETERA') || p.subcategory?.toUpperCase().includes('BILLETERA')))
       );
     }
 
@@ -377,53 +309,58 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
 }
 
 /**
- * Agrupa las variantes de la BD por color para generar fichas de producto unificadas.
+ * Agrupa las variantes de la BD por color para generar fichas de producto unificadas para chaquetas 5080.
  */
 function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
-  // Agrupar por color normalizado
   const colorGroups = new Map<string, ERPProductPublic[]>();
 
   for (const item of items) {
-    const rawColor = item.color || 'Negro';
-    const cleanColor = capitalizeWords(rawColor);
-    const group = colorGroups.get(cleanColor) || [];
+    let colorName = (item.color || '').trim();
+    if (!colorName) {
+      const parts = item.ref.split('-');
+      if (parts.length >= 3) {
+        colorName = parts[parts.length - 2];
+      }
+    }
+    const normKey = normalizeColorKey(colorName);
+    const resolvedColor = COLOR_MAP[normKey] || capitalizeWords(colorName) || 'Unicolor';
+
+    const group = colorGroups.get(normKey) || [];
     group.push(item);
-    colorGroups.set(cleanColor, group);
+    colorGroups.set(normKey, group);
   }
 
   const products: Product[] = [];
 
-  for (const [colorName, variants] of colorGroups) {
-    const normKey = normalizeColorKey(colorName);
-    const slug = `chaqueta-impermeable-${colorName.toLowerCase().replace(/\s+/g, '-')}`;
-    
-    // Total de stock sumando todas las tallas
+  for (const [normKey, variants] of colorGroups) {
+    const colorName = COLOR_MAP[normKey] || capitalizeWords(variants[0].color) || 'Unicolor';
+    const slug = `chaqueta-impermeable-${normKey.replace(/\s+/g, '-')}`;
+    const brand = variants[0]?.brand || 'The North Face';
     const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = variants.some(v => (v.stock || 0) > 0);
 
-    // Mapear variantes existentes a ProductVariant (ignorando registros padre sin talla)
-    const brand = variants[0]?.brand || 'The North Face';
+    const productVariants: ProductVariant[] = [];
     const existingMap = new Map<string, ProductVariant>();
+
     variants.forEach(v => {
-      const s = (v.size || '').toUpperCase().trim();
-      if (!s || s === 'ÚNICA' || s === 'UNICA' || s === 'NONE' || s === 'NULL') {
-        return; // Ignorar el registro base padre
+      let sz = (v.size || '').trim().toUpperCase();
+      if (!sz) {
+        const parts = v.ref.split('-');
+        sz = parts[parts.length - 1].toUpperCase();
       }
-      existingMap.set(s, {
-        id: String(v.id),
-        talla: s,
-        color: colorName,
-        stock: v.stock || 0,
-        status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
-        referencia: v.ref,
-      });
+      if (sz) {
+        existingMap.set(sz, {
+          id: String(v.id),
+          talla: sz,
+          color: colorName,
+          stock: v.stock || 0,
+          status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
+          referencia: v.ref,
+        });
+      }
     });
 
-    // Para la Chaqueta 5080, las tallas válidas son estrictamente M, L, XL, XXL
-    const STANDARD_SIZES = ['M', 'L', 'XL', 'XXL'];
-    const productVariants: ProductVariant[] = [];
-
-    STANDARD_SIZES.forEach(sz => {
+    CANONICAL_SIZES.forEach(sz => {
       if (existingMap.has(sz)) {
         productVariants.push(existingMap.get(sz)!);
       } else {
@@ -438,16 +375,13 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       }
     });
 
-    // Añadir talla XXXL únicamente si está explícitamente en la base de datos
     if (existingMap.has('XXXL')) {
       productVariants.push(existingMap.get('XXXL')!);
     }
 
-    // Buscar la mejor imagen WebP
     const firstImg = variants.find(v => v.images && v.images.length > 0)?.images?.[0];
     const resolvedImage = resolveImageUrl(firstImg, colorName);
 
-    // Recolectar todas las imágenes secundarias si existen
     const allImages: string[] = [];
     variants.forEach(v => {
       if (v.images) {
@@ -497,7 +431,6 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
     });
   }
 
-  // Ordenar: primero las que tienen stock disponible
   products.sort((a, b) => {
     if (a.status !== b.status) return a.status === 'disponible' ? -1 : 1;
     return a.name.localeCompare(b.name);

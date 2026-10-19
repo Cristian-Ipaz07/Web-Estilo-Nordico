@@ -62,6 +62,8 @@ export interface ProductVariant {
   stock: number;
   status: 'disponible' | 'agotado';
   referencia: string;
+  image?: string;
+  brand?: string;
 }
 
 // ─── PERFUMES (datos estáticos reales) ───────────────────
