@@ -14,6 +14,7 @@ export const STORE_CONFIG = {
   city: 'San Juan de Pasto',
   department: 'Nariño',
   country: 'Colombia',
+  address: 'Manzana G3 Casa 14, Nueva Aranda, Pasto',
 
   // Contacto
   whatsapp: {

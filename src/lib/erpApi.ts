@@ -250,7 +250,7 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
         'Materiales de alta durabilidad y excelente confección',
         `Referencia de catálogo: ${refBase}`,
         `Marca destacada: ${brand}`,
-        'Garantía directa en punto físico Pasto (Calle 18 Centro)',
+        'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
       ],
       variants: productVariants,
       stock: totalStock,

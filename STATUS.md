@@ -34,7 +34,7 @@
   - `3 Unidades` / `3 Billeteras` (Ahorro Máximo + Domicilio Gratis).
 - **Selector de Diseños y Modelos**: Para referencias con variantes de marca o diseño (ej. Billetera 8270: Lacoste, Nike, Puma, Tommy, Adidas), el cliente puede seleccionar el diseño directamente en píldoras visuales y la foto principal cambia en tiempo real a la foto exacta del diseño.
 - **Limpieza de Tallas para Accesorios**: Productos sin tallas (billeteras, correas, relojes) ya no muestran advertencias de "Horma reducida 😉", tablas de medidas `63x53 cm` ni bloqueos de formulario al agregar al carrito o pedir por WhatsApp.
-- **Garantías y Reseñas Reales**: Reseñas verificadas adaptadas a la categoría y respaldo en punto físico de Pasto (Calle 18 Centro Histórico).
+- **Garantías y Reseñas Reales**: Reseñas verificadas adaptadas a la categoría y respaldo en punto físico de Pasto (Manzana G3 Casa 14, Nueva Aranda).
 
 ### 2. Política de Envíos y Domicilio Gratis (Pasto y Nacional)
 - **Chaquetas Ref 5080**: Conservan su beneficio exclusivo de Domicilio Gratis en Pasto desde 1 unidad.
