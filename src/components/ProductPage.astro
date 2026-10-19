@@ -62,11 +62,13 @@ const unitNamePlural = isJacket ? 'Chaquetas'
   : isWatch ? 'Relojes'
   : `${unitName}s`;
 
-// Solo las chaquetas tienen variantes de color que navegan a otras páginas estáticas de chaqueta
+// Solo las chaquetas tienen variantes de color que navegan a otras páginas estáticas de chaqueta (estricto por género y marca)
 const colorVariants = isJacket
   ? allProducts.filter(p => 
       p.category === 'chaquetas' && 
       (p.subcategory || '').toUpperCase().includes('CHAQUETA') &&
+      p.gender === product.gender &&
+      (product.brand ? p.brand === product.brand : true) &&
       p.slug.startsWith('chaqueta-impermeable-') &&
       p.slug !== 'chaqueta-impermeable-'
     )
@@ -334,7 +336,7 @@ const faqs = [
                   ¡DOMICILIO GRATIS EN PASTO! (Pagas al recibir en casa)
                 </span>
                 <span class="text-[9px] text-emerald-700 font-medium">
-                  Beneficio exclusivo Chaquetas Ref 5080 hoy
+                  Beneficio exclusivo en Chaquetas Impermeables hoy
                 </span>
               </div>
             </div>
@@ -373,17 +375,19 @@ const faqs = [
           </div>
         </div>
 
-        <!-- Color selector para Chaquetas 5080 con Mini-Preview Real de cada prenda -->
+        <!-- Color selector para Chaquetas con Mini-Preview Real de cada prenda -->
         {colorVariants.length > 0 && (
           <div class="mb-6">
             <div class="flex items-center justify-between mb-2">
               <label class="block text-xs font-black text-text-main uppercase tracking-widest">Color disponible:</label>
-              <span class="text-xs font-black text-[#C9A962] uppercase tracking-wider">{product.name.replace('Chaqueta Impermeable ', '')}</span>
+              <span class="text-xs font-black text-[#C9A962] uppercase tracking-wider">
+                {product.name.replace(/Chaqueta Impermeable (Dama )?([A-Za-z ]+ )?/i, '').trim()}
+              </span>
             </div>
             <div class="flex flex-wrap gap-2">
               {colorVariants.map((cv) => {
                 const isActive = cv.slug === product.slug;
-                const colorName = cv.name.replace('Chaqueta Impermeable ', '');
+                const cleanColorName = cv.name.replace(/Chaqueta Impermeable (Dama )?([A-Za-z ]+ )?/i, '').trim();
                 return (
                   <a
                     href={`/chaquetas/${cv.slug}`}
@@ -393,18 +397,18 @@ const faqs = [
                         ? 'border-[#0B0B0C] ring-2 ring-[#C9A962] scale-105 shadow-md'
                         : 'border-[#E5E7EB] hover:border-black'
                     ]}
-                    title={`Color: ${colorName}`}
+                    title={`Color: ${cleanColorName}`}
                   >
                     <img 
                       src={cv.image} 
-                      alt={colorName} 
+                      alt={cleanColorName} 
                       class="w-full h-full object-cover" 
                       loading="lazy" 
                     />
                     <div 
                       class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-tl border-t border-l border-white/60 shadow-xs" 
                       style={`background-color: ${cv.colorHex || '#333'}`}
-                      title={colorName}
+                      title={cleanColorName}
                     ></div>
                     {isActive && (
                       <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
@@ -415,7 +419,7 @@ const faqs = [
                 );
               })}
             </div>
-            <p class="mt-2 text-[11px] text-text-muted">Color seleccionado: <span class="font-bold text-text-main">{product.name.replace('Chaqueta Impermeable ', '')}</span></p>
+            <p class="mt-2 text-[11px] text-text-muted">Color seleccionado: <span class="font-bold text-text-main">{product.name.replace(/Chaqueta Impermeable (Dama )?([A-Za-z ]+ )?/i, '').trim()}</span></p>
           </div>
         )}
 

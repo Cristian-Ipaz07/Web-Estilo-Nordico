@@ -27,20 +27,20 @@ const SUBCAT_META: Record<string, { label: string; href: string }> = {
   'LICRA': { label: 'Licras Deportivas', href: '/chaquetas?tipo=licra' },
 };
 
-function formatSubcategory(code: string, rawName: string) {
+function formatSubcategory(code: string, rawName: string, dept: 'hombre' | 'mujer') {
   const norm = code.toUpperCase().trim();
-  if (SUBCAT_META[norm]) return SUBCAT_META[norm];
+  const label = SUBCAT_META[norm]?.label || (rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : norm);
   return {
-    label: rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : norm,
-    href: `/chaquetas?tipo=${norm.toLowerCase()}`
+    label,
+    href: `/chaquetas?genero=${dept}&tipo=${norm.toLowerCase()}`
   };
 }
 
 const rawHombre = navData.departments['HOMBRE'] || [];
 const rawMujer = navData.departments['MUJER'] || [];
 
-const hombreItems = rawHombre.map(item => formatSubcategory(item.code, item.name));
-const mujerItems = rawMujer.map(item => formatSubcategory(item.code, item.name));
+const hombreItems = rawHombre.map(item => formatSubcategory(item.code, item.name, 'hombre'));
+const mujerItems = rawMujer.map(item => formatSubcategory(item.code, item.name, 'mujer'));
 
 interface NavMenuItem {
   label: string;
@@ -55,21 +55,21 @@ const navMenu: NavMenuItem[] = [];
 if (hombreItems.length > 0) {
   navMenu.push({
     label: 'Hombre',
-    href: '/chaquetas',
+    href: '/chaquetas?genero=hombre',
     badge: null,
     items: [
-      { label: 'Ver Todo Hombre', href: '/chaquetas' },
+      { label: 'Ver Todo Hombre', href: '/chaquetas?genero=hombre' },
       ...hombreItems
     ]
   });
 } else {
   navMenu.push({
     label: 'Hombre',
-    href: '/chaquetas',
+    href: '/chaquetas?genero=hombre',
     badge: null,
     items: [
-      { label: 'Ver Todo Hombre', href: '/chaquetas' },
-      { label: 'Chaquetas Impermeables', href: '/chaquetas' }
+      { label: 'Ver Todo Hombre', href: '/chaquetas?genero=hombre' },
+      { label: 'Chaquetas Impermeables', href: '/chaquetas?genero=hombre&tipo=chaqueta' }
     ]
   });
 }
@@ -78,10 +78,10 @@ if (hombreItems.length > 0) {
 if (mujerItems.length > 0) {
   navMenu.push({
     label: 'Mujer',
-    href: '/chaquetas?cat=mujer',
+    href: '/chaquetas?genero=mujer',
     badge: null,
     items: [
-      { label: 'Ver Todo Mujer', href: '/chaquetas?cat=mujer' },
+      { label: 'Ver Todo Mujer', href: '/chaquetas?genero=mujer' },
       ...mujerItems
     ]
   });

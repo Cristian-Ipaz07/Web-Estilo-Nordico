@@ -97,9 +97,45 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   <section class="py-8 sm:py-12 bg-white">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       
+      <!-- Department Selector Tabs (Koaj / Zara / Mattelsa Style) -->
+      <div class="flex items-center justify-center gap-2 sm:gap-3 mb-6" id="department-tabs">
+        <button 
+          type="button" 
+          class="dept-tab active-dept px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5"
+          data-dept="all"
+        >
+          <span>🔥</span> Todo el Catálogo
+        </button>
+        <button 
+          type="button" 
+          class="dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5"
+          data-dept="hombre"
+        >
+          <span>👔</span> Colección Hombre
+        </button>
+        <button 
+          type="button" 
+          class="dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5"
+          data-dept="mujer"
+        >
+          <span>👗</span> Colección Mujer
+        </button>
+      </div>
+
       <!-- Filter Bar (Light Theme) -->
       <div class="mb-8 p-5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]" id="filter-bar">
         <div class="flex flex-wrap gap-4 items-end">
+          
+          <!-- Gender / Department select -->
+          <div class="flex-1 min-w-[130px]">
+            <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Departamento</label>
+            <select id="filter-gender" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+              <option value="all" selected>Todos (Hombre y Mujer)</option>
+              <option value="hombre">Hombre</option>
+              <option value="mujer">Mujer</option>
+            </select>
+          </div>
+
           {apparelTypes.length > 1 && (
             <div class="flex-1 min-w-[130px]">
               <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Prenda</label>
@@ -165,6 +201,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
             <div 
               class="product-item"
               data-type={normalizedType}
+              data-gender={product.gender || 'hombre'}
               data-subcategory={rawSub}
               data-name={rawName}
               data-colors={product.variants?.map(v => v.color).join(',')}
@@ -182,6 +219,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
                 image={product.image}
                 description={product.description}
                 category="chaquetas"
+                gender={product.gender}
                 stock={product.stock}
                 status={product.status}
                 colorHex={product.colorHex}
@@ -216,6 +254,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
 </BaseLayout>
 
 <script>
+  const filterGender = document.getElementById('filter-gender') as HTMLSelectElement | null;
   const filterType = document.getElementById('filter-type') as HTMLSelectElement | null;
   const filterColor = document.getElementById('filter-color') as HTMLSelectElement | null;
   const filterSize = document.getElementById('filter-size') as HTMLSelectElement | null;
@@ -224,9 +263,15 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   const filterCount = document.getElementById('filter-count');
   const emptyState = document.getElementById('empty-state');
   const items = document.querySelectorAll('.product-item');
+  const deptTabs = document.querySelectorAll('.dept-tab');
 
-  // Soporte de Parámetros URL (ej: /chaquetas?tipo=buso&talla=XL&color=Negro)
+  // Soporte de Parámetros URL (ej: /chaquetas?genero=mujer&tipo=chaqueta&talla=M)
   const urlParams = new URLSearchParams(window.location.search);
+  const rawParamGender = (urlParams.get('genero') || urlParams.get('gender') || urlParams.get('cat') || '').trim().toLowerCase();
+  let activeGender = (rawParamGender === 'mujer' || rawParamGender === 'dama') ? 'mujer'
+    : (rawParamGender === 'hombre' || rawParamGender === 'caballero') ? 'hombre'
+    : 'all';
+
   const rawParamTipo = (urlParams.get('tipo') || urlParams.get('categoria') || '').trim().toUpperCase();
   const paramTipo = rawParamTipo.includes('BUSO') ? 'BUSO'
     : rawParamTipo.includes('CAMISETA') ? 'CAMISETA'
@@ -236,30 +281,61 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     : rawParamTipo.includes('CHAQUETA') ? 'CHAQUETA'
     : rawParamTipo;
 
-  // Actualizar hero si viene por tipo específico
-  if (paramTipo) {
+  function updateHeroAndMeta() {
     const heroTitle = document.querySelector('#chaquetas-hero h1');
     const heroSlogan = document.querySelector('#chaquetas-hero p');
-    if (paramTipo === 'BUSO') {
-      if (heroTitle) heroTitle.textContent = 'Busos & Hoodies';
-      if (heroSlogan) heroSlogan.textContent = 'Piezas únicas y exclusivas en confección premium. Selecciona tu talla exacta.';
-      document.title = 'Busos & Hoodies | Estilo Nórdico';
-    } else if (paramTipo === 'CAMISETA') {
-      if (heroTitle) heroTitle.textContent = 'Camisetas';
-      if (heroSlogan) heroSlogan.textContent = 'Diseños streetwear exclusivos con acabados de primera.';
-      document.title = 'Camisetas | Estilo Nórdico';
-    } else if (paramTipo === 'BERMUDA') {
-      if (heroTitle) heroTitle.textContent = 'Bermudas';
-      if (heroSlogan) heroSlogan.textContent = 'Comodidad y frescura para tu estilo diario.';
-      document.title = 'Bermudas | Estilo Nórdico';
+
+    if (activeGender === 'mujer') {
+      if (heroTitle) heroTitle.textContent = paramTipo === 'CHAQUETA' ? 'Chaquetas Dama' : 'Colección Mujer';
+      if (heroSlogan) heroSlogan.textContent = 'Prendas térmicas e impermeables diseñadas con silueta, tallas y confección exclusiva para mujer.';
+      document.title = 'Colección Mujer | Estilo Nórdico Pasto';
+    } else if (activeGender === 'hombre') {
+      if (heroTitle) {
+        heroTitle.textContent = paramTipo === 'BUSO' ? 'Busos & Hoodies' 
+          : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
+          : paramTipo === 'CHAQUETA' ? 'Chaquetas Hombre'
+          : 'Colección Hombre';
+      }
+      if (heroSlogan) heroSlogan.textContent = 'Chaquetas térmicas, busos exclusivos y piezas urbanas con stock real para hombre.';
+      document.title = 'Colección Hombre | Estilo Nórdico Pasto';
+    } else {
+      if (heroTitle) {
+        heroTitle.textContent = paramTipo === 'BUSO' ? 'Busos & Hoodies'
+          : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
+          : paramTipo === 'BERMUDA' ? 'Bermudas'
+          : 'Chaquetas & Moda Streetwear';
+      }
+      if (heroSlogan) heroSlogan.textContent = 'Para quienes buscan estilo, comodidad y protección. Paga al recibir en Pasto.';
+      document.title = 'Chaquetas & Moda Streetwear | Estilo Nórdico Pasto';
+    }
+  }
+
+  function syncDepartmentUI() {
+    // 1. Sync tabs
+    deptTabs.forEach(tab => {
+      const tabDept = tab.getAttribute('data-dept') || 'all';
+      const isActive = tabDept === activeGender;
+      if (isActive) {
+        tab.className = 'dept-tab active-dept px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5';
+      } else {
+        tab.className = 'dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5';
+      }
+    });
+
+    // 2. Sync select
+    if (filterGender) {
+      filterGender.value = activeGender;
     }
 
-    if (filterType) {
-      for (let i = 0; i < filterType.options.length; i++) {
-        if (filterType.options[i].value.toUpperCase() === paramTipo) {
-          filterType.selectedIndex = i;
-          break;
-        }
+    updateHeroAndMeta();
+  }
+
+  // Sincronizar select de tipo si viene en URL
+  if (paramTipo && filterType) {
+    for (let i = 0; i < filterType.options.length; i++) {
+      if (filterType.options[i].value.toUpperCase() === paramTipo) {
+        filterType.selectedIndex = i;
+        break;
       }
     }
   }
@@ -292,6 +368,8 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   }
 
   function applyFilters() {
+    const selectedGender = filterGender ? filterGender.value : activeGender;
+    activeGender = selectedGender;
     const selectedType = filterType ? filterType.value : (paramTipo || 'all');
     const color = filterColor ? filterColor.value : 'all';
     const size = filterSize ? filterSize.value : 'all';
@@ -300,6 +378,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
 
     items.forEach((item) => {
       const el = item as HTMLElement;
+      const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
       const itemType = (el.dataset.type || '').toUpperCase();
       const colors = (el.dataset.colors || '').toUpperCase().split(',').filter(Boolean);
       const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
@@ -308,12 +387,17 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
 
       let show = true;
 
-      // Filtro por tipo de prenda
+      // 1. Filtro estricto por Departamento (Hombre / Mujer)
+      if (selectedGender !== 'all' && itemGender !== selectedGender) {
+        show = false;
+      }
+
+      // 2. Filtro por tipo de prenda
       if (selectedType !== 'all' && itemType !== selectedType) {
         show = false;
       }
 
-      // Filtro por color del select o por colores pasados por URL
+      // 3. Filtro por color
       if (color !== 'all') {
         if (!colors.includes(color.toUpperCase())) show = false;
       } else if (paramColors.length > 0) {
@@ -321,7 +405,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
         if (!matchesAnyColor) show = false;
       }
       
-      // Filtrar por talla seleccionada en el select o por las tallas pasadas por URL
+      // 4. Filtrar por talla
       if (size !== 'all') {
         const checkSizes = status === 'disponible' ? availableSizes : sizes;
         if (!checkSizes.includes(size.toUpperCase())) show = false;
@@ -338,7 +422,8 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     });
 
     if (filterCount) {
-      let countText = `${visible} producto${visible !== 1 ? 's' : ''}`;
+      const genderLabel = selectedGender === 'mujer' ? 'en Colección Mujer' : selectedGender === 'hombre' ? 'en Colección Hombre' : 'en Catálogo';
+      let countText = `${visible} producto${visible !== 1 ? 's' : ''} ${genderLabel}`;
       const filterLabels = [];
       if (selectedType !== 'all') filterLabels.push(`Prenda: ${selectedType}`);
       if (paramTallas.length > 0 && size === 'all') filterLabels.push(`Talla: ${paramTallas.join(', ')}`);
@@ -351,22 +436,65 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
   }
 
+  // Click listeners para Department Tabs
+  deptTabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      const targetDept = tab.getAttribute('data-dept') || 'all';
+      activeGender = targetDept;
+      syncDepartmentUI();
+
+      // Actualizar URL limpia
+      const newParams = new URLSearchParams(window.location.search);
+      if (targetDept === 'all') {
+        newParams.delete('genero');
+        newParams.delete('cat');
+      } else {
+        newParams.set('genero', targetDept);
+        newParams.delete('cat');
+      }
+      const newQuery = newParams.toString();
+      window.history.replaceState({}, '', `${window.location.pathname}${newQuery ? `?${newQuery}` : ''}`);
+
+      applyFilters();
+    });
+  });
+
+  filterGender?.addEventListener('change', () => {
+    activeGender = filterGender.value;
+    syncDepartmentUI();
+    const newParams = new URLSearchParams(window.location.search);
+    if (activeGender === 'all') {
+      newParams.delete('genero');
+      newParams.delete('cat');
+    } else {
+      newParams.set('genero', activeGender);
+      newParams.delete('cat');
+    }
+    const newQuery = newParams.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${newQuery ? `?${newQuery}` : ''}`);
+    applyFilters();
+  });
+
   filterType?.addEventListener('change', applyFilters);
   filterColor?.addEventListener('change', applyFilters);
   filterSize?.addEventListener('change', applyFilters);
   filterStatus?.addEventListener('change', applyFilters);
+
   filterReset?.addEventListener('click', () => {
+    activeGender = 'all';
+    syncDepartmentUI();
+    if (filterGender) filterGender.value = 'all';
     if (filterType) filterType.value = 'all';
     if (filterColor) filterColor.value = 'all';
     if (filterSize) filterSize.value = 'all';
     if (filterStatus) filterStatus.value = 'all';
-    // Clear URL params without full page reload
     if (window.location.search) {
       window.history.replaceState({}, '', window.location.pathname);
     }
     applyFilters();
   });
 
-  // Initial filter run
+  // Inicialización
+  syncDepartmentUI();
   applyFilters();
 </script>

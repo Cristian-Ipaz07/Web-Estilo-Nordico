@@ -65,9 +65,13 @@ const COLOR_HEX_MAP: Record<string, string> = {
   'rojo': '#dc2626',
   'rojo franja': '#831843',
   'verde': '#15803d',
+  'verde militar': '#15803d',
+  'verde menta': '#6ee7b7',
+  'lila pastel': '#d8b4e2',
+  'palo de rosa': '#f4a7bb',
   'camel': '#c19a6b',
   'amarillo': '#f4d03f',
-  'blanco': '#f8f9fa',
+  'blanco': '#ffffff',
   'cafe': '#6f4e37',
   'cafe claro': '#a0785a',
   'cafe oscuro': '#4a3525',
@@ -391,24 +395,38 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
   try {
     const rawProducts = await getProducts({ limit: 200 });
 
-    // Chaquetas 5080
-    const jacketItems = rawProducts.filter(p => 
-      p.ref.startsWith('5080') || 
-      p.subcategory?.toUpperCase() === 'CHAQUETA' ||
-      p.product_type?.toUpperCase() === 'CHAQUETA'
-    );
+    // 1. Chaquetas Hombre (Ref 5080 y categoría HOMBRE)
+    const menJacketItems = rawProducts.filter(p => {
+      const ref = (p.ref || '').trim();
+      const cat = (p.category || '').toUpperCase().trim();
+      const sub = (p.subcategory || '').toUpperCase().trim();
+      const ptype = (p.product_type || '').toUpperCase().trim();
+      if (ref.startsWith('5081') || cat === 'MUJER') return false;
+      return ref.startsWith('5080') || ((sub === 'CHAQUETA' || ptype === 'CHAQUETA') && cat !== 'MUJER');
+    });
 
-    // Otras prendas publicadas (Busos, Camisetas, Bermudas, Billeteras, etc.)
-    const otherClothing = rawProducts.filter(p => 
-      !p.ref.startsWith('5080') &&
-      p.subcategory?.toUpperCase() !== 'CHAQUETA' &&
-      p.product_type?.toUpperCase() !== 'CHAQUETA'
-    );
+    // 2. Chaquetas Mujer (Ref 5081 y categoría MUJER)
+    const womenJacketItems = rawProducts.filter(p => {
+      const ref = (p.ref || '').trim();
+      const cat = (p.category || '').toUpperCase().trim();
+      const sub = (p.subcategory || '').toUpperCase().trim();
+      const ptype = (p.product_type || '').toUpperCase().trim();
+      return ref.startsWith('5081') || (cat === 'MUJER' && (sub === 'CHAQUETA' || ptype === 'CHAQUETA'));
+    });
 
-    const jacketsList = jacketItems.length > 0 ? groupERPJacketsByColor(jacketItems) : getFallbackJackets();
+    // 3. Otras prendas publicadas (Busos, Camisetas, Bermudas, Billeteras, etc.)
+    const otherClothing = rawProducts.filter(p => {
+      const ref = (p.ref || '').trim();
+      const sub = (p.subcategory || '').toUpperCase().trim();
+      const ptype = (p.product_type || '').toUpperCase().trim();
+      return !ref.startsWith('5080') && !ref.startsWith('5081') && sub !== 'CHAQUETA' && ptype !== 'CHAQUETA';
+    });
+
+    const menJacketsList = menJacketItems.length > 0 ? groupERPMenJackets(menJacketItems) : getFallbackJackets();
+    const womenJacketsList = womenJacketItems.length > 0 ? groupERPWomenJackets(womenJacketItems) : [];
     const otherList = otherClothing.length > 0 ? groupERPClothing(otherClothing) : [];
 
-    const allApparel = [...jacketsList, ...otherList];
+    const allApparel = [...menJacketsList, ...womenJacketsList, ...otherList];
 
     if (subcategoryFilter) {
       const targetSub = subcategoryFilter.toUpperCase().trim();
@@ -427,13 +445,13 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
 }
 
 /**
- * Agrupa las variantes de la BD por color para generar fichas de producto unificadas para chaquetas 5080.
+ * Agrupa las variantes de chaquetas de HOMBRE (Ref 5080) por color.
+ * Mantiene compatibilidad total con los slugs existentes.
  */
-function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
+function groupERPMenJackets(items: ERPProductPublic[]): Product[] {
   const colorGroups = new Map<string, ERPProductPublic[]>();
 
   for (const item of items) {
-    // Omitir el contenedor padre base '5080' sin color
     if ((item.ref || '').trim().toUpperCase() === '5080') continue;
 
     let colorName = (item.color || '').trim();
@@ -528,12 +546,12 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       category: 'chaquetas',
       subcategory: 'Chaqueta Impermeable Térmica',
       gender: 'hombre',
-      tags: ['impermeable', 'urbana', 'térmica', normKey, brand.toLowerCase()],
+      tags: ['impermeable', 'hombre', 'urbana', 'térmica', normKey, brand.toLowerCase()],
       price,
       anchorPrice,
       image: resolvedImage,
       images: allImages,
-      description: `Chaqueta impermeable térmica premium color ${colorName} (${brand}). Confección de alta resistencia con forro térmico acolchado, gorro extraíble y protección cortaviento ideal para Pasto y clima frío.`,
+      description: `Chaqueta impermeable térmica para hombre color ${colorName} (${brand}). Confección nacional de alta resistencia con forro térmico acolchado, gorro extraíble y protección cortaviento ideal para Pasto y clima frío.`,
       features: [
         'Acolchado térmico (retiene calor corporal)',
         'Gorro / Capucha extraíble con ajuste',
@@ -549,6 +567,141 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       hook: colorName === 'Negro' || colorName === 'Azul',
       source: 'erp',
       colorHex: COLOR_HEX_MAP[normKey] || '#1a1a1a',
+    });
+  }
+
+  products.sort((a, b) => {
+    if (a.status !== b.status) return a.status === 'disponible' ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  return products;
+}
+
+/**
+ * Agrupa las variantes de chaquetas de MUJER (Ref 5081) por marca y color.
+ * Separa Columbia y The North Face, asignando género femenino y fotos reales desde Supabase.
+ */
+function groupERPWomenJackets(items: ERPProductPublic[]): Product[] {
+  const groups = new Map<string, ERPProductPublic[]>();
+
+  for (const item of items) {
+    if ((item.ref || '').trim().toUpperCase() === '5081') continue;
+
+    let colorName = (item.color || '').trim();
+    if (!colorName) {
+      const parts = item.ref.split('-');
+      if (parts.length >= 3) {
+        colorName = parts[parts.length - 2];
+      }
+    }
+    const normColor = normalizeColorKey(colorName);
+    if (!normColor) continue;
+
+    const brand = (item.brand || (normColor === 'rojo' ? 'The North Face' : 'Columbia')).trim();
+    const groupKey = `${slugify(brand)}__${normColor}`;
+
+    const group = groups.get(groupKey) || [];
+    group.push(item);
+    groups.set(groupKey, group);
+  }
+
+  const products: Product[] = [];
+  const WOMEN_SIZES = ['S', 'M', 'L', 'XL'];
+
+  for (const [groupKey, variants] of groups) {
+    const [brandSlug, normColor] = groupKey.split('__');
+    const brand = variants[0]?.brand || (brandSlug === 'columbia' ? 'Columbia' : 'The North Face');
+    const colorName = COLOR_MAP[normColor] || capitalizeWords(variants[0].color) || 'Unicolor';
+    const slug = `chaqueta-impermeable-dama-${brandSlug}-${normColor.replace(/\s+/g, '-')}`;
+    const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
+    const hasAvailable = variants.some(v => (v.stock || 0) > 0);
+
+    const productVariants: ProductVariant[] = [];
+    const existingMap = new Map<string, ProductVariant>();
+
+    variants.forEach(v => {
+      let sz = (v.size || '').trim().toUpperCase();
+      if (!sz) {
+        const parts = v.ref.split('-');
+        sz = parts[parts.length - 1].toUpperCase();
+      }
+      if (sz) {
+        existingMap.set(sz, {
+          id: String(v.id),
+          talla: sz,
+          color: colorName,
+          stock: v.stock || 0,
+          status: (v.stock || 0) > 0 ? 'disponible' : 'agotado',
+          referencia: v.ref,
+        });
+      }
+    });
+
+    WOMEN_SIZES.forEach(sz => {
+      if (existingMap.has(sz)) {
+        productVariants.push(existingMap.get(sz)!);
+      } else {
+        productVariants.push({
+          id: `erp-5081-${brandSlug}-${normColor}-${sz.toLowerCase()}-sp`,
+          talla: sz,
+          color: colorName,
+          stock: 0,
+          status: 'agotado',
+          referencia: `5081-${brand.toUpperCase().replace(/\s+/g, '-')}-${normColor.toUpperCase()}-${sz}`,
+        });
+      }
+    });
+
+    const firstImg = variants.find(v => v.images && v.images.length > 0)?.images?.[0];
+    const resolvedImage = resolveImageUrl(firstImg, colorName);
+
+    const allImages: string[] = [];
+    variants.forEach(v => {
+      if (v.images) {
+        v.images.forEach(img => {
+          const res = resolveImageUrl(img, colorName);
+          if (!allImages.includes(res)) allImages.push(res);
+        });
+      }
+    });
+
+    if (allImages.length === 0) {
+      allImages.push(resolvedImage);
+    }
+
+    const price = variants[0]?.price_sale || DEFAULT_JACKET_PRICE;
+    const anchorPrice = variants[0]?.compare_price || DEFAULT_JACKET_ANCHOR;
+
+    products.push({
+      id: `erp-5081-${brandSlug}-${normColor.replace(/\s+/g, '-')}`,
+      slug,
+      name: `Chaqueta Impermeable Dama ${brand} ${colorName}`,
+      brand,
+      category: 'chaquetas',
+      subcategory: 'Chaqueta Impermeable Dama',
+      gender: 'mujer',
+      tags: ['impermeable', 'mujer', 'dama', 'urbana', 'térmica', normColor, brand.toLowerCase()],
+      price,
+      anchorPrice,
+      image: resolvedImage,
+      images: allImages,
+      description: `Chaqueta impermeable térmica para dama ${brand} color ${colorName}. Confección liviana y abrigada con forro térmico acolchado, silueta ergonómica, capucha ajustable y protección cortaviento ideal para Pasto y clima frío.`,
+      features: [
+        `Silueta y corte exclusivo para dama (${brand})`,
+        'Forro térmico acolchado que retiene calor corporal',
+        'Capucha / Gorro con ajuste y cordón',
+        'Tela cortaviento semi-impermeable (soporta llovizna)',
+        `Color disponible: ${colorName}`,
+        'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
+      ],
+      variants: productVariants,
+      stock: totalStock,
+      status: hasAvailable ? 'disponible' : 'agotado',
+      featured: ['Verde Menta', 'Palo de Rosa', 'Lila Pastel', 'Negro', 'Blanco'].includes(colorName),
+      hook: colorName === 'Verde Menta' || colorName === 'Palo de Rosa',
+      source: 'erp',
+      colorHex: COLOR_HEX_MAP[normColor] || '#e8a598',
     });
   }
 

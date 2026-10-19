@@ -39,6 +39,35 @@ export async function getStaticPaths() {
     });
   }
 
+  // Alias para retrocompatibilidad con chaquetas de mujer (evitando colisión con hombre)
+  jackets.forEach(j => {
+    if (j.gender === 'mujer' && j.slug.includes('columbia')) {
+      const parts = j.slug.split('-');
+      const multiWordColor = parts.slice(4).join('-');
+      if (multiWordColor) {
+        const aliasSlug = `chaqueta-impermeable-${multiWordColor}`;
+        if (!paths.some(p => p.params.slug === aliasSlug)) {
+          paths.push({
+            params: { slug: aliasSlug },
+            props: { jacket: j, allJackets: jackets },
+          });
+        }
+      }
+    }
+  });
+
+  const defaultWomanJacket = jackets.find(j => j.gender === 'mujer');
+  if (defaultWomanJacket) {
+    ['5081', '5081-columbia', 'chaqueta-impermeable-dama', 'chaqueta-mujer'].forEach(alias => {
+      if (!paths.some(p => p.params.slug === alias)) {
+        paths.push({
+          params: { slug: alias },
+          props: { jacket: defaultWomanJacket, allJackets: jackets },
+        });
+      }
+    });
+  }
+
   // Alias para billeteras u otros slugs con -unicolor
   jackets.forEach(j => {
     if (j.slug.startsWith('billetera-8270')) {
@@ -54,13 +83,17 @@ export async function getStaticPaths() {
 
 const { jacket, allJackets } = Astro.props;
 
-const isJacket = (jacket.subcategory || '').toUpperCase().includes('CHAQUETA') || jacket.id.includes('5080');
-const categoryLabel = isJacket ? 'Chaquetas' : (jacket.subcategory ? `${jacket.subcategory.charAt(0).toUpperCase()}${jacket.subcategory.slice(1).toLowerCase()}` : 'Prendas');
-const categoryHref = isJacket ? '/chaquetas' : `/chaquetas?tipo=${encodeURIComponent((jacket.subcategory || '').toLowerCase())}`;
+const isJacket = (jacket.subcategory || '').toUpperCase().includes('CHAQUETA') || jacket.id.includes('5080') || jacket.id.includes('5081');
+const categoryLabel = isJacket 
+  ? (jacket.gender === 'mujer' ? 'Chaquetas Dama' : 'Chaquetas') 
+  : (jacket.subcategory ? `${jacket.subcategory.charAt(0).toUpperCase()}${jacket.subcategory.slice(1).toLowerCase()}` : 'Prendas');
+const categoryHref = isJacket 
+  ? `/chaquetas?genero=${jacket.gender || 'hombre'}` 
+  : `/chaquetas?genero=${jacket.gender || 'hombre'}&tipo=${encodeURIComponent((jacket.subcategory || '').toLowerCase())}`;
 
-// Related products
+// Related products (estricto por género para nunca mezclar hombre con mujer)
 const related = allJackets
-  .filter((j: any) => j.id !== jacket.id && j.status === 'disponible')
+  .filter((j: any) => j.id !== jacket.id && j.gender === jacket.gender && j.status === 'disponible')
   .slice(0, 3);
 const relatedTitle = isJacket ? 'Otros Colores Disponibles' : 'Otras Opciones Disponibles';
 ---

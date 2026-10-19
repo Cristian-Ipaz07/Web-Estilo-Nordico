@@ -18,9 +18,12 @@ const activeSubs = new Set((navData.active_subcategories || []).map(s => s.toUpp
 // Definición de chips con su correspondiente subcategoría del ERP
 const chipDefinitions = [
   { id: 'all', label: '🔥 Todo', href: '/', always: true },
+  { id: 'mujer', label: '👗 Mujer', href: '/chaquetas?genero=mujer', always: true },
+  { id: 'hombre', label: '👔 Hombre', href: '/chaquetas?genero=hombre', always: true },
   { id: 'chaquetas', code: 'CHAQUETA', label: '🧥 Chaquetas', href: '/chaquetas' },
-  { id: 'camisetas', code: 'CAMISETA', label: '👕 Camisetas', href: '/chaquetas?tipo=camiseta' },
   { id: 'busos', code: 'BUSO', label: '🧥 Busos & Sacos', href: '/chaquetas?tipo=buso' },
+  { id: 'billeteras', code: 'BILLETERA', label: '👛 Billeteras', href: '/chaquetas?tipo=billetera' },
+  { id: 'camisetas', code: 'CAMISETA', label: '👕 Camisetas', href: '/chaquetas?tipo=camiseta' },
   { id: 'jeans', code: 'JEANS', label: '👖 Jeans & Denim', href: '/chaquetas?tipo=jeans' },
   { id: 'pantalones', code: 'PANTALON', label: '👖 Pantalones', href: '/chaquetas?tipo=pantalon' },
   { id: 'bermudas', code: 'BERMUDA', label: '🩳 Bermudas', href: '/chaquetas?tipo=bermuda' },

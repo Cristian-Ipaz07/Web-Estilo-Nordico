@@ -22,10 +22,11 @@ interface Props {
   stock?: number;
   status?: string;
   colorHex?: string;
+  gender?: string;
   variants?: { id: string; talla: string; stock: number; status: string }[];
 }
 
-const { id, slug, name, brand, price, anchorPrice, image, description, category, stock, status, colorHex, variants } = Astro.props;
+const { id, slug, name, brand, price, anchorPrice, image, description, category, stock, status, colorHex, gender, variants } = Astro.props;
 const discount = getDiscount(price, anchorPrice);
 const productPageUrl = `/${category}/${slug}`;
 const isAvailable = status !== 'agotado';
@@ -45,7 +46,7 @@ const uniqueVariantsList = Array.from(uniqueVariantsMap.values());
 const isSingleSizePiece = uniqueVariantsList.length === 1;
 ---
 
-<article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] hover:border-[#C9A962] transition-colors flex flex-col group relative shadow-sm" id={`product-${id}`}>
+<article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] hover:border-[#C9A962] transition-colors flex flex-col group relative shadow-sm" id={`product-${id}`} data-gender={gender || ''}>
   <!-- Image container (clickable → product page) -->
   <a href={productPageUrl} class="relative overflow-hidden bg-[#F3F4F6] aspect-square block">
     <img 
@@ -60,9 +61,16 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
         -{discount}%
       </div>
     )}
-    <!-- Brand badge -->
-    <div class="absolute top-2.5 right-2.5 bg-[#0B0B0C]/80 border border-white/10 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm">
-      {brand}
+    <!-- Brand & Gender badges -->
+    <div class="absolute top-2.5 right-2.5 flex items-center gap-1.5">
+      {gender === 'mujer' && (
+        <span class="bg-[#C9A962] text-[#0B0B0C] text-[8px] font-black px-1.5 py-0.5 rounded-sm uppercase tracking-wider shadow-sm">
+          Dama
+        </span>
+      )}
+      <div class="bg-[#0B0B0C]/80 border border-white/10 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-widest shadow-sm">
+        {brand}
+      </div>
     </div>
     <!-- Stock badge -->
     {status && (
@@ -206,11 +214,20 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
         const title = titleEl?.textContent?.trim() || '';
         if (!title.toLowerCase().includes('chaqueta')) return;
         
-        const colorName = title.replace(/chaqueta impermeable/i, '').trim().toLowerCase();
+        const cleanColorName = title
+          .replace(/chaqueta impermeable/i, '')
+          .replace(/dama/i, '')
+          .replace(/columbia/i, '')
+          .replace(/the north face/i, '')
+          .trim()
+          .toLowerCase();
+        
+        const isWoman = (card.getAttribute('data-gender') || '').toLowerCase() === 'mujer' || title.toLowerCase().includes('dama');
+        const refPrefix = isWoman ? '5081' : '5080';
         
         const variants = products.filter((p: any) => {
-          if (!p.ref || !p.ref.startsWith('5080')) return false;
-          if (colorName && p.color && p.color.toLowerCase().trim() === colorName) return true;
+          if (!p.ref || !p.ref.startsWith(refPrefix)) return false;
+          if (cleanColorName && p.color && p.color.toLowerCase().trim() === cleanColorName) return true;
           return false;
         });
 
