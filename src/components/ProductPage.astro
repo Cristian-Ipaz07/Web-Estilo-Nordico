@@ -64,7 +64,12 @@ const unitNamePlural = isJacket ? 'Chaquetas'
 
 // Solo las chaquetas tienen variantes de color que navegan a otras páginas estáticas de chaqueta
 const colorVariants = isJacket
-  ? allProducts.filter(p => p.category === 'chaquetas' && (p.subcategory || '').toUpperCase().includes('CHAQUETA'))
+  ? allProducts.filter(p => 
+      p.category === 'chaquetas' && 
+      (p.subcategory || '').toUpperCase().includes('CHAQUETA') &&
+      p.slug.startsWith('chaqueta-impermeable-') &&
+      p.slug !== 'chaqueta-impermeable-'
+    )
   : [];
 
 // Variantes internas del producto (diseños/modelos o colores de esta referencia)
@@ -368,11 +373,14 @@ const faqs = [
           </div>
         </div>
 
-        <!-- Color selector para Chaquetas 5080 -->
+        <!-- Color selector para Chaquetas 5080 con Mini-Preview Real de cada prenda -->
         {colorVariants.length > 0 && (
           <div class="mb-6">
-            <label class="block text-sm font-bold text-text-main mb-2">Color:</label>
-            <div class="flex flex-wrap gap-2.5">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-black text-text-main uppercase tracking-widest">Color disponible:</label>
+              <span class="text-xs font-black text-[#C9A962] uppercase tracking-wider">{product.name.replace('Chaqueta Impermeable ', '')}</span>
+            </div>
+            <div class="flex flex-wrap gap-2">
               {colorVariants.map((cv) => {
                 const isActive = cv.slug === product.slug;
                 const colorName = cv.name.replace('Chaqueta Impermeable ', '');
@@ -380,22 +388,34 @@ const faqs = [
                   <a
                     href={`/chaquetas/${cv.slug}`}
                     class:list={[
-                      'w-9 h-9 rounded-full border-2 transition-all duration-200 flex items-center justify-center relative hover:scale-110 shadow-sm',
+                      'w-12 h-12 rounded-md border-2 transition-all duration-200 flex items-center justify-center relative hover:scale-105 shadow-xs overflow-hidden group bg-[#F9F9FB]',
                       isActive
-                        ? 'border-primary ring-2 ring-primary/20 scale-105'
-                        : 'border-border hover:border-text-muted'
+                        ? 'border-[#0B0B0C] ring-2 ring-[#C9A962] scale-105 shadow-md'
+                        : 'border-[#E5E7EB] hover:border-black'
                     ]}
-                    style={`background-color: ${cv.colorHex || '#ccc'}`}
-                    title={colorName}
+                    title={`Color: ${colorName}`}
                   >
+                    <img 
+                      src={cv.image} 
+                      alt={colorName} 
+                      class="w-full h-full object-cover" 
+                      loading="lazy" 
+                    />
+                    <div 
+                      class="absolute bottom-0 right-0 w-3.5 h-3.5 rounded-tl border-t border-l border-white/60 shadow-xs" 
+                      style={`background-color: ${cv.colorHex || '#333'}`}
+                      title={colorName}
+                    ></div>
                     {isActive && (
-                      <span class="absolute w-2 h-2 rounded-full bg-white shadow-sm"></span>
+                      <div class="absolute inset-0 bg-black/25 flex items-center justify-center">
+                        <span class="w-2.5 h-2.5 rounded-full bg-white shadow-md ring-2 ring-[#C9A962]"></span>
+                      </div>
                     )}
                   </a>
                 );
               })}
             </div>
-            <p class="mt-2 text-xs text-text-muted">Color seleccionado: <span class="font-bold text-text-main">{product.name.replace('Chaqueta Impermeable ', '')}</span></p>
+            <p class="mt-2 text-[11px] text-text-muted">Color seleccionado: <span class="font-bold text-text-main">{product.name.replace('Chaqueta Impermeable ', '')}</span></p>
           </div>
         )}
 

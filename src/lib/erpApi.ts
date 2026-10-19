@@ -52,19 +52,19 @@ const COLOR_IMAGE_MAP: Record<string, string> = {
   'gris raton': '5080-the-north-face-gris-raton.webp',
   'rojo': '5080-the-north-face-rojo.webp',
   'rojo franja': '5080-the-north-face-rojo-franja.webp',
-  'verde': '5080-the-north-face-verde.webp',
+  'verde': '5080-the-north-face-verde-militar.webp',
 };
 
 const COLOR_HEX_MAP: Record<string, string> = {
   'negro': '#1a1a1a',
-  'azul': '#2b5aa7',
-  'azul cobalto': '#0047ab',
-  'beige': '#cbb894',
-  'gris claro': '#b0b3b8',
-  'gris raton': '#6e6e6e',
-  'rojo': '#b3282d',
-  'rojo franja': '#991b1e',
-  'verde': '#2e5a36',
+  'azul': '#2563eb',
+  'azul cobalto': '#1e3a8a',
+  'beige': '#d2b48c',
+  'gris claro': '#cbd5e1',
+  'gris raton': '#475569',
+  'rojo': '#dc2626',
+  'rojo franja': '#831843',
+  'verde': '#15803d',
   'camel': '#c19a6b',
   'amarillo': '#f4d03f',
   'blanco': '#f8f9fa',
@@ -108,14 +108,30 @@ function capitalizeWords(str: string): string {
 }
 
 function resolveImageUrl(backendImg: string | undefined, colorName: string): string {
-  if (backendImg && backendImg.startsWith('http')) {
+  // 1. Si es un CDN en la nube de producción (Supabase Storage, Cloudinary, etc.) y NO es localhost
+  if (backendImg && backendImg.startsWith('https://') && !backendImg.includes('localhost') && !backendImg.includes('127.0.0.1')) {
     return backendImg;
   }
+
+  // 2. Si viene una ruta local o de localhost (común en importación ERP), extraer el nombre del archivo
+  if (backendImg) {
+    const filenameMatch = backendImg.match(/([^\/\\]+\.webp)/i);
+    if (filenameMatch) {
+      let filename = filenameMatch[1];
+      if (filename === '5080-the-north-face-verde.webp') {
+        filename = '5080-the-north-face-verde-militar.webp';
+      }
+      return `/assets/products/5080/${filename}`;
+    }
+  }
+
+  // 3. Fallback al mapa por nombre normalizado de color
   const norm = normalizeColorKey(colorName);
   const localWebp = COLOR_IMAGE_MAP[norm];
   if (localWebp) {
     return `/assets/products/5080/${localWebp}`;
   }
+
   return '/assets/products/5080/5080-the-north-face-negro.webp';
 }
 
@@ -417,6 +433,9 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
   const colorGroups = new Map<string, ERPProductPublic[]>();
 
   for (const item of items) {
+    // Omitir el contenedor padre base '5080' sin color
+    if ((item.ref || '').trim().toUpperCase() === '5080') continue;
+
     let colorName = (item.color || '').trim();
     if (!colorName) {
       const parts = item.ref.split('-');
@@ -425,7 +444,7 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
       }
     }
     const normKey = normalizeColorKey(colorName);
-    const resolvedColor = COLOR_MAP[normKey] || capitalizeWords(colorName) || 'Unicolor';
+    if (!normKey) continue;
 
     const group = colorGroups.get(normKey) || [];
     group.push(item);
@@ -437,7 +456,7 @@ function groupERPJacketsByColor(items: ERPProductPublic[]): Product[] {
   for (const [normKey, variants] of colorGroups) {
     const colorName = COLOR_MAP[normKey] || capitalizeWords(variants[0].color) || 'Unicolor';
     const slug = `chaqueta-impermeable-${normKey.replace(/\s+/g, '-')}`;
-    const brand = variants[0]?.brand || 'The North Face';
+    const brand = variants.find(v => v.brand && v.brand.toUpperCase().includes('NORTH'))?.brand || variants[0]?.brand || 'The North Face';
     const totalStock = variants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = variants.some(v => (v.stock || 0) > 0);
 
