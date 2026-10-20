@@ -45,6 +45,31 @@
 - **Unificación de Variantes y Fotos**: Las variantes del ERP se asocian bajo la referencia base (`refBase`), reuniendo todas las fotos subidas a las variantes en una sola galería de alta calidad alojada en Supabase Storage.
 - **Alias de Slugs**: Soporte para `/chaquetas/billetera-8270` y retrocompatibilidad con `/chaquetas/billetera-8270-unicolor`.
 
+### 4. Separación Estricta de Departamentos (Hombre vs Mujer — Auditoría Arquitectónica)
+- **Desacople Visual y Filtros por Género**: Se erradicó la mezcla de prendas masculinas y femeninas en el catálogo `/chaquetas`.
+- **Tabs y Selectores Dinámicos**: Pestañas de acceso rápido (`👔 Colección Hombre`, `👗 Colección Mujer`) y selector desplegable que filtra en milisegundos en el DOM y sincroniza con el Hero Banner y meta-etiquetas.
+- **Enrutamiento Limpio y Enlaces de Campaña**: Parámetros `?genero=mujer` y `?genero=hombre` adaptan el título, subtítulo e inventario visible en tiempo real.
+- **Segmentación de Chaquetas**: Ref 5080 (Hombre: The North Face / Columbia) vs Ref 5081 (Mujer: Columbia y The North Face en 8 tonos femeninos: Azul, Beige, Blanco, Lila Pastel, Negro, Palo de Rosa, Verde Menta, Rojo).
+
+### 5. Piezas Únicas de Confección & Busos Mónaco (Ref 30861)
+- **Modelado Unitario**: Cada variante de buso representa una prenda exclusiva con stock unitario (`stock: 1`).
+- **Foto Real y Talla Exacta**: Cada pieza se renderiza como producto independiente con su fotografía real de confección, marca (Nike, Puma, Tommy, Calvin Klein, Paris Atelier, Redefine, etc.) y talla real (M, L, XL, XXL).
+
+### 6. Despliegue de Conjuntos Importados (Ref 1326 — 20 Octubre)
+- **Lanzamiento Exclusivo Online**: Integración de 4 conjuntos importados de alta gama (Chaqueta con cremallera + Pantalón/Sudadera a $170.000 COP) desglosados en el ERP y publicados en la web:
+  - *Conjunto Importado · Dsquared2 Gris* (Talla L, 3 fotos Supabase Storage)
+  - *Conjunto Importado · Louis Vuitton Blanco* (Talla XL, 3 fotos Supabase Storage)
+  - *Conjunto Importado · Under Armour Azul* (Talla XL, 3 fotos Supabase Storage)
+  - *Conjunto Importado · Under Armour Negro Rojo* (Talla M, 3 fotos Supabase Storage)
+- **Chip Táctil Móvil**: Agregado `🏃 Conjuntos` (`/chaquetas?tipo=conjunto`) en `CategoryChips.astro`.
+- **Filtros y URLs Compatibles**: Selector de tipo incluye `Conjuntos Importados`. Rutas y aliases creados en Astro: `/chaquetas/conjuntos`, `/chaquetas/1326`, `/chaquetas/conjunto-1326`.
+- **Ficha de Producto Adaptada**: `ProductPage.astro` detecta `isConjunto` para ajustar unidades ("Conjunto" / "Conjuntos"), especificaciones de chaqueta + pantalón y garantía directa en Pasto.
+
+### 7. Compilación Estática Masiva & Despliegue Vercel
+- **Build SSG**: Compilación de **108 páginas estáticas** completada en 2m 46s con 0 errores.
+- **Sincronización Git**: Commit `03ef409` subido a `origin/main` en GitHub, disparando auto-deploy en Vercel (`web-estilo-nordico.vercel.app`).
+- **Conexión con Catálogo de Asesores**: Totalmente compatible con los links generados desde `AdvisorCatalog.jsx` del ERP.
+
 ---
 ## 🛠️ OBJETIVOS DE EJECUCIÓN EN ESTE PROYECTO
 - [x] **Paso 1:** Crear cliente `src/lib/erpApi.ts` con tipado TypeScript para conectar a la API del ERP. (✅ 100% Funcional y probado con Ref 5080 y WebP)
