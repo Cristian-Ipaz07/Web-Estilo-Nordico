@@ -512,12 +512,15 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
       return ref.startsWith('5081') || (cat === 'MUJER' && (sub === 'CHAQUETA' || ptype === 'CHAQUETA'));
     });
 
-    // 3. Otras prendas publicadas (Busos, Camisetas, Bermudas, Billeteras, etc.)
+    // 3. Otras prendas de ropa publicadas (Busos, Camisetas, Conjuntos, Bermudas, etc. EXCLUYENDO accesorios no textiles)
     const otherClothing = rawProducts.filter(p => {
       const ref = (p.ref || '').trim();
       const sub = (p.subcategory || '').toUpperCase().trim();
       const ptype = (p.product_type || '').toUpperCase().trim();
-      return !ref.startsWith('5080') && !ref.startsWith('5081') && sub !== 'CHAQUETA' && ptype !== 'CHAQUETA';
+      const cat = (p.category || '').toUpperCase().trim();
+      const isJacket = ref.startsWith('5080') || ref.startsWith('5081') || sub === 'CHAQUETA' || ptype === 'CHAQUETA';
+      const isAccessory = sub === 'BILLETERA' || ptype === 'BILLETERA' || sub.includes('ACCESORIO') || cat === 'ACCESORIOS';
+      return !isJacket && !isAccessory;
     });
 
     const menJacketsList = menJacketItems.length > 0 ? groupERPMenJackets(menJacketItems) : getFallbackJackets();

@@ -12,32 +12,35 @@ import { fetchNavigationFromERP } from '../lib/erpApi';
 const currentPath = Astro.url.pathname;
 const navData = await fetchNavigationFromERP();
 
-// Diccionario de metadatos estéticos para subcategorías del ERP
-const SUBCAT_META: Record<string, { label: string; href: string }> = {
-  'CHAQUETA': { label: 'Chaquetas Impermeables', href: '/chaquetas' },
-  'CAMISETA': { label: 'Camisetas Streetwear', href: '/chaquetas?tipo=camiseta' },
-  'BUSO': { label: 'Busos & Sacos', href: '/chaquetas?tipo=buso' },
-  'PANTALON': { label: 'Pantalones & Joggers', href: '/chaquetas?tipo=pantalon' },
-  'JEANS': { label: 'Jeans & Denim', href: '/chaquetas?tipo=jeans' },
-  'BERMUDA': { label: 'Bermudas Algodón', href: '/chaquetas?tipo=bermuda' },
-  'BLUSAS': { label: 'Blusas & Tops', href: '/chaquetas?tipo=blusas' },
-  'BODY': { label: 'Bodys', href: '/chaquetas?tipo=body' },
-  'CONJUNTO': { label: 'Conjuntos', href: '/chaquetas?tipo=conjunto' },
-  'SUDADERA': { label: 'Sudaderas', href: '/chaquetas?tipo=sudadera' },
-  'LICRA': { label: 'Licras Deportivas', href: '/chaquetas?tipo=licra' },
-};
-
+// Formateador limpio de subcategorías directo desde la app / ERP (sin nombres inventados)
 function formatSubcategory(code: string, rawName: string, dept: 'hombre' | 'mujer') {
   const norm = code.toUpperCase().trim();
-  const label = SUBCAT_META[norm]?.label || (rawName ? rawName.charAt(0).toUpperCase() + rawName.slice(1).toLowerCase() : norm);
+  let label = (rawName || norm).trim();
+  const lower = label.toLowerCase();
+  if (lower === 'chaqueta') label = 'Chaquetas';
+  else if (lower === 'camiseta') label = 'Camisetas';
+  else if (lower === 'buso') label = 'Busos';
+  else if (lower === 'conjunto') label = 'Conjuntos';
+  else if (lower === 'bermuda') label = 'Bermudas';
+  else if (lower === 'pantalon') label = 'Pantalones';
+  else if (lower === 'jean' || lower === 'jeans') label = 'Jeans';
+  else if (!label.endsWith('s') && !label.endsWith('S')) label = `${label}s`;
+
   return {
     label,
     href: `/chaquetas?genero=${dept}&tipo=${norm.toLowerCase()}`
   };
 }
 
-const rawHombre = navData.departments['HOMBRE'] || [];
-const rawMujer = navData.departments['MUJER'] || [];
+// Filtrar únicamente prendas de ropa textil para los menús de Hombre y Mujer (excluyendo accesorios como Billeteras)
+const rawHombre = (navData.departments['HOMBRE'] || []).filter(item => {
+  const code = item.code.toUpperCase().trim();
+  return code !== 'BILLETERA' && !code.includes('ACCESORIO');
+});
+const rawMujer = (navData.departments['MUJER'] || []).filter(item => {
+  const code = item.code.toUpperCase().trim();
+  return code !== 'BILLETERA' && !code.includes('ACCESORIO');
+});
 
 const hombreItems = rawHombre.map(item => formatSubcategory(item.code, item.name, 'hombre'));
 const mujerItems = rawMujer.map(item => formatSubcategory(item.code, item.name, 'mujer'));

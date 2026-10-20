@@ -26,6 +26,15 @@
 ---
 
 ## 🚀 HITOS RECIENTES (SESIÓN 20 OCTUBRE 2026)
+### 1. Filtros Grupales Multiselección (Tallas, Prendas y Departamentos) + Estado "Disponible" por Defecto
+- **Multiselección de Tallas**: Botones/chips interactivos para tallas (`S`, `M`, `L`, `XL`, `XXL`) con capacidad de seleccionar múltiples combinaciones a la vez (ej. ver prendas en talla M y L simultáneamente).
+- **Multiselección de Prendas**: Chips interactivos para prendas (`Chaquetas`, `Camisetas`, `Busos`, `Conjuntos`, `Bermudas`) con selección múltiple (ej. ver Camisetas y Busos a la vez).
+- **Multiselección de Departamento (Hombre y Mujer a la vez)**: Los botones superiores de colección (`Colección Hombre` y `Colección Mujer`) ahora pueden activarse conjuntamente para ver ropa de ambos géneros en una sola vista unificada.
+- **Estado Predeterminado "Disponible" (En Stock)**: La tienda web ahora arranca por defecto mostrando solo productos disponibles, ocultando automáticamente referencias agotadas para maximizar la tasa de conversión (CRO).
+- **Excepción Permanente para Chaquetas Insignia 5080 y 5081**: Al ser referencias evergreen de reposición continua de fábrica bajo pedido, NUNCA se ocultan por stock 0 ni por el filtro de disponibilidad.
+- **Subcategorías Fieles al ERP (Sin Nombres Inventados)**: En el menú desplegable de navegación (`HOMBRE` y `MUJER`) se eliminaron los sufijos de marketing artificiales ("Camisetas Streetwear", "Busos & Sacos", "Chaquetas Impermeables") reemplazándolos exactamente por las subcategorías limpias del ERP (`Chaquetas`, `Camisetas`, `Busos`, `Conjuntos`).
+- **Catálogo Exclusivo de Ropa**: La sección `/chaquetas` filtra y excluye accesorios no textiles (billeteras), asegurando que el catálogo sea 100% de prendas de vestir (ropa).
+
 ### 1. Regla de Inventario Estricta: Retiro Automático de Prendas Vendidas (Stock <= 0)
 - **Principio**: En Estilo Nórdico, las únicas prendas perennes de inventario continuo son las Chaquetas 5080 y 5081 (que admiten sobrepedido de fábrica).
 - **Prendas Únicas de Confección (Camisetas, Busos, Conjuntos, etc.)**: En cuanto su stock llega a 0, desaparecen automáticamente del catálogo (`/chaquetas`), de los filtros y de los selectores de modelos para evitar mostrar piezas no disponibles.

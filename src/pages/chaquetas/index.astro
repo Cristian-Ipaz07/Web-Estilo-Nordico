@@ -1,6 +1,8 @@
 ---
 /**
  * /chaquetas/index.astro — Catálogo de chaquetas y prendas del ERP (Estilo Dark Mode Streetwear)
+ * Filtros grupales multiselección por Prendas y Tallas, con Estado Disponible por defecto
+ * y excepción permanente para Chaquetas Insignia 5080 y 5081.
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProductCard from '../../components/ProductCard.astro';
@@ -10,7 +12,6 @@ import { getUniqueColors, getUniqueSizes } from '../../data/products';
 const jackets = await fetchJacketsFromERP();
 const colors = getUniqueColors(jackets);
 const sizes = getUniqueSizes(jackets);
-const availableCount = jackets.filter(j => j.status === 'disponible').length;
 
 // Tipos de prendas disponibles en el catálogo
 const apparelTypes = Array.from(new Set(jackets.map(j => {
@@ -23,12 +24,18 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   if (sub.includes('BERMUDA')) return 'BERMUDA';
   if (sub.includes('JEAN')) return 'JEANS';
   if (sub.includes('PANTALON')) return 'PANTALON';
-  if (sub.includes('BILLETERA')) return 'BILLETERA';
   return sub || 'PRENDA';
 }))).filter(Boolean).sort();
+
+// Conteo de productos disponibles por defecto (incluye Chaquetas 5080 y 5081)
+const availableCount = jackets.filter(j => {
+  const sub = (j.subcategory || '').toUpperCase();
+  const isEvergreen = j.id.includes('5080') || j.id.includes('5081') || sub.includes('CHAQUETA');
+  return isEvergreen || j.status === 'disponible';
+}).length;
 ---
 
-<BaseLayout title="Chaquetas & Moda Streetwear" description="Prendas de Confección Premium Colombiana con stock real. Filtros por prenda, color y talla. Paga al recibir en Pasto y envíos a todo el país.">
+<BaseLayout title="Chaquetas & Moda Streetwear" description="Prendas de Confección Premium Colombiana con stock real. Filtros grupales por prenda, color y talla. Paga al recibir en Pasto y envíos a todo el país.">
   
   <!-- Page Header (Premium Banner with bottom white fade) -->
   <section class="relative w-full h-[70vh] sm:h-[80vh] flex items-end overflow-hidden bg-black" id="chaquetas-hero">
@@ -123,67 +130,120 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
         </button>
       </div>
 
-      <!-- Filter Bar (Light Theme) -->
-      <div class="mb-8 p-5 bg-[#F9F9FB] rounded-md border border-[#E5E7EB]" id="filter-bar">
+      <!-- Filter Bar (Light Theme con Filtros Grupales) -->
+      <div class="mb-8 p-5 sm:p-6 bg-[#F9F9FB] rounded-xl border border-[#E5E7EB] shadow-sm" id="filter-bar">
+        
+        <!-- Grupo 1: Selector Múltiple de Prendas (Chips) -->
+        {apparelTypes.length > 1 && (
+          <div class="mb-5 pb-5 border-b border-[#E5E7EB]">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
+                <span>👕</span> Prenda <span class="text-text-muted font-normal lowercase tracking-normal">(multiselección: ej. Camisetas y Busos)</span>
+              </span>
+              <span id="badge-types-count" class="hidden text-[9px] font-black bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+            </div>
+            <div class="flex flex-wrap gap-2" id="type-chips">
+              <button 
+                type="button" 
+                class="type-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
+                data-type="all"
+              >
+                Todas las prendas
+              </button>
+              {apparelTypes.map(t => {
+                const label = t === 'CHAQUETA' ? '🧥 Chaquetas'
+                  : t === 'CONJUNTO' ? '🏃‍♂️ Conjuntos'
+                  : t === 'BUSO' ? '🥋 Busos'
+                  : t === 'CAMISETA' ? '👕 Camisetas'
+                  : t === 'BERMUDA' ? '🩳 Bermudas'
+                  : t === 'JEANS' ? '👖 Jeans'
+                  : t === 'PANTALON' ? '👖 Pantalones'
+                                    : t;
+                return (
+                  <button 
+                    type="button" 
+                    class="type-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none"
+                    data-type={t}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        <!-- Grupo 2: Selector Múltiple de Tallas (Chips) -->
+        {sizes.length > 0 && (
+          <div class="mb-5 pb-5 border-b border-[#E5E7EB]">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
+                <span>📏</span> Talla <span class="text-text-muted font-normal lowercase tracking-normal">(multiselección: ej. M y L a la vez)</span>
+              </span>
+              <span id="badge-sizes-count" class="hidden text-[9px] font-black bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+            </div>
+            <div class="flex flex-wrap gap-2" id="size-chips">
+              <button 
+                type="button" 
+                class="size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
+                data-size="all"
+              >
+                Todas las tallas
+              </button>
+              {sizes.map(size => (
+                <button 
+                  type="button" 
+                  class="size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none min-w-[42px] justify-center"
+                  data-size={size}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Grupo 3: Controles Secundarios (Departamento, Color, Estado, Limpiar) -->
         <div class="flex flex-wrap gap-4 items-end">
           
           <!-- Gender / Department select -->
           <div class="flex-1 min-w-[130px]">
             <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Departamento</label>
-            <select id="filter-gender" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+            <select id="filter-gender" class="w-full px-3 py-2.5 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
               <option value="all" selected>Todos (Hombre y Mujer)</option>
               <option value="hombre">Hombre</option>
               <option value="mujer">Mujer</option>
             </select>
           </div>
 
-          {apparelTypes.length > 1 && (
-            <div class="flex-1 min-w-[130px]">
-              <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Prenda</label>
-              <select id="filter-type" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
-                <option value="all" selected>Todas</option>
-                {apparelTypes.map(t => (
-                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'CONJUNTO' ? 'Conjuntos Importados' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t === 'BILLETERA' ? 'Billeteras' : t}</option>
-                ))}
-              </select>
-            </div>
-          )}
-
           <!-- Color filter -->
           <div class="flex-1 min-w-[140px]">
             <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Color</label>
-            <select id="filter-color" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+            <select id="filter-color" class="w-full px-3 py-2.5 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
               <option value="all">Todos los colores</option>
               {colors.map(color => (
                 <option value={color}>{color}</option>
               ))}
             </select>
           </div>
-          <!-- Size filter -->
-          <div class="flex-1 min-w-[120px]">
-            <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Talla</label>
-            <select id="filter-size" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
-              <option value="all">Todas</option>
-              {sizes.map(size => (
-                <option value={size}>{size}</option>
-              ))}
-            </select>
-          </div>
-          <!-- Status filter -->
-          <div class="flex-1 min-w-[130px]">
+
+          <!-- Status filter (Predeterminado: Disponibles) -->
+          <div class="flex-1 min-w-[140px]">
             <label class="block text-[9px] font-black text-text-main mb-2 uppercase tracking-widest">Estado</label>
-            <select id="filter-status" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
-              <option value="all" selected>Todos</option>
-              <option value="disponible">Disponibles</option>
-              <option value="agotado">Agotados</option>
+            <select id="filter-status" class="w-full px-3 py-2.5 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+              <option value="disponible" selected>Disponibles (En Stock)</option>
+              <option value="all">Ver Todos (Incluye Agotados)</option>
+              <option value="agotado">Solo Agotados</option>
             </select>
           </div>
-          <!-- Reset -->
-          <button id="filter-reset" class="px-5 py-2.5 rounded-md text-[10px] font-black uppercase tracking-widest text-text-main border border-[#E5E7EB] hover:border-[#0B0B0C] hover:bg-[#F9F9FB] transition-all cursor-pointer">
-            Limpiar
+
+          <!-- Reset button -->
+          <button id="filter-reset" class="px-5 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest text-text-main border border-[#E5E7EB] bg-white hover:border-[#0B0B0C] hover:bg-[#F3F4F6] transition-all cursor-pointer">
+            Limpiar Filtros
           </button>
         </div>
-        <p class="mt-3 text-[10px] text-text-muted uppercase tracking-wider" id="filter-count">{jackets.length} productos</p>
+
+        <p class="mt-3.5 text-[10px] text-text-muted uppercase tracking-wider font-semibold" id="filter-count">{availableCount} productos disponibles</p>
       </div>
 
       <!-- Products Grid -->
@@ -198,11 +258,20 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
             : rawSub.includes('BERMUDA') ? 'BERMUDA'
             : rawSub.includes('JEAN') ? 'JEANS'
             : rawSub.includes('PANTALON') ? 'PANTALON'
-            : rawSub.includes('BILLETERA') ? 'BILLETERA'
-            : rawSub || 'PRENDA';
+                        : rawSub || 'PRENDA';
+          
+          // Chaquetas 5080 y 5081 son productos evergreen permanentes que admiten sobrepedido constante de fábrica
+          const isEvergreenJacket = normalizedType === 'CHAQUETA' || 
+            product.id.includes('5080') || 
+            product.id.includes('5081') || 
+            product.slug.includes('5080') || 
+            product.slug.includes('5081') ||
+            product.slug.includes('chaqueta');
+
           return (
             <div 
               class="product-item"
+              data-id={product.id}
               data-type={normalizedType}
               data-gender={product.gender || 'hombre'}
               data-subcategory={rawSub}
@@ -211,6 +280,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
               data-sizes={product.variants?.map(v => v.talla).join(',')}
               data-status={product.status}
               data-available-sizes={product.variants?.filter(v => v.status === 'disponible').map(v => v.talla).join(',')}
+              data-is-evergreen={isEvergreenJacket ? 'true' : 'false'}
             >
               <ProductCard
                 id={product.id}
@@ -237,7 +307,10 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
       <div id="empty-state" class="hidden text-center py-16">
         <span class="text-3xl mb-4 block">🔍</span>
         <p class="text-sm font-black text-text-main uppercase tracking-widest">No hay prendas con estos filtros</p>
-        <p class="text-xs text-text-muted mt-1 uppercase tracking-wider">Intenta cambiar la combinación de filtros</p>
+        <p class="text-xs text-text-muted mt-1 uppercase tracking-wider">Intenta cambiar la combinación de prendas o probar con otras tallas</p>
+        <button id="empty-reset-btn" class="mt-4 inline-block px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest bg-[#0B0B0C] text-white hover:bg-black transition-all cursor-pointer">
+          Ver todas las prendas disponibles
+        </button>
       </div>
     </div>
   </section>
@@ -258,104 +331,60 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
 
 <script>
   const filterGender = document.getElementById('filter-gender') as HTMLSelectElement | null;
-  const filterType = document.getElementById('filter-type') as HTMLSelectElement | null;
   const filterColor = document.getElementById('filter-color') as HTMLSelectElement | null;
-  const filterSize = document.getElementById('filter-size') as HTMLSelectElement | null;
   const filterStatus = document.getElementById('filter-status') as HTMLSelectElement | null;
   const filterReset = document.getElementById('filter-reset');
+  const emptyResetBtn = document.getElementById('empty-reset-btn');
   const filterCount = document.getElementById('filter-count');
   const emptyState = document.getElementById('empty-state');
   const items = document.querySelectorAll('.product-item');
   const deptTabs = document.querySelectorAll('.dept-tab');
 
-  // Soporte de Parámetros URL (ej: /chaquetas?genero=mujer&tipo=chaqueta&talla=M)
+  // Estado de Filtros Grupales (Multiselección: Géneros, Prendas y Tallas)
+  const selectedGenders = new Set<string>();
+  const selectedTypes = new Set<string>();
+  const selectedSizes = new Set<string>();
+
+  const ACTIVE_CHIP_CLASS = 'type-chip size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none';
+  const INACTIVE_CHIP_CLASS = 'type-chip size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none';
+
+  // Soporte de Parámetros URL (ej: /chaquetas?genero=hombre&tipo=camiseta,buso&talla=M,L&estado=disponible)
   const urlParams = new URLSearchParams(window.location.search);
   const rawParamGender = (urlParams.get('genero') || urlParams.get('gender') || urlParams.get('cat') || '').trim().toLowerCase();
-  let activeGender = (rawParamGender === 'mujer' || rawParamGender === 'dama') ? 'mujer'
-    : (rawParamGender === 'hombre' || rawParamGender === 'caballero') ? 'hombre'
-    : 'all';
-
-  const rawParamTipo = (urlParams.get('tipo') || urlParams.get('categoria') || '').trim().toUpperCase();
-  const paramTipo = rawParamTipo.includes('CONJUNTO') ? 'CONJUNTO'
-    : rawParamTipo.includes('BUSO') ? 'BUSO'
-    : rawParamTipo.includes('CAMISETA') ? 'CAMISETA'
-    : rawParamTipo.includes('BERMUDA') ? 'BERMUDA'
-    : rawParamTipo.includes('JEAN') ? 'JEANS'
-    : rawParamTipo.includes('BILLETERA') ? 'BILLETERA'
-    : rawParamTipo.includes('CHAQUETA') ? 'CHAQUETA'
-    : rawParamTipo;
-
-  function updateHeroAndMeta() {
-    const heroTitle = document.querySelector('#chaquetas-hero h1');
-    const heroSlogan = document.querySelector('#chaquetas-hero p');
-
-    if (activeGender === 'mujer') {
-      if (heroTitle) heroTitle.textContent = paramTipo === 'CHAQUETA' ? 'Chaquetas Dama' : 'Colección Mujer';
-      if (heroSlogan) heroSlogan.textContent = 'Prendas térmicas e impermeables diseñadas con silueta, tallas y confección exclusiva para mujer.';
-      document.title = 'Colección Mujer | Estilo Nórdico Pasto';
-    } else if (activeGender === 'hombre') {
-      if (heroTitle) {
-        heroTitle.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos Importados'
-          : paramTipo === 'BUSO' ? 'Busos & Hoodies' 
-          : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
-          : paramTipo === 'CHAQUETA' ? 'Chaquetas Hombre'
-          : 'Colección Hombre';
-      }
-      if (heroSlogan) {
-        heroSlogan.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados con stock real.'
-          : 'Chaquetas térmicas, busos exclusivos y piezas urbanas con stock real para hombre.';
-      }
-      document.title = (paramTipo === 'CONJUNTO' ? 'Conjuntos Hombre' : 'Colección Hombre') + ' | Estilo Nórdico Pasto';
-    } else {
-      if (heroTitle) {
-        heroTitle.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos Importados'
-          : paramTipo === 'BUSO' ? 'Busos & Hoodies'
-          : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
-          : paramTipo === 'BERMUDA' ? 'Bermudas'
-          : 'Chaquetas & Moda Streetwear';
-      }
-      if (heroSlogan) {
-        heroSlogan.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados de alta gama.'
-          : 'Para quienes buscan estilo, comodidad y protección. Paga al recibir en Pasto.';
-      }
-      document.title = (paramTipo === 'CONJUNTO' ? 'Conjuntos Importados' : 'Chaquetas & Moda Streetwear') + ' | Estilo Nórdico Pasto';
-    }
+  let activeGender = 'all';
+  if (rawParamGender.includes('hombre') || rawParamGender.includes('caballero')) selectedGenders.add('hombre');
+  if (rawParamGender.includes('mujer') || rawParamGender.includes('dama')) selectedGenders.add('mujer');
+  if (selectedGenders.size === 1) {
+    activeGender = selectedGenders.has('hombre') ? 'hombre' : 'mujer';
   }
 
-  function syncDepartmentUI() {
-    // 1. Sync tabs
-    deptTabs.forEach(tab => {
-      const tabDept = tab.getAttribute('data-dept') || 'all';
-      const isActive = tabDept === activeGender;
-      if (isActive) {
-        tab.className = 'dept-tab active-dept px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5';
-      } else {
-        tab.className = 'dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5';
-      }
-    });
-
-    // 2. Sync select
-    if (filterGender) {
-      filterGender.value = activeGender;
-    }
-
-    updateHeroAndMeta();
-  }
-
-  // Sincronizar select de tipo si viene en URL
-  if (paramTipo && filterType) {
-    for (let i = 0; i < filterType.options.length; i++) {
-      if (filterType.options[i].value.toUpperCase() === paramTipo) {
-        filterType.selectedIndex = i;
-        break;
-      }
-    }
-  }
-
-  const paramTallas = (urlParams.get('talla') || urlParams.get('tallas') || urlParams.get('size') || '')
+  // Parsear tipos iniciales desde URL (soporta múltiples separados por coma)
+  const rawParamTipos = (urlParams.get('tipo') || urlParams.get('tipos') || urlParams.get('categoria') || '')
     .split(',')
     .map(s => s.trim().toUpperCase())
     .filter(Boolean);
+
+  rawParamTipos.forEach(t => {
+    const norm = t.includes('CONJUNTO') ? 'CONJUNTO'
+      : t.includes('BUSO') ? 'BUSO'
+      : t.includes('CAMISETA') ? 'CAMISETA'
+      : t.includes('BERMUDA') ? 'BERMUDA'
+      : t.includes('JEAN') ? 'JEANS'
+      : t.includes('PANTALON') ? 'PANTALON'
+            : t.includes('CHAQUETA') ? 'CHAQUETA'
+      : t;
+    selectedTypes.add(norm);
+  });
+
+  // Parsear tallas iniciales desde URL (soporta múltiples: ?talla=M,L)
+  const rawParamTallas = (urlParams.get('talla') || urlParams.get('tallas') || urlParams.get('size') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+
+  rawParamTallas.forEach(s => selectedSizes.add(s));
+
+  // Parsear colores iniciales desde URL
   const paramColors = (urlParams.get('color') || urlParams.get('colores') || '')
     .split(',')
     .map(c => c.trim().toUpperCase())
@@ -370,22 +399,181 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     }
   }
 
-  if (paramTallas.length === 1 && filterSize) {
-    for (let i = 0; i < filterSize.options.length; i++) {
-      if (filterSize.options[i].value.toUpperCase() === paramTallas[0]) {
-        filterSize.selectedIndex = i;
-        break;
+  // Parsear estado inicial desde URL (Por defecto: 'disponible')
+  const paramEstado = (urlParams.get('estado') || urlParams.get('status') || 'disponible').toLowerCase();
+  if (filterStatus) {
+    filterStatus.value = (paramEstado === 'all' || paramEstado === 'agotado') ? paramEstado : 'disponible';
+  }
+
+  const ACTIVE_DEPT_CLASS = 'dept-tab active-dept px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5';
+  const INACTIVE_DEPT_CLASS = 'dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5';
+
+  function syncDepartmentUI() {
+    const allTab = document.querySelector('.dept-tab[data-dept="all"]');
+    const hombreTab = document.querySelector('.dept-tab[data-dept="hombre"]');
+    const mujerTab = document.querySelector('.dept-tab[data-dept="mujer"]');
+
+    if (selectedGenders.size === 0) {
+      // Todo el catálogo activo
+      if (allTab) allTab.className = ACTIVE_DEPT_CLASS;
+      if (hombreTab) hombreTab.className = INACTIVE_DEPT_CLASS;
+      if (mujerTab) mujerTab.className = INACTIVE_DEPT_CLASS;
+      if (filterGender) filterGender.value = 'all';
+      activeGender = 'all';
+    } else if (selectedGenders.size === 2) {
+      // Ambos (Hombre y Mujer) seleccionados al tiempo!
+      if (allTab) allTab.className = ACTIVE_DEPT_CLASS;
+      if (hombreTab) hombreTab.className = ACTIVE_DEPT_CLASS;
+      if (mujerTab) mujerTab.className = ACTIVE_DEPT_CLASS;
+      if (filterGender) filterGender.value = 'all';
+      activeGender = 'all';
+    } else {
+      // Solo uno seleccionado
+      if (allTab) allTab.className = INACTIVE_DEPT_CLASS;
+      const isHombre = selectedGenders.has('hombre');
+      if (hombreTab) hombreTab.className = isHombre ? ACTIVE_DEPT_CLASS : INACTIVE_DEPT_CLASS;
+      if (mujerTab) mujerTab.className = !isHombre ? ACTIVE_DEPT_CLASS : INACTIVE_DEPT_CLASS;
+      if (filterGender) filterGender.value = isHombre ? 'hombre' : 'mujer';
+      activeGender = isHombre ? 'hombre' : 'mujer';
+    }
+
+    updateHeroAndMeta();
+  }
+
+  function syncTypeChipsUI() {
+    const typeChips = document.querySelectorAll('.type-chip');
+    const badge = document.getElementById('badge-types-count');
+    const allChip = document.querySelector('.type-chip[data-type="all"]');
+
+    if (selectedTypes.size === 0) {
+      if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
+      if (badge) badge.classList.add('hidden');
+      typeChips.forEach(chip => {
+        if (chip.getAttribute('data-type') !== 'all') {
+          chip.className = INACTIVE_CHIP_CLASS;
+        }
+      });
+    } else {
+      if (allChip) allChip.className = INACTIVE_CHIP_CLASS;
+      if (badge) {
+        badge.classList.remove('hidden');
+        badge.textContent = `${selectedTypes.size} seleccionada${selectedTypes.size > 1 ? 's' : ''}`;
       }
+      typeChips.forEach(chip => {
+        const t = chip.getAttribute('data-type');
+        if (t && t !== 'all') {
+          chip.className = selectedTypes.has(t) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+        }
+      });
+    }
+  }
+
+  function syncSizeChipsUI() {
+    const sizeChips = document.querySelectorAll('.size-chip');
+    const badge = document.getElementById('badge-sizes-count');
+    const allChip = document.querySelector('.size-chip[data-size="all"]');
+
+    if (selectedSizes.size === 0) {
+      if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
+      if (badge) badge.classList.add('hidden');
+      sizeChips.forEach(chip => {
+        if (chip.getAttribute('data-size') !== 'all') {
+          chip.className = INACTIVE_CHIP_CLASS;
+        }
+      });
+    } else {
+      if (allChip) allChip.className = INACTIVE_CHIP_CLASS;
+      if (badge) {
+        badge.classList.remove('hidden');
+        badge.textContent = `${selectedSizes.size} seleccionada${selectedSizes.size > 1 ? 's' : ''}`;
+      }
+      sizeChips.forEach(chip => {
+        const s = chip.getAttribute('data-size');
+        if (s && s !== 'all') {
+          chip.className = selectedSizes.has(s) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+        }
+      });
+    }
+  }
+
+  function updateURL() {
+    const newParams = new URLSearchParams();
+    if (selectedGenders.size === 1) {
+      newParams.set('genero', Array.from(selectedGenders)[0]);
+    } else if (selectedGenders.size === 2) {
+      newParams.set('genero', 'hombre,mujer');
+    }
+    if (selectedTypes.size > 0) {
+      newParams.set('tipo', Array.from(selectedTypes).join(',').toLowerCase());
+    }
+    if (selectedSizes.size > 0) {
+      newParams.set('talla', Array.from(selectedSizes).join(','));
+    }
+    if (filterColor && filterColor.value !== 'all') {
+      newParams.set('color', filterColor.value.toLowerCase());
+    }
+    if (filterStatus && filterStatus.value !== 'disponible') {
+      newParams.set('estado', filterStatus.value);
+    }
+    const newQuery = newParams.toString();
+    window.history.replaceState({}, '', `${window.location.pathname}${newQuery ? `?${newQuery}` : ''}`);
+  }
+
+  function updateHeroAndMeta() {
+    const heroTitle = document.querySelector('#chaquetas-hero h1');
+    const heroSlogan = document.querySelector('#chaquetas-hero p');
+
+    const typesList = Array.from(selectedTypes);
+    const singleType = typesList.length === 1 ? typesList[0] : null;
+
+    if (activeGender === 'mujer') {
+      if (heroTitle) {
+        heroTitle.textContent = singleType === 'CHAQUETA' ? 'Chaquetas Dama'
+          : singleType === 'CONJUNTO' ? 'Conjuntos Dama'
+          : singleType === 'CAMISETA' ? 'Camisetas Dama'
+          : 'Colección Mujer';
+      }
+      if (heroSlogan) heroSlogan.textContent = 'Prendas térmicas e impermeables diseñadas con silueta, tallas y confección exclusiva para mujer.';
+      document.title = 'Colección Mujer | Estilo Nórdico Pasto';
+    } else if (activeGender === 'hombre') {
+      if (heroTitle) {
+        heroTitle.textContent = singleType === 'CONJUNTO' ? 'Conjuntos Importados'
+          : singleType === 'BUSO' ? 'Busos & Hoodies' 
+          : singleType === 'CAMISETA' ? 'Camisetas Streetwear'
+          : singleType === 'CHAQUETA' ? 'Chaquetas Hombre'
+          : singleType === 'BERMUDA' ? 'Bermudas Hombre'
+          : typesList.length > 1 ? 'Prendas Hombre'
+          : 'Colección Hombre';
+      }
+      if (heroSlogan) {
+        heroSlogan.textContent = singleType === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados con stock real.'
+          : 'Chaquetas térmicas, busos exclusivos y piezas urbanas con stock real para hombre.';
+      }
+      document.title = (singleType === 'CONJUNTO' ? 'Conjuntos Hombre' : 'Colección Hombre') + ' | Estilo Nórdico Pasto';
+    } else {
+      if (heroTitle) {
+        heroTitle.textContent = singleType === 'CONJUNTO' ? 'Conjuntos Importados'
+          : singleType === 'BUSO' ? 'Busos'
+          : singleType === 'CAMISETA' ? 'Camisetas Streetwear'
+          : singleType === 'BERMUDA' ? 'Bermudas'
+          : singleType === 'CHAQUETA' ? 'Chaquetas Térmicas'
+          : typesList.length > 1 ? 'Catálogo Seleccionado'
+          : 'Chaquetas & Moda Streetwear';
+      }
+      if (heroSlogan) {
+        heroSlogan.textContent = singleType === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados de alta gama.'
+          : 'Para quienes buscan estilo, comodidad y protección. Paga al recibir en Pasto.';
+      }
+      document.title = (singleType === 'CONJUNTO' ? 'Conjuntos Importados' : 'Chaquetas & Moda Streetwear') + ' | Estilo Nórdico Pasto';
     }
   }
 
   function applyFilters() {
     const selectedGender = filterGender ? filterGender.value : activeGender;
     activeGender = selectedGender;
-    const selectedType = filterType ? filterType.value : (paramTipo || 'all');
     const color = filterColor ? filterColor.value : 'all';
-    const size = filterSize ? filterSize.value : 'all';
-    const status = filterStatus ? filterStatus.value : 'all';
+    // Estado predeterminado en 'disponible' si no está definido
+    const status = filterStatus ? filterStatus.value : 'disponible';
     let visible = 0;
 
     items.forEach((item) => {
@@ -396,16 +584,19 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
       const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
       const availableSizes = (el.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
       const itemStatus = el.dataset.status || '';
+      const isEvergreen = el.dataset.isEvergreen === 'true';
 
       let show = true;
 
-      // 1. Filtro estricto por Departamento (Hombre / Mujer)
-      if (selectedGender !== 'all' && itemGender !== selectedGender) {
-        show = false;
+      // 1. Filtro grupal por Departamento (Hombre / Mujer seleccionables al tiempo)
+      if (selectedGenders.size === 1) {
+        if (!selectedGenders.has(itemGender)) {
+          show = false;
+        }
       }
 
-      // 2. Filtro por tipo de prenda
-      if (selectedType !== 'all' && itemType !== selectedType) {
+      // 2. Filtro grupal por tipo de prenda (Multiselección: ej. Camisetas y Busos)
+      if (selectedTypes.size > 0 && !selectedTypes.has(itemType)) {
         show = false;
       }
 
@@ -417,17 +608,26 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
         if (!matchesAnyColor) show = false;
       }
       
-      // 4. Filtrar por talla
-      if (size !== 'all') {
-        const checkSizes = status === 'disponible' ? availableSizes : sizes;
-        if (!checkSizes.includes(size.toUpperCase())) show = false;
-      } else if (paramTallas.length > 0) {
-        const checkSizes = status === 'disponible' ? availableSizes : sizes;
-        const matchesAny = paramTallas.some(pt => checkSizes.includes(pt));
-        if (!matchesAny) show = false;
+      // 4. Filtro grupal por talla (Multiselección: ej. M y L a la vez)
+      if (selectedSizes.size > 0) {
+        // Para chaquetas 5080 y 5081 se usan todas las tallas del modelo porque admiten reposición/sobrepedido continuo.
+        // Para prendas normales en modo disponible, se evalúan solo las tallas con stock real (availableSizes).
+        const checkSizes = isEvergreen ? sizes : (status === 'disponible' ? availableSizes : sizes);
+        const matchesAnySelectedSize = Array.from(selectedSizes).some(sz => checkSizes.includes(sz));
+        if (!matchesAnySelectedSize) show = false;
       }
 
-      if (status !== 'all' && itemStatus !== status) show = false;
+      // 5. Filtro por estado (Disponibles / Agotados / Todos)
+      // REGLA CRÍTICA DE NEGOCIO: Las chaquetas 5080 y 5081 NUNCA se ocultan cuando el filtro es 'disponible'
+      if (status === 'disponible') {
+        if (!isEvergreen && itemStatus !== 'disponible') {
+          show = false;
+        }
+      } else if (status === 'agotado') {
+        if (isEvergreen || itemStatus !== 'agotado') {
+          show = false;
+        }
+      }
 
       el.style.display = show ? '' : 'none';
       if (show) visible++;
@@ -435,11 +635,13 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
 
     if (filterCount) {
       const genderLabel = selectedGender === 'mujer' ? 'en Colección Mujer' : selectedGender === 'hombre' ? 'en Colección Hombre' : 'en Catálogo';
-      let countText = `${visible} producto${visible !== 1 ? 's' : ''} ${genderLabel}`;
+      const statusLabel = status === 'disponible' ? 'disponibles' : status === 'agotado' ? 'agotados' : 'en total';
+      let countText = `${visible} producto${visible !== 1 ? 's' : ''} ${statusLabel} ${genderLabel}`;
+
       const filterLabels = [];
-      if (selectedType !== 'all') filterLabels.push(`Prenda: ${selectedType}`);
-      if (paramTallas.length > 0 && size === 'all') filterLabels.push(`Talla: ${paramTallas.join(', ')}`);
-      if (paramColors.length > 0 && color === 'all') filterLabels.push(`Color: ${paramColors.join(', ')}`);
+      if (selectedTypes.size > 0) filterLabels.push(`Prendas: ${Array.from(selectedTypes).join(', ')}`);
+      if (selectedSizes.size > 0) filterLabels.push(`Tallas: ${Array.from(selectedSizes).join(', ')}`);
+      if (color !== 'all') filterLabels.push(`Color: ${color}`);
       if (filterLabels.length > 0) {
         countText += ` · ${filterLabels.join(' | ')}`;
       }
@@ -448,65 +650,127 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
   }
 
-  // Click listeners para Department Tabs
+
+
+  // Click listeners para Department Tabs con soporte de multiselección
   deptTabs.forEach(tab => {
     tab.addEventListener('click', () => {
       const targetDept = tab.getAttribute('data-dept') || 'all';
-      activeGender = targetDept;
-      syncDepartmentUI();
-
-      // Actualizar URL limpia
-      const newParams = new URLSearchParams(window.location.search);
       if (targetDept === 'all') {
-        newParams.delete('genero');
-        newParams.delete('cat');
+        selectedGenders.clear();
       } else {
-        newParams.set('genero', targetDept);
-        newParams.delete('cat');
+        if (selectedGenders.has(targetDept)) {
+          selectedGenders.delete(targetDept);
+        } else {
+          selectedGenders.add(targetDept);
+        }
       }
-      const newQuery = newParams.toString();
-      window.history.replaceState({}, '', `${window.location.pathname}${newQuery ? `?${newQuery}` : ''}`);
-
+      syncDepartmentUI();
+      updateURL();
       applyFilters();
     });
   });
 
+  // Listener para Chips de Tipo de Prenda (Multiselección)
+  const typeChips = document.querySelectorAll('.type-chip');
+  typeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const t = chip.getAttribute('data-type');
+      if (!t) return;
+      if (t === 'all') {
+        selectedTypes.clear();
+      } else {
+        if (selectedTypes.has(t)) {
+          selectedTypes.delete(t);
+        } else {
+          selectedTypes.add(t);
+        }
+      }
+      syncTypeChipsUI();
+      updateURL();
+      updateHeroAndMeta();
+      applyFilters();
+    });
+  });
+
+  // Listener para Chips de Talla (Multiselección)
+  const sizeChips = document.querySelectorAll('.size-chip');
+  sizeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const s = chip.getAttribute('data-size');
+      if (!s) return;
+      if (s === 'all') {
+        selectedSizes.clear();
+      } else {
+        if (selectedSizes.has(s)) {
+          selectedSizes.delete(s);
+        } else {
+          selectedSizes.add(s);
+        }
+      }
+      syncSizeChipsUI();
+      updateURL();
+      applyFilters();
+    });
+  });
+
+  // Listener para select de Departamento
   filterGender?.addEventListener('change', () => {
-    activeGender = filterGender.value;
+    selectedGenders.clear();
+    if (filterGender.value === 'hombre') selectedGenders.add('hombre');
+    else if (filterGender.value === 'mujer') selectedGenders.add('mujer');
     syncDepartmentUI();
-    const newParams = new URLSearchParams(window.location.search);
-    if (activeGender === 'all') {
-      newParams.delete('genero');
-      newParams.delete('cat');
-    } else {
-      newParams.set('genero', activeGender);
-      newParams.delete('cat');
-    }
-    const newQuery = newParams.toString();
-    window.history.replaceState({}, '', `${window.location.pathname}${newQuery ? `?${newQuery}` : ''}`);
+    updateURL();
     applyFilters();
   });
 
-  filterType?.addEventListener('change', applyFilters);
-  filterColor?.addEventListener('change', applyFilters);
-  filterSize?.addEventListener('change', applyFilters);
-  filterStatus?.addEventListener('change', applyFilters);
+  // Listeners para select de Color y Estado
+  filterColor?.addEventListener('change', () => {
+    updateURL();
+    applyFilters();
+  });
 
+  filterStatus?.addEventListener('change', () => {
+    updateURL();
+    applyFilters();
+  });
+
+  // Reset de Filtros (Vuelve al estado por defecto: DISPONIBLE)
   filterReset?.addEventListener('click', () => {
+    selectedGenders.clear();
     activeGender = 'all';
-    syncDepartmentUI();
+    selectedTypes.clear();
+    selectedSizes.clear();
     if (filterGender) filterGender.value = 'all';
-    if (filterType) filterType.value = 'all';
     if (filterColor) filterColor.value = 'all';
-    if (filterSize) filterSize.value = 'all';
-    if (filterStatus) filterStatus.value = 'all';
+    if (filterStatus) filterStatus.value = 'disponible';
+    
+    syncDepartmentUI();
+    syncTypeChipsUI();
+    syncSizeChipsUI();
+    
     if (window.location.search) {
       window.history.replaceState({}, '', window.location.pathname);
     }
     applyFilters();
   });
 
+  // Botón de reset en Empty State
+  emptyResetBtn?.addEventListener('click', () => {
+    selectedTypes.clear();
+    selectedSizes.clear();
+    if (filterColor) filterColor.value = 'all';
+    if (filterStatus) filterStatus.value = 'disponible';
+    
+    syncTypeChipsUI();
+    syncSizeChipsUI();
+    updateURL();
+    applyFilters();
+  });
+
   // Inicialización
   syncDepartmentUI();
+  syncTypeChipsUI();
+  syncSizeChipsUI();
   applyFilters();
 </script>
