@@ -17,16 +17,36 @@ interface Props {
   price: number;
   anchorPrice: number;
   image: string;
+  images?: string[];
   description: string;
   category: string;
   stock?: number;
   status?: string;
   colorHex?: string;
   gender?: string;
-  variants?: { id: string; talla: string; stock: number; status: string }[];
+  variants?: { id: string; talla: string; stock: number; status: string; images?: string[] }[];
 }
 
-const { id, slug, name, brand, price, anchorPrice, image, description, category, stock, status, colorHex, gender, variants } = Astro.props;
+const { id, slug, name, brand, price, anchorPrice, image, images = [], description, category, stock, status, colorHex, gender, variants } = Astro.props;
+
+// Recolectar todas las fotos únicas del producto (portada, galería y fotos de variantes)
+const allCardImages: string[] = [];
+if (image) allCardImages.push(image);
+if (images && Array.isArray(images)) {
+  images.forEach(img => {
+    if (img && typeof img === 'string' && !allCardImages.includes(img)) allCardImages.push(img);
+  });
+}
+if (variants && Array.isArray(variants)) {
+  variants.forEach((v: any) => {
+    if (v.images && Array.isArray(v.images)) {
+      v.images.forEach((img: string) => {
+        if (img && typeof img === 'string' && !allCardImages.includes(img)) allCardImages.push(img);
+      });
+    }
+  });
+}
+const hasMultipleImages = allCardImages.length >= 2;
 const discount = getDiscount(price, anchorPrice);
 const productPageUrl = `/${category}/${slug}`;
 const isAvailable = status !== 'agotado';
@@ -47,14 +67,40 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
 ---
 
 <article class="product-card bg-white rounded-md overflow-hidden border border-[#E5E7EB] hover:border-[#C9A962] transition-colors flex flex-col group relative shadow-sm" id={`product-${id}`} data-gender={gender || ''}>
-  <!-- Image container (clickable → product page) -->
-  <a href={productPageUrl} class="relative overflow-hidden bg-[#F3F4F6] aspect-square block">
-    <img 
-      src={image} 
-      alt={name}
-      class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-      loading="lazy"
-    />
+  <!-- Image container (clickable → product page) con Auto-Preview para 2+ fotos -->
+  <a href={productPageUrl} class="relative overflow-hidden bg-[#F3F4F6] aspect-square block group/cardimg">
+    {hasMultipleImages ? (
+      <div 
+        class="card-image-slider relative w-full h-full overflow-hidden"
+        data-total={allCardImages.length}
+      >
+        {allCardImages.map((imgSrc, idx) => (
+          <img 
+            src={imgSrc} 
+            alt={`${name} - Vista ${idx + 1}`}
+            class={`card-slide-img absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ease-in-out group-hover:scale-105 ${idx === 0 ? 'opacity-100 z-10' : 'opacity-0 z-0 pointer-events-none'}`}
+            loading={idx === 0 ? "lazy" : "lazy"}
+            data-index={idx}
+          />
+        ))}
+        <!-- Indicador sutil de fotos múltiples -->
+        <div class="card-dots-indicator absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2 py-1 rounded-full pointer-events-none transition-opacity duration-300">
+          {allCardImages.map((_, idx) => (
+            <span 
+              class={`card-dot rounded-full transition-all duration-300 ${idx === 0 ? 'bg-white w-3 h-1.5' : 'bg-white/40 w-1.5 h-1.5'}`}
+              data-dot-index={idx}
+            ></span>
+          ))}
+        </div>
+      </div>
+    ) : (
+      <img 
+        src={image} 
+        alt={name}
+        class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+        loading="lazy"
+      />
+    )}
     <!-- Discount badge -->
     {discount > 0 && (
       <div class="absolute top-2.5 left-2.5 bg-red-600 text-white text-[9px] font-black px-2 py-0.5 rounded-md uppercase tracking-wider shadow-md">
@@ -361,4 +407,111 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
       window.dispatchEvent(new CustomEvent('cart:open'));
     });
   });
+
+  // ── Auto-preview de ciclo único para productos con 2 o más fotos ──
+  function setCardSlide(slider: HTMLElement, targetIndex: number) {
+    const imgs = slider.querySelectorAll<HTMLImageElement>('.card-slide-img');
+    const dots = slider.querySelectorAll<HTMLElement>('.card-dot');
+
+    imgs.forEach((img, idx) => {
+      if (idx === targetIndex) {
+        img.classList.remove('opacity-0', 'z-0', 'pointer-events-none');
+        img.classList.add('opacity-100', 'z-10');
+      } else {
+        img.classList.remove('opacity-100', 'z-10');
+        img.classList.add('opacity-0', 'z-0', 'pointer-events-none');
+      }
+    });
+
+    dots.forEach((dot, idx) => {
+      if (idx === targetIndex) {
+        dot.className = 'card-dot rounded-full transition-all duration-300 bg-white w-3 h-1.5';
+      } else {
+        dot.className = 'card-dot rounded-full transition-all duration-300 bg-white/40 w-1.5 h-1.5';
+      }
+    });
+  }
+
+  function runCardSingleCycle(slider: HTMLElement) {
+    const imgs = slider.querySelectorAll<HTMLImageElement>('.card-slide-img');
+    const total = imgs.length;
+    if (total < 2) return;
+
+    // Solo un ciclo: pasa por las fotos secundarias y queda fija en la primera (índice 0)
+    const steps: number[] = [];
+    for (let i = 1; i < total; i++) {
+      steps.push(i);
+    }
+    steps.push(0); // Vuelve y reposa en la primera imagen
+
+    let stepIndex = 0;
+    const initialWait = 650; // Pausa para ver la primera imagen
+    const stepDuration = 1400; // Tiempo en cada imagen antes de pasar a la siguiente
+
+    setTimeout(() => {
+      const timer = setInterval(() => {
+        if (stepIndex < steps.length) {
+          const nextIdx = steps[stepIndex];
+          setCardSlide(slider, nextIdx);
+          stepIndex++;
+        } else {
+          clearInterval(timer);
+          setCardSlide(slider, 0); // Queda fija en la primera imagen
+          slider.dataset.cycleCompleted = 'true';
+        }
+      }, stepDuration);
+    }, initialWait);
+  }
+
+  function initCardSliders() {
+    const sliders = document.querySelectorAll<HTMLElement>('.card-image-slider:not([data-cycle-init])');
+    if (sliders.length === 0) return;
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const el = entry.target as HTMLElement;
+            if (el.dataset.cycleRan === 'true') return;
+            el.dataset.cycleRan = 'true';
+            observer.unobserve(el);
+            runCardSingleCycle(el);
+          }
+        });
+      }, {
+        threshold: 0.2, // Activar cuando al menos 20% de la tarjeta es visible
+      });
+
+      sliders.forEach(s => {
+        s.setAttribute('data-cycle-init', 'true');
+        observer.observe(s);
+      });
+    } else {
+      sliders.forEach(s => {
+        s.setAttribute('data-cycle-init', 'true');
+        setTimeout(() => runCardSingleCycle(s), 1000);
+      });
+    }
+
+    // Soporte opcional de hover en escritorio tras finalizar el ciclo
+    document.querySelectorAll<HTMLElement>('.product-card').forEach(card => {
+      const slider = card.querySelector<HTMLElement>('.card-image-slider');
+      if (!slider || card.dataset.hoverInit === 'true') return;
+      card.dataset.hoverInit = 'true';
+
+      card.addEventListener('mouseenter', () => {
+        if (slider.dataset.cycleCompleted === 'true') {
+          setCardSlide(slider, 1);
+        }
+      });
+      card.addEventListener('mouseleave', () => {
+        if (slider.dataset.cycleCompleted === 'true') {
+          setCardSlide(slider, 0);
+        }
+      });
+    });
+  }
+
+  initCardSliders();
+  document.addEventListener('astro:page-load', initCardSliders);
 </script>

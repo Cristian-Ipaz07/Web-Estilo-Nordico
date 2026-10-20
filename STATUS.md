@@ -26,6 +26,12 @@
 ---
 
 ## 🚀 HITOS RECIENTES (SESIÓN 20 OCTUBRE 2026)
+### 1. Auto-Preview Dinámico de Ciclo Único para Productos con 2+ Fotos (`ProductCard.astro`)
+- **Detección Automática de Multimedia**: Las tarjetas de producto en el catálogo y página principal recopilan todas las imágenes reales disponibles (foto frontal, trasera, detalles y variantes).
+- **Transición Automática de Ciclo Único**: Al desplazarse por el catálogo, cuando una prenda con 2 o más fotos entra en pantalla (`IntersectionObserver`), las imágenes pasan automáticamente de forma fluida y suave mediante crossfade CSS.
+- **Detención Permanente en la Portada**: El recorrido realiza estrictamente **un solo ciclo** y regresa a la primera imagen principal, quedando fija para que el cliente la explore y decida ingresar a la ficha del producto.
+- **Indicador Visual y Hover en Escritorio**: Incluye sutiles puntos indicadores de fotografías disponibles y permite al usuario en desktop inspeccionar la foto trasera pasando el cursor sobre la prenda.
+
 ### 1. Filtros Grupales Multiselección (Tallas, Prendas y Departamentos) + Estado "Disponible" por Defecto
 - **Multiselección de Tallas**: Botones/chips interactivos para tallas (`S`, `M`, `L`, `XL`, `XXL`) con capacidad de seleccionar múltiples combinaciones a la vez (ej. ver prendas en talla M y L simultáneamente).
 - **Multiselección de Prendas**: Chips interactivos para prendas (`Chaquetas`, `Camisetas`, `Busos`, `Conjuntos`, `Bermudas`) con selección múltiple (ej. ver Camisetas y Busos a la vez).
