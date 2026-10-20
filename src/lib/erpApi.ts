@@ -225,13 +225,15 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
       return sz && !['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(sz);
     });
 
-    // Detectar si son prendas con piezas únicas de catálogo (busos, lotes de confección donde cada variante tiene foto, marca y talla única)
+    // Detectar si son prendas con piezas únicas de catálogo (busos, conjuntos, lotes de confección donde cada variante tiene foto, marca y talla única)
     const isUniqueClothingGroup = hasSizedVariants && (
       (parentItem.product_type || '').toUpperCase() === 'ROPA' ||
       (parentItem.subcategory || '').toUpperCase().includes('BUSO') ||
+      (parentItem.subcategory || '').toUpperCase().includes('CONJUNTO') ||
       (parentItem.subcategory || '').toUpperCase().includes('CAMISETA') ||
       (parentItem.subcategory || '').toUpperCase().includes('BERMUDA') ||
       (parentItem.name || '').toUpperCase().includes('BUSO') ||
+      (parentItem.name || '').toUpperCase().includes('CONJUNTO') ||
       effectiveVariants.some(v => v.stock === 1)
     );
 
@@ -254,12 +256,18 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
 
         const subcat = (v.subcategory || parentItem.subcategory || 'BUSO').trim();
         const cleanSubcat = capitalizeWords(subcat);
+        const isConjunto = cleanSubcat.toUpperCase() === 'CONJUNTO';
+        const isBuso = cleanSubcat.toUpperCase() === 'BUSO';
 
-        // Nombre exacto y vendedor: "Buso Mónaco · Tommy Amarillo"
-        const displayName = `${cleanSubcat} Mónaco · ${capitalizeWords(vBrand)} ${vColor}`;
+        // Nombre exacto y vendedor: "Conjunto Importado · Dsquared2 Gris" o "Buso Mónaco · Tommy Amarillo"
+        const displayName = isConjunto
+          ? `Conjunto Importado · ${capitalizeWords(vBrand)} ${vColor}`
+          : (isBuso
+            ? `${cleanSubcat} Mónaco · ${capitalizeWords(vBrand)} ${vColor}`
+            : `${cleanSubcat} · ${capitalizeWords(vBrand)} ${vColor}`);
         const vSlug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}-${slugify(vBrand)}-${slugify(vColor)}-${slugify(vTalla)}`;
 
-        const price = v.price_sale || parentItem.price_sale || 60000;
+        const price = v.price_sale || parentItem.price_sale || (isConjunto ? 170000 : 60000);
         const anchorPrice = v.compare_price || parentItem.compare_price || Math.round(price * 1.4);
 
         const vProductVariants: ProductVariant[] = [{
@@ -287,21 +295,33 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
             vColor.toLowerCase(),
             vTalla.toLowerCase(),
             refBase.toLowerCase(),
-            'urbano',
+            isConjunto ? 'conjunto' : 'buso',
+            isConjunto ? 'deportivo' : 'urbano',
             'streetwear'
           ],
           price,
           anchorPrice,
           image: vImg,
           images: vAllImages,
-          description: v.description || `${cleanSubcat} de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`,
-          features: [
-            `Pieza única disponible en Talla ${vTalla}`,
-            `Diseño y marca: ${capitalizeWords(vBrand)} (${vColor})`,
-            'Materiales de alta durabilidad y excelente confección',
-            `Referencia exacta: ${v.ref}`,
-            'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
-          ],
+          description: v.description || (isConjunto
+            ? `Conjunto urbano y deportivo importado de alta gama (Chaqueta con cremallera + Pantalón/Sudadera). Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Tela suave y resistente de alta calidad, acabados premium y ajuste cómodo. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`
+            : `${cleanSubcat} de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`),
+          features: isConjunto
+            ? [
+              `Conjunto completo: Chaqueta con cremallera + Pantalón/Sudadera`,
+              `Pieza exclusiva disponible en Talla ${vTalla}`,
+              `Diseño y marca: ${capitalizeWords(vBrand)} (${vColor})`,
+              'Material importado de alta durabilidad, confort y excelente confección',
+              `Referencia exacta: ${v.ref}`,
+              'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
+            ]
+            : [
+              `Pieza única disponible en Talla ${vTalla}`,
+              `Diseño y marca: ${capitalizeWords(vBrand)} (${vColor})`,
+              'Materiales de alta durabilidad y excelente confección',
+              `Referencia exacta: ${v.ref}`,
+              'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
+            ],
           variants: vProductVariants,
           stock: vStock,
           status: isAvailable ? 'disponible' : 'agotado',
@@ -432,6 +452,7 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
       const targetSub = subcategoryFilter.toUpperCase().trim();
       return allApparel.filter(p => 
         p.subcategory?.toUpperCase().trim() === targetSub ||
+        (targetSub === 'CONJUNTO' && (p.name.toUpperCase().includes('CONJUNTO') || p.subcategory?.toUpperCase().includes('CONJUNTO'))) ||
         (targetSub === 'BUSO' && (p.name.toUpperCase().includes('BUSO') || p.subcategory?.toUpperCase().includes('BUSO'))) ||
         (targetSub === 'BILLETERA' && (p.name.toUpperCase().includes('BILLETERA') || p.subcategory?.toUpperCase().includes('BILLETERA')))
       );

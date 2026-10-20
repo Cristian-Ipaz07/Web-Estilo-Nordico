@@ -27,6 +27,20 @@ export async function getStaticPaths() {
     });
   }
 
+  // Alias para retrocompatibilidad con conjuntos importados (Ref 1326)
+  const defaultConjunto = jackets.find(j => j.id.includes('1326') || j.slug.includes('1326') || (j.name || '').toUpperCase().includes('CONJUNTO'));
+  if (defaultConjunto) {
+    const conjuntoAliases = ['conjunto-1326', 'conjuntos', '1326', 'conjunto', 'conjuntos-importados'];
+    conjuntoAliases.forEach(alias => {
+      if (!paths.some(p => p.params.slug === alias)) {
+        paths.push({
+          params: { slug: alias },
+          props: { jacket: defaultConjunto, allJackets: jackets },
+        });
+      }
+    });
+  }
+
   // Alias para retrocompatibilidad con links del ERP y directos
   const defaultJacket = jackets.find(j => j.slug === 'chaqueta-impermeable-negro') || jackets[0];
   if (defaultJacket) {

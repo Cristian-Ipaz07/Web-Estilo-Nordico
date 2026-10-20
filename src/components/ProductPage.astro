@@ -31,6 +31,7 @@ const subcatUpper = (product.subcategory || '').toUpperCase();
 const nameUpper = (product.name || '').toUpperCase();
 
 const isJacket = subcatUpper.includes('CHAQUETA') || product.id.includes('5080');
+const isConjunto = subcatUpper.includes('CONJUNTO') || nameUpper.includes('CONJUNTO');
 const isWallet = subcatUpper.includes('BILLETERA');
 const isCap = subcatUpper.includes('GORRA');
 const isBelt = subcatUpper.includes('CORREA');
@@ -40,7 +41,8 @@ const isPants = subcatUpper.includes('PANTALON') || subcatUpper.includes('JEAN')
 const isPerfume = product.category === 'perfumes';
 const isWatch = product.category === 'relojes';
 
-const unitName = isJacket ? 'Chaqueta'
+const unitName = isConjunto ? 'Conjunto'
+  : isJacket ? 'Chaqueta'
   : isWallet ? 'Billetera'
   : isCap ? 'Gorra'
   : isBelt ? 'Correa'
@@ -51,7 +53,8 @@ const unitName = isJacket ? 'Chaqueta'
   : isWatch ? 'Reloj'
   : (product.subcategory || 'Prenda');
 
-const unitNamePlural = isJacket ? 'Chaquetas'
+const unitNamePlural = isConjunto ? 'Conjuntos'
+  : isJacket ? 'Chaquetas'
   : isWallet ? 'Billeteras'
   : isCap ? 'Gorras'
   : isBelt ? 'Correas'

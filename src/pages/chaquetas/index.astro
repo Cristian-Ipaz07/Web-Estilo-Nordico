@@ -17,6 +17,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
   const sub = (j.subcategory || '').toUpperCase();
   const name = (j.name || '').toUpperCase();
   if (sub.includes('CHAQUETA')) return 'CHAQUETA';
+  if (sub.includes('CONJUNTO') || name.includes('CONJUNTO')) return 'CONJUNTO';
   if (sub.includes('BUSO') || name.includes('BUSO') || name.includes('CAPUCHA')) return 'BUSO';
   if (sub.includes('CAMISETA')) return 'CAMISETA';
   if (sub.includes('BERMUDA')) return 'BERMUDA';
@@ -142,7 +143,7 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
               <select id="filter-type" class="w-full px-3 py-2.5 rounded-md border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
                 <option value="all" selected>Todas</option>
                 {apparelTypes.map(t => (
-                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t === 'BILLETERA' ? 'Billeteras' : t}</option>
+                  <option value={t}>{t === 'CHAQUETA' ? 'Chaquetas' : t === 'CONJUNTO' ? 'Conjuntos Importados' : t === 'BUSO' ? 'Busos & Sacos' : t === 'CAMISETA' ? 'Camisetas' : t === 'BERMUDA' ? 'Bermudas' : t === 'BILLETERA' ? 'Billeteras' : t}</option>
                 ))}
               </select>
             </div>
@@ -191,11 +192,13 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
           const rawSub = (product.subcategory || '').toUpperCase();
           const rawName = (product.name || '').toUpperCase();
           const normalizedType = rawSub.includes('CHAQUETA') ? 'CHAQUETA'
+            : (rawSub.includes('CONJUNTO') || rawName.includes('CONJUNTO')) ? 'CONJUNTO'
             : (rawSub.includes('BUSO') || rawName.includes('BUSO') || rawName.includes('CAPUCHA')) ? 'BUSO'
             : rawSub.includes('CAMISETA') ? 'CAMISETA'
             : rawSub.includes('BERMUDA') ? 'BERMUDA'
             : rawSub.includes('JEAN') ? 'JEANS'
             : rawSub.includes('PANTALON') ? 'PANTALON'
+            : rawSub.includes('BILLETERA') ? 'BILLETERA'
             : rawSub || 'PRENDA';
           return (
             <div 
@@ -273,7 +276,8 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
     : 'all';
 
   const rawParamTipo = (urlParams.get('tipo') || urlParams.get('categoria') || '').trim().toUpperCase();
-  const paramTipo = rawParamTipo.includes('BUSO') ? 'BUSO'
+  const paramTipo = rawParamTipo.includes('CONJUNTO') ? 'CONJUNTO'
+    : rawParamTipo.includes('BUSO') ? 'BUSO'
     : rawParamTipo.includes('CAMISETA') ? 'CAMISETA'
     : rawParamTipo.includes('BERMUDA') ? 'BERMUDA'
     : rawParamTipo.includes('JEAN') ? 'JEANS'
@@ -291,22 +295,30 @@ const apparelTypes = Array.from(new Set(jackets.map(j => {
       document.title = 'Colección Mujer | Estilo Nórdico Pasto';
     } else if (activeGender === 'hombre') {
       if (heroTitle) {
-        heroTitle.textContent = paramTipo === 'BUSO' ? 'Busos & Hoodies' 
+        heroTitle.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos Importados'
+          : paramTipo === 'BUSO' ? 'Busos & Hoodies' 
           : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
           : paramTipo === 'CHAQUETA' ? 'Chaquetas Hombre'
           : 'Colección Hombre';
       }
-      if (heroSlogan) heroSlogan.textContent = 'Chaquetas térmicas, busos exclusivos y piezas urbanas con stock real para hombre.';
-      document.title = 'Colección Hombre | Estilo Nórdico Pasto';
+      if (heroSlogan) {
+        heroSlogan.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados con stock real.'
+          : 'Chaquetas térmicas, busos exclusivos y piezas urbanas con stock real para hombre.';
+      }
+      document.title = (paramTipo === 'CONJUNTO' ? 'Conjuntos Hombre' : 'Colección Hombre') + ' | Estilo Nórdico Pasto';
     } else {
       if (heroTitle) {
-        heroTitle.textContent = paramTipo === 'BUSO' ? 'Busos & Hoodies'
+        heroTitle.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos Importados'
+          : paramTipo === 'BUSO' ? 'Busos & Hoodies'
           : paramTipo === 'CAMISETA' ? 'Camisetas Streetwear'
           : paramTipo === 'BERMUDA' ? 'Bermudas'
           : 'Chaquetas & Moda Streetwear';
       }
-      if (heroSlogan) heroSlogan.textContent = 'Para quienes buscan estilo, comodidad y protección. Paga al recibir en Pasto.';
-      document.title = 'Chaquetas & Moda Streetwear | Estilo Nórdico Pasto';
+      if (heroSlogan) {
+        heroSlogan.textContent = paramTipo === 'CONJUNTO' ? 'Conjuntos exclusivos de chaqueta y pantalón importados de alta gama.'
+          : 'Para quienes buscan estilo, comodidad y protección. Paga al recibir en Pasto.';
+      }
+      document.title = (paramTipo === 'CONJUNTO' ? 'Conjuntos Importados' : 'Chaquetas & Moda Streetwear') + ' | Estilo Nórdico Pasto';
     }
   }
 
