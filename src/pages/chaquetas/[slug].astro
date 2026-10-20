@@ -15,15 +15,31 @@ export async function getStaticPaths() {
     props: { jacket, allJackets: jackets },
   }));
 
-  // Alias para retrocompatibilidad con busos
-  const defaultBuso = jackets.find(j => j.id.includes('30861') || j.slug.includes('30861') || (j.name || '').toUpperCase().includes('BUSO'));
+  // Alias para retrocompatibilidad con busos Mónaco (Ref 30861)
+  const defaultBuso = jackets.find(j => j.id.includes('30861') || j.slug.includes('30861'));
   if (defaultBuso) {
     const busoAliases = ['buso-30861', 'buso-30861-capucha', '30861'];
     busoAliases.forEach(alias => {
-      paths.push({
-        params: { slug: alias },
-        props: { jacket: defaultBuso, allJackets: jackets },
-      });
+      if (!paths.some(p => p.params.slug === alias)) {
+        paths.push({
+          params: { slug: alias },
+          props: { jacket: defaultBuso, allJackets: jackets },
+        });
+      }
+    });
+  }
+
+  // Alias para retrocompatibilidad con busos Izan (Ref 3708)
+  const defaultBuso3708 = jackets.find(j => j.id.includes('3708') || j.slug.includes('3708') || (j.name || '').toUpperCase().includes('IZAN'));
+  if (defaultBuso3708) {
+    const izanAliases = ['buso-3708', '3708', 'buso-izan', 'busos-izan', 'izan'];
+    izanAliases.forEach(alias => {
+      if (!paths.some(p => p.params.slug === alias)) {
+        paths.push({
+          params: { slug: alias },
+          props: { jacket: defaultBuso3708, allJackets: jackets },
+        });
+      }
     });
   }
 

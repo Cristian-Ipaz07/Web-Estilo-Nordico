@@ -2,8 +2,7 @@ import type { Product, ProductVariant } from '../data/products';
 
 // URL base del backend ERP (FastAPI en producción)
 export const ERP_API_BASE_URL = 
-  import.meta.env.PUBLIC_ERP_API_URL || 
-  import.meta.env.VITE_API_URL || 
+  (typeof import.meta !== 'undefined' && import.meta?.env && (import.meta.env.PUBLIC_ERP_API_URL || import.meta.env.VITE_API_URL)) || 
   'https://estilo-nordico-app.onrender.com';
 
 // ─── Tipos del ERP ──────────────────────────────────────────
@@ -259,11 +258,17 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
         const isConjunto = cleanSubcat.toUpperCase() === 'CONJUNTO';
         const isBuso = cleanSubcat.toUpperCase() === 'BUSO';
 
-        // Nombre exacto y vendedor: "Conjunto Importado · Dsquared2 Gris" o "Buso Mónaco · Tommy Amarillo"
+        // Detectar si el grupo padre tiene un nombre específico de colección (ej: "IZAN", "Mónaco")
+        const parentNameClean = (parentItem.name || '').trim();
+        const collectionName = (parentNameClean && !['BUSO', 'ROPA', 'PRENDA', refBase].includes(parentNameClean.toUpperCase()))
+          ? capitalizeWords(parentNameClean)
+          : (refBase === '30861' ? 'Mónaco' : (refBase === '3708' ? 'Izan' : ''));
+
+        // Nombre exacto y vendedor: "Conjunto Importado · Dsquared2 Gris" o "Buso Izan · Awesome Blanco"
         const displayName = isConjunto
           ? `Conjunto Importado · ${capitalizeWords(vBrand)} ${vColor}`
           : (isBuso
-            ? `${cleanSubcat} Mónaco · ${capitalizeWords(vBrand)} ${vColor}`
+            ? `${cleanSubcat} ${collectionName ? collectionName + ' · ' : ''}${capitalizeWords(vBrand)} ${vColor}`
             : `${cleanSubcat} · ${capitalizeWords(vBrand)} ${vColor}`);
         const vSlug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}-${slugify(vBrand)}-${slugify(vColor)}-${slugify(vTalla)}`;
 
@@ -295,17 +300,19 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
             vColor.toLowerCase(),
             vTalla.toLowerCase(),
             refBase.toLowerCase(),
+            collectionName.toLowerCase(),
             isConjunto ? 'conjunto' : 'buso',
             isConjunto ? 'deportivo' : 'urbano',
-            'streetwear'
-          ],
+            'streetwear',
+            'oversize'
+          ].filter(Boolean),
           price,
           anchorPrice,
           image: vImg,
           images: vAllImages,
           description: v.description || (isConjunto
             ? `Conjunto urbano y deportivo importado de alta gama (Chaqueta con cremallera + Pantalón/Sudadera). Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Tela suave y resistente de alta calidad, acabados premium y ajuste cómodo. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`
-            : `${cleanSubcat} de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`),
+            : `${cleanSubcat} ${collectionName ? collectionName + ' ' : ''}de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`),
           features: isConjunto
             ? [
               `Conjunto completo: Chaqueta con cremallera + Pantalón/Sudadera`,

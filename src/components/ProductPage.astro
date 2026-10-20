@@ -77,6 +77,15 @@ const colorVariants = isJacket
     )
   : [];
 
+// Variantes de familia para prendas únicas de confección (Busos, Conjuntos)
+const currentRefBase = (product.id || '').replace(/^erp-/, '').split('-')[0].toUpperCase();
+const clothingFamilyVariants = (!isJacket && currentRefBase && (isHoodie || isConjunto))
+  ? allProducts.filter(p => {
+      const pRef = (p.id || '').replace(/^erp-/, '').split('-')[0].toUpperCase();
+      return pRef === currentRefBase;
+    })
+  : [];
+
 // Variantes internas del producto (diseños/modelos o colores de esta referencia)
 const rawVariants = product.variants || [];
 const hasModelVariants = !isJacket && rawVariants.length > 1;
@@ -423,6 +432,49 @@ const faqs = [
               })}
             </div>
             <p class="mt-2 text-[11px] text-text-muted">Color seleccionado: <span class="font-bold text-text-main">{product.name.replace(/Chaqueta Impermeable (Dama )?([A-Za-z ]+ )?/i, '').trim()}</span></p>
+          </div>
+        )}
+
+        <!-- Selector de Diseños / Variantes de la Colección (Busos Izan / Mónaco, Conjuntos) -->
+        {clothingFamilyVariants.length > 1 && (
+          <div class="mb-6">
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-black text-text-main uppercase tracking-widest">
+                Diseños de esta colección ({clothingFamilyVariants.length} disponibles):
+              </label>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {clothingFamilyVariants.map((fv) => {
+                const isActive = fv.slug === product.slug;
+                const vTalla = fv.variants?.[0]?.talla || '';
+                return (
+                  <a
+                    href={`/chaquetas/${fv.slug}`}
+                    class:list={[
+                      'p-2 rounded-md border text-left transition-all duration-200 flex items-center gap-2.5 relative group',
+                      isActive
+                        ? 'border-[#0B0B0C] bg-[#F9F9FB] ring-2 ring-[#C9A962] shadow-sm'
+                        : 'border-[#E5E7EB] bg-white hover:border-[#0B0B0C] hover:bg-[#F9F9FB]'
+                    ]}
+                  >
+                    <div class="w-10 h-10 rounded overflow-hidden bg-neutral-100 flex-shrink-0 border border-[#E5E7EB]">
+                      <img src={fv.image} alt={fv.name} class="w-full h-full object-cover group-hover:scale-105 transition-transform" loading="lazy" />
+                    </div>
+                    <div class="min-w-0 flex-1">
+                      <p class="text-[11px] font-black text-text-main truncate uppercase tracking-tight">{fv.brand}</p>
+                      <div class="flex items-center gap-1.5 mt-0.5">
+                        <span class="text-[9px] font-bold text-text-muted uppercase">{fv.variants?.[0]?.color || 'Unicolor'}</span>
+                        {vTalla && (
+                          <span class="text-[8px] font-black px-1.5 py-0.2 rounded bg-neutral-200 text-text-main uppercase">
+                            Talla {vTalla}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </a>
+                );
+              })}
+            </div>
           </div>
         )}
 

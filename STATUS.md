@@ -1,5 +1,5 @@
 # ESTADO EN VIVO: NODO TIENDA WEB (ESTILO NÓRDICO)
-> Última actualización: 2026-10-19 | Ficha Universal Omnicanal (Billeteras, Busos, Chaquetas) + Promo Domicilio Gratis (2+ Prendas)
+> Última actualización: 2026-10-20 | Integración Busos Oversize Izan (Ref 3708), Aliases y Selector de Colección
 
 ## 📊 RESUMEN EJECUTIVO
 * **Rol**: Catálogo público, captación con Meta Ads, carrito multi-prenda y checkout consolidado por WhatsApp.
@@ -25,7 +25,14 @@
 
 ---
 
-## 🚀 HITOS RECIENTES (SESIÓN 19 OCTUBRE 2026)
+## 🚀 HITOS RECIENTES (SESIÓN 20 OCTUBRE 2026)
+### 1. Integración de Busos Oversize Izan (Ref 3708)
+- **Extracción Automática desde el ERP Cloud**: 6 variantes reales (Awesome Blanco M, Deadly Blanco L/M, King Negro M, PureSoul Negro S/M) con fotos en alta definición en Supabase Storage, precio de $140.000 COP y stock de 1 unidad por variante.
+- **Nomenclatura Limpia**: Eliminación de nombres hardcodeados. El nombre respeta la colección del producto padre (`Buso Izan · Awesome Blanco`, `Buso Izan · Deadly Blanco`, etc.).
+- **Aliases de Acceso Directo y Redirección**: Rutas `/chaquetas/buso-3708`, `/chaquetas/3708`, `/chaquetas/buso-izan` redirigen a la ficha con HTTP 200 sin riesgo de 404.
+- **Selector de Diseños de la Colección**: Dentro de la ficha de producto se despliegan en miniatura todas las piezas hermanas de la misma colección para alternar diseño y talla con 1 clic.
+
+## 🚀 HITOS ANTERIORES (SESIÓN 19 OCTUBRE 2026)
 ### 1. Ficha de Producto Universal y Dinámica (`ProductPage.astro`)
 - **Adaptabilidad a Toda Prenda o Accesorio**: La plantilla se desacopló del diseño rígido de Chaquetas. Detecta dinámicamente si el producto es Chaqueta, Billetera, Buso, Camiseta, Gorra, Perfume o Reloj.
 - **Nomenclatura Dinámica de Unidades y Packs**:
