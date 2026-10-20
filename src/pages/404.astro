@@ -1,0 +1,56 @@
+---
+/**
+ * 404.astro — Página de pieza vendida / no encontrada (CRO Friendly)
+ * Redirige la atención del cliente al catálogo activo en caso de prendas ya vendidas.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout 
+  title="Esta Prenda Ya Fue Vendida" 
+  description="Esta pieza exclusiva ya fue vendida. Explora nuestro catálogo con stock disponible para entrega inmediata en Pasto."
+>
+  <section class="min-h-[75vh] flex items-center justify-center py-16 px-4 bg-[#F9F9FB]">
+    <div class="max-w-xl w-full text-center bg-white p-8 sm:p-12 rounded-2xl border border-[#E5E7EB] shadow-sm">
+      <div class="w-16 h-16 mx-auto mb-5 rounded-full bg-amber-50 border border-amber-200 flex items-center justify-center text-3xl">
+        ⚡
+      </div>
+      <span class="inline-block text-[9px] font-black uppercase tracking-widest px-3 py-1 bg-neutral-100 border border-neutral-200 rounded-md text-text-muted mb-3">
+        Lote Exclusivo · Pieza Única
+      </span>
+      <h1 class="text-2xl sm:text-3xl font-black font-title uppercase tracking-wider text-text-main mb-3">
+        Esta prenda ya fue vendida
+      </h1>
+      <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed mb-8 max-w-md mx-auto">
+        En Estilo Nórdico trabajamos con prendas de confección y lotes exclusivos por talla única. En cuanto una pieza se vende, se retira inmediatamente del catálogo.
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-3 justify-center items-center">
+        <a 
+          href="/chaquetas" 
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-[#0B0B0C] text-white hover:bg-neutral-800 text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-md transition-all shadow-sm"
+        >
+          🔥 Ver Prendas Disponibles
+        </a>
+        <a 
+          href="/chaquetas?tipo=camiseta" 
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-[#0B0B0C] border border-[#E5E7EB] hover:border-[#0B0B0C] text-xs font-black uppercase tracking-widest px-6 py-3.5 rounded-md transition-all"
+        >
+          👕 Ver Camisetas
+        </a>
+      </div>
+
+      <div class="mt-8 pt-6 border-t border-[#E5E7EB]">
+        <p class="text-[11px] text-text-muted mb-2 font-light">¿Buscabas una referencia o talla en particular?</p>
+        <a 
+          href="https://api.whatsapp.com/send?phone=573218888046&text=%C2%A1Hola%20Estilo%20N%C3%B3rdico!%20Vi%20una%20prenda%20que%20ya%20estaba%20agotada%20en%20la%20web%2C%20%C2%BFtienen%20modelos%20similares%20disponibles%20en%20Pasto%3F" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          class="inline-flex items-center gap-2 text-xs font-black text-emerald-600 hover:text-emerald-700 uppercase tracking-wider"
+        >
+          <span>💬</span> Consultar con Asesor por WhatsApp →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

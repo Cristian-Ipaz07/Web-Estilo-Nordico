@@ -77,12 +77,12 @@ const colorVariants = isJacket
     )
   : [];
 
-// Variantes de familia para prendas únicas de confección (Busos, Conjuntos)
+// Variantes de familia para prendas únicas de confección (Busos, Conjuntos, Camisetas)
 const currentRefBase = (product.id || '').replace(/^erp-/, '').split('-')[0].toUpperCase();
-const clothingFamilyVariants = (!isJacket && currentRefBase && (isHoodie || isConjunto))
+const clothingFamilyVariants = (!isJacket && currentRefBase && (isHoodie || isConjunto || isShirt))
   ? allProducts.filter(p => {
       const pRef = (p.id || '').replace(/^erp-/, '').split('-')[0].toUpperCase();
-      return pRef === currentRefBase;
+      return pRef === currentRefBase && (p.stock || 0) > 0;
     })
   : [];
 

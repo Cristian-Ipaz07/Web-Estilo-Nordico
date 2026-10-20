@@ -1,5 +1,5 @@
 # ESTADO EN VIVO: NODO TIENDA WEB (ESTILO NÓRDICO)
-> Última actualización: 2026-10-20 | Integración Busos Oversize Izan (Ref 3708), Aliases y Selector de Colección
+> Última actualización: 2026-10-20 | Integración Catálogo Completo Camisetas Streetwear + Regla de Retiro Automático de Prendas Vendidas (Stock <= 0)
 
 ## 📊 RESUMEN EJECUTIVO
 * **Rol**: Catálogo público, captación con Meta Ads, carrito multi-prenda y checkout consolidado por WhatsApp.
@@ -26,6 +26,15 @@
 ---
 
 ## 🚀 HITOS RECIENTES (SESIÓN 20 OCTUBRE 2026)
+### 1. Regla de Inventario Estricta: Retiro Automático de Prendas Vendidas (Stock <= 0)
+- **Principio**: En Estilo Nórdico, las únicas prendas perennes de inventario continuo son las Chaquetas 5080 y 5081 (que admiten sobrepedido de fábrica).
+- **Prendas Únicas de Confección (Camisetas, Busos, Conjuntos, etc.)**: En cuanto su stock llega a 0, desaparecen automáticamente del catálogo (`/chaquetas`), de los filtros y de los selectores de modelos para evitar mostrar piezas no disponibles.
+- **Página 404 CRO Personalizada**: Si un usuario accede a un enlace histórico o compartido de una pieza ya vendida, la página le explica amablemente que la prenda exclusiva ya fue vendida y le ofrece accesos directos al catálogo disponible y asesoría por WhatsApp.
+
+### 2. Integración de Camisetas Streetwear Multimarca
+- **50 variantes reales cargadas**: Americanino, Chevignon, Dolce & Gabbana, Lacoste, Boss, Diesel, Moncler, Clemont, Essentials, Monastery, Superdry, IBK Oversize, Karl y Nike.
+- **Nomenclatura Limpia**: Títulos formateados automáticamente como `Camiseta · [Marca] [Color]` con talla exacta.
+- **Paginación Automática de la API ERP**: Lectura fluida de todos los productos del backend sin corte de límite.
 ### 1. Integración de Busos Oversize Izan (Ref 3708)
 - **Extracción Automática desde el ERP Cloud**: 6 variantes reales (Awesome Blanco M, Deadly Blanco L/M, King Negro M, PureSoul Negro S/M) con fotos en alta definición en Supabase Storage, precio de $140.000 COP y stock de 1 unidad por variante.
 - **Nomenclatura Limpia**: Eliminación de nombres hardcodeados. El nombre respeta la colección del producto padre (`Buso Izan · Awesome Blanco`, `Buso Izan · Deadly Blanco`, etc.).

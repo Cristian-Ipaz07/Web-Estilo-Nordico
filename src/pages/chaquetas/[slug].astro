@@ -57,6 +57,22 @@ export async function getStaticPaths() {
     });
   }
 
+  // Alias para colecciones de camisetas con stock disponible
+  const shirtRefs = ['7647', '7650', '7651', '1536', '1535', '8942', '4978'];
+  shirtRefs.forEach(refNum => {
+    const defaultShirt = jackets.find(j => (j.id.includes(refNum) || j.slug.includes(refNum)) && (j.stock || 0) > 0);
+    if (defaultShirt) {
+      [`camiseta-${refNum}`, `camisetas-${refNum}`, refNum].forEach(alias => {
+        if (!paths.some(p => p.params.slug === alias)) {
+          paths.push({
+            params: { slug: alias },
+            props: { jacket: defaultShirt, allJackets: jackets },
+          });
+        }
+      });
+    }
+  });
+
   // Alias para retrocompatibilidad con links del ERP y directos
   const defaultJacket = jackets.find(j => j.slug === 'chaqueta-impermeable-negro') || jackets[0];
   if (defaultJacket) {

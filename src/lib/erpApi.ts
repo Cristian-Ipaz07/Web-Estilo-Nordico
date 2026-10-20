@@ -151,27 +151,53 @@ export async function getProducts(params?: {
   offset?: number;
 }): Promise<ERPProductPublic[]> {
   try {
-    const url = new URL(`${ERP_API_BASE_URL}/api/public/products`);
-    if (params) {
-      Object.entries(params).forEach(([key, val]) => {
-        if (val !== undefined && val !== null) {
-          url.searchParams.append(key, String(val));
-        }
+    const allItems: ERPProductPublic[] = [];
+    const pageSize = 100;
+    let currentOffset = params?.offset || 0;
+    const maxRequested = params?.limit;
+
+    while (true) {
+      const url = new URL(`${ERP_API_BASE_URL}/api/public/products`);
+      if (params) {
+        Object.entries(params).forEach(([key, val]) => {
+          if (val !== undefined && val !== null && key !== 'offset' && key !== 'limit') {
+            url.searchParams.append(key, String(val));
+          }
+        });
+      }
+      url.searchParams.append('limit', String(pageSize));
+      url.searchParams.append('offset', String(currentOffset));
+
+      const res = await fetch(url.toString(), {
+        headers: {
+          'Accept': 'application/json',
+        },
       });
+
+      if (!res.ok) {
+        console.warn(`[ERP API] Fallo al consultar productos: HTTP ${res.status}`);
+        break;
+      }
+
+      const data: ERPProductPublic[] = await res.json();
+      if (!Array.isArray(data) || data.length === 0) {
+        break;
+      }
+
+      allItems.push(...data);
+
+      if (maxRequested && allItems.length >= maxRequested) {
+        return allItems.slice(0, maxRequested);
+      }
+
+      if (data.length < pageSize) {
+        break;
+      }
+
+      currentOffset += pageSize;
     }
 
-    const res = await fetch(url.toString(), {
-      headers: {
-        'Accept': 'application/json',
-      },
-    });
-
-    if (!res.ok) {
-      console.warn(`[ERP API] Fallo al consultar productos: HTTP ${res.status}`);
-      return [];
-    }
-
-    return await res.json();
+    return allItems;
   } catch (err) {
     console.error('[ERP API] Error de red o conexión al backend:', err);
     return [];
@@ -236,14 +262,22 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
       effectiveVariants.some(v => v.stock === 1)
     );
 
-    // Si son piezas únicas (ej: Busos 30861), cada variante es un PRODUCTO INDIVIDUAL con su foto real y su talla exacta
+    // Si son piezas únicas (ej: Busos 30861, Camisetas 7647, etc.), cada variante es un PRODUCTO INDIVIDUAL con su foto real y su talla exacta
     if (isUniqueClothingGroup) {
       for (const v of effectiveVariants) {
+        const vStock = v.stock || 0;
+
+        // REGLA FUNDAMENTAL DE INVENTARIO:
+        // Las prendas únicas de catálogo (camisetas, busos, conjuntos, etc.) que se vendan (stock <= 0)
+        // DEBEN DESAPARECER POR COMPLETO de la web.
+        if (vStock <= 0) {
+          continue;
+        }
+
         const vBrand = (v.brand && v.brand !== 'Estilo Nórdico' ? v.brand : parentItem.brand) || 'Estilo Nórdico';
         const vColor = capitalizeWords((v.color || 'Unicolor').trim());
         const vTalla = (v.size || 'ÚNICA').trim().toUpperCase();
-        const vStock = v.stock || 0;
-        const isAvailable = vStock > 0;
+        const isAvailable = true;
 
         const vImg = (Array.isArray(v.images) && v.images.length > 0 && v.images[0])
           ? v.images[0]
@@ -253,24 +287,54 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
           ? v.images
           : [vImg];
 
-        const subcat = (v.subcategory || parentItem.subcategory || 'BUSO').trim();
+        const subcat = (v.subcategory || parentItem.subcategory || 'PRENDA').trim();
         const cleanSubcat = capitalizeWords(subcat);
         const isConjunto = cleanSubcat.toUpperCase() === 'CONJUNTO';
         const isBuso = cleanSubcat.toUpperCase() === 'BUSO';
+        const isCamiseta = cleanSubcat.toUpperCase() === 'CAMISETA';
 
         // Detectar si el grupo padre tiene un nombre específico de colección (ej: "IZAN", "Mónaco")
         const parentNameClean = (parentItem.name || '').trim();
-        const collectionName = (parentNameClean && !['BUSO', 'ROPA', 'PRENDA', refBase].includes(parentNameClean.toUpperCase()))
+        const isGenericName = (name: string) => {
+          const upper = name.toUpperCase();
+          return upper.includes('CAMISETA') || 
+                 upper.includes('BUSO') || 
+                 upper.includes('CONJUNTO') || 
+                 upper.includes('ROPA') || 
+                 upper.includes('PRENDA') || 
+                 upper.includes('TELA') || 
+                 upper.includes('1.1') || 
+                 upper === refBase;
+        };
+        const collectionName = (parentNameClean && !isGenericName(parentNameClean))
           ? capitalizeWords(parentNameClean)
           : (refBase === '30861' ? 'Mónaco' : (refBase === '3708' ? 'Izan' : ''));
 
-        // Nombre exacto y vendedor: "Conjunto Importado · Dsquared2 Gris" o "Buso Izan · Awesome Blanco"
+        // Nombre exacto y vendedor: "Conjunto Importado · Dsquared2 Gris", "Buso Izan · Awesome Blanco" o "Camiseta · Nike Gris Cenizo"
         const displayName = isConjunto
           ? `Conjunto Importado · ${capitalizeWords(vBrand)} ${vColor}`
           : (isBuso
             ? `${cleanSubcat} ${collectionName ? collectionName + ' · ' : ''}${capitalizeWords(vBrand)} ${vColor}`
-            : `${cleanSubcat} · ${capitalizeWords(vBrand)} ${vColor}`);
-        const vSlug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}-${slugify(vBrand)}-${slugify(vColor)}-${slugify(vTalla)}`;
+            : (isCamiseta
+              ? `${cleanSubcat} · ${capitalizeWords(vBrand)} ${vColor}`
+              : `${cleanSubcat} · ${capitalizeWords(vBrand)} ${vColor}`));
+
+        let vSlug = `${subcat.toLowerCase().replace(/\s+/g, '-')}-${refBase.toLowerCase()}-${slugify(vBrand)}-${slugify(vColor)}-${slugify(vTalla)}`;
+        let finalDisplayName = displayName;
+
+        // Desambiguar si existen dos prendas con misma marca, color y talla (ej: Americanino Established vs Italy)
+        if (products.some(p => p.slug === vSlug)) {
+          const refParts = v.ref.split('-').map(p => slugify(p)).filter(Boolean);
+          const diffPart = refParts.find(rp => !vSlug.includes(rp) && rp !== refBase.toLowerCase());
+          if (diffPart) {
+            vSlug = `${vSlug}-${diffPart}`;
+            finalDisplayName = isCamiseta
+              ? `${cleanSubcat} · ${capitalizeWords(vBrand)} ${capitalizeWords(diffPart)} ${vColor}`
+              : `${displayName} (${capitalizeWords(diffPart)})`;
+          } else {
+            vSlug = `${vSlug}-${v.id}`;
+          }
+        }
 
         const price = v.price_sale || parentItem.price_sale || (isConjunto ? 170000 : 60000);
         const anchorPrice = v.compare_price || parentItem.compare_price || Math.round(price * 1.4);
@@ -280,7 +344,7 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
           talla: vTalla,
           color: vColor,
           stock: vStock,
-          status: isAvailable ? 'disponible' : 'agotado',
+          status: 'disponible',
           referencia: v.ref,
           image: vImg,
           brand: vBrand,
@@ -289,7 +353,7 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
         products.push({
           id: `erp-${v.ref.toLowerCase().replace(/\s+/g, '-')}`,
           slug: vSlug,
-          name: displayName,
+          name: finalDisplayName,
           brand: vBrand,
           category: 'chaquetas',
           subcategory: subcat,
@@ -301,7 +365,7 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
             vTalla.toLowerCase(),
             refBase.toLowerCase(),
             collectionName.toLowerCase(),
-            isConjunto ? 'conjunto' : 'buso',
+            isConjunto ? 'conjunto' : (isBuso ? 'buso' : 'camiseta'),
             isConjunto ? 'deportivo' : 'urbano',
             'streetwear',
             'oversize'
@@ -312,7 +376,9 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
           images: vAllImages,
           description: v.description || (isConjunto
             ? `Conjunto urbano y deportivo importado de alta gama (Chaqueta con cremallera + Pantalón/Sudadera). Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Tela suave y resistente de alta calidad, acabados premium y ajuste cómodo. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`
-            : `${cleanSubcat} ${collectionName ? collectionName + ' ' : ''}de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`),
+            : (isBuso
+              ? `${cleanSubcat} ${collectionName ? collectionName + ' ' : ''}de confección seleccionada, alta resistencia y diseño moderno. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`
+              : `${cleanSubcat} urbana y streetwear de confección premium, tacto suave y máxima frescura. Modelo exclusivo ${capitalizeWords(vBrand)} color ${vColor} en Talla ${vTalla}. Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda) y envíos nacionales.`)),
           features: isConjunto
             ? [
               `Conjunto completo: Chaqueta con cremallera + Pantalón/Sudadera`,
@@ -354,17 +420,22 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
     const totalStock = effectiveVariants.reduce((sum, v) => sum + (v.stock || 0), 0);
     const hasAvailable = effectiveVariants.some(v => (v.stock || 0) > 0);
 
-    const productVariants: ProductVariant[] = effectiveVariants.map(v => {
+    // Si todo el producto multi-diseño está agotado (stock total <= 0), no se muestra en la web
+    if (!hasAvailable || totalStock <= 0) {
+      continue;
+    }
+
+    const availableVariants = effectiveVariants.filter(v => (v.stock || 0) > 0);
+    const productVariants: ProductVariant[] = availableVariants.map(v => {
       const vColor = capitalizeWords((v.color || 'Unicolor').trim());
       const vTalla = (v.size || '').trim().toUpperCase();
-      const isAvailable = (v.stock || 0) > 0;
       const vImage = (Array.isArray(v.images) && v.images[0]) ? v.images[0] : allImages[0] || '';
       return {
         id: String(v.id),
         talla: (!vTalla || ['ÚNICA', 'UNICA', 'NONE', 'NULL', ''].includes(vTalla)) ? 'ÚNICA' : vTalla,
         color: vColor,
         stock: v.stock || 0,
-        status: isAvailable ? 'disponible' : 'agotado',
+        status: 'disponible',
         referencia: v.ref,
         image: vImage,
         brand: v.brand || brand,
