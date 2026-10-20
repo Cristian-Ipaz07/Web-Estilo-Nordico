@@ -129,3 +129,18 @@
 - [x] **Sincronización en la Nube (GitHub)**:
   - Repositorio oficial creado y publicado en `https://github.com/Cristian-Ipaz07/Web-Estilo-Nordico`.
   - Rama `main` sincronizada con `origin/main` (340 objetos subidos).
+
+---
+
+## 🚀 FASE 4: EXPANDIENDO CATÁLOGO MULTI-PRENDA Y FILTROS AVANZADOS (2026-10-20)
+- [x] **Filtros Grupales y Multiselección Simultánea**:
+  - Departamentos (Hombre y Mujer) activos concurrentemente o conmutables.
+  - Tipos de prenda (Chips multiselección para Chaquetas, Busos, Camisetas, Conjuntos, etc.).
+  - Tallas (Chips multiselección para S, M, L, XL, XXL).
+  - Estado predeterminado en *Disponibles (En Stock)*, manteniendo siempre visibles las chaquetas evergreen 5080 y 5081 para sobrepedido de fábrica.
+- [x] **Filtro Desplegable Interactivo por Referencia / Modelo**:
+  - Menú desplegable flotante con checkboxes para marcar y desmarcar referencias dinámicamente.
+  - Nombres legibles sincronizados directamente del ERP (ej: *Camiseta · Polo Importada 1.1 (1536)*, *Buso · Izan (3708)*, *Camiseta · Ibk Oversize (8942)*, *Chaqueta · Impermeable Hombre (5080)*, etc.).
+  - Contador dinámico en badge (`#ref-count-badge`), botón de restablecimiento rápido (*Ver todas*), y sincronización de query params en URL (`?ref=...`).
+- [x] **Slider Automático de Previsualización en Cards**:
+  - En tarjetas con 2 o más fotos, ejecuta automáticamente un ciclo de previsualización al cargar y descansa en la foto de portada principal.
