@@ -18,6 +18,8 @@ export interface Product {
   slug: string;
   name: string;
   brand: string;
+  reference?: string;
+  referenceName?: string;
   
   // Clasificación
   category: 'chaquetas' | 'perfumes' | 'relojes';

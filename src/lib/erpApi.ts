@@ -350,11 +350,17 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
           brand: vBrand,
         }];
 
+        const refDisplayName = (parentItem.name && parentItem.name.trim() !== refBase)
+          ? `${cleanSubcat} · ${capitalizeWords(parentItem.name.trim())} (${refBase})`
+          : `${cleanSubcat} · Ref. ${refBase}`;
+
         products.push({
           id: `erp-${v.ref.toLowerCase().replace(/\s+/g, '-')}`,
           slug: vSlug,
           name: finalDisplayName,
           brand: vBrand,
+          reference: refBase,
+          referenceName: refDisplayName,
           category: 'chaquetas',
           subcategory: subcat,
           gender: (v.category?.toLowerCase() || parentItem.category?.toLowerCase() || 'hombre') as any,
@@ -452,11 +458,17 @@ export function groupERPClothing(items: ERPProductPublic[]): Product[] {
     const price = parentItem.price_sale || groupItems[0].price_sale || 85000;
     const anchorPrice = parentItem.compare_price || Math.round(price * 1.4);
 
+    const refDisplayName = (parentItem.name && parentItem.name.trim() !== refBase)
+      ? `${cleanSubcat} · ${capitalizeWords(parentItem.name.trim())} (${refBase})`
+      : `${cleanSubcat} · Ref. ${refBase}`;
+
     products.push({
       id: `erp-${refBase.toLowerCase()}`,
       slug,
       name: capitalizeWords(baseName),
       brand,
+      reference: refBase,
+      referenceName: refDisplayName,
       category: 'chaquetas',
       subcategory: subcat,
       gender: (parentItem.category?.toLowerCase() || 'hombre') as any,
@@ -645,6 +657,8 @@ function groupERPMenJackets(items: ERPProductPublic[]): Product[] {
       slug,
       name: `Chaqueta Impermeable ${colorName}`,
       brand,
+      reference: '5080',
+      referenceName: 'Chaqueta · Impermeable Hombre (5080)',
       category: 'chaquetas',
       subcategory: 'Chaqueta Impermeable Térmica',
       gender: 'hombre',
@@ -780,6 +794,8 @@ function groupERPWomenJackets(items: ERPProductPublic[]): Product[] {
       slug,
       name: `Chaqueta Impermeable Dama ${brand} ${colorName}`,
       brand,
+      reference: '5081',
+      referenceName: 'Chaqueta · Impermeable Dama (5081)',
       category: 'chaquetas',
       subcategory: 'Chaqueta Impermeable Dama',
       gender: 'mujer',
