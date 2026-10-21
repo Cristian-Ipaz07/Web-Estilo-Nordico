@@ -12,11 +12,20 @@ import { STORE_CONFIG } from '../config/store';
 // Fetch dynamic jackets from ERP
 const jackets = await fetchJacketsFromERP();
 
-// Filter featured products
-const featuredJackets = jackets.filter(j => j.featured);
-const featuredPerfumes = perfumes.filter(p => p.featured);
-const featuredRelojes = relojes.filter(r => r.featured);
-const featuredProducts = [...featuredJackets, ...featuredPerfumes, ...featuredRelojes];
+// Selección curada de 8 productos destacados top (prendas emblemáticas + perfume insignia + reloj insignia)
+const topClothing = [
+  jackets.find(j => j.id.includes('5080') && j.name.includes('Negro')) || jackets.find(j => j.id.includes('5080')),
+  jackets.find(j => j.id.includes('5081')) || jackets.find(j => j.gender === 'mujer'),
+  jackets.find(j => j.reference === '3708' || j.name.toLowerCase().includes('izan')),
+  jackets.find(j => j.reference === '8942' || j.name.toLowerCase().includes('ibk')),
+  jackets.find(j => j.reference === '1326' || j.name.toLowerCase().includes('conjunto')),
+  jackets.find(j => j.reference === '1536' || j.name.toLowerCase().includes('polo')),
+].filter(Boolean) as typeof jackets;
+
+const topPerfume = perfumes.find(p => p.id === 'perf-01' || p.name.includes('Ohm')) || perfumes[0];
+const topReloj = relojes.find(r => r.id === 'rel-01' || r.name.includes('Curren')) || relojes[0];
+
+const featuredProducts = [...topClothing, topPerfume, topReloj].slice(0, 8);
 
 // Find the hook jacket
 const hookProduct = jackets.find(j => j.hook) || jackets[0];
@@ -118,39 +127,6 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
     </div>
   </section>
 
-  <!-- 3. Featured Products (Light Mode Streetwear Grid) -->
-  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="featured-products">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="text-center mb-12 sm:mb-16">
-        <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest mb-3">Top Ventas</span>
-        <h2 class="text-2xl sm:text-4xl font-title font-black text-text-main uppercase tracking-widest">Productos Destacados</h2>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
-        {featuredProducts.map((product, index) => (
-          <div class={`fade-in fade-in-delay-${(index % 4) + 1}`}>
-            <ProductCard
-              id={product.id}
-              slug={product.slug}
-              name={product.name}
-              brand={product.brand}
-              price={product.price}
-              anchorPrice={product.anchorPrice}
-              image={product.image}
-              images={product.images}
-              description={product.description}
-              category={product.category}
-              stock={product.stock}
-              status={product.status}
-              colorHex={product.colorHex}
-              variants={product.variants}
-            />
-          </div>
-        ))}
-      </div>
-    </div>
-  </section>
-
   <!-- 4. Seccion Arma tu Look / Combos Streetwear (Dynamo Brand CRO Booster > $130k) -->
   <section class="py-16 sm:py-24 bg-[#121214] border-t border-[#262626] text-white" id="combos">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -237,40 +213,210 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
     </div>
   </section>
 
-  <!-- 5. Landing Informativa (Ubicación, Misión, Propósito - Estilo Minimalista) -->
-  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="landing-info">
+  
+  <!-- 3. Featured Products (Light Mode Streetwear Grid) -->
+  <section class="py-16 sm:py-24 bg-white border-t border-[#E5E7EB]" id="featured-products">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      <div class="text-center mb-12 sm:mb-16">
+        <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest mb-3">Top Ventas</span>
+        <h2 class="text-2xl sm:text-4xl font-title font-black text-text-main uppercase tracking-widest">Productos Destacados</h2>
+      </div>
+
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 lg:gap-8">
+        {featuredProducts.map((product, index) => (
+          <div class={`fade-in fade-in-delay-${(index % 4) + 1}`}>
+            <ProductCard
+              id={product.id}
+              slug={product.slug}
+              name={product.name}
+              brand={product.brand}
+              price={product.price}
+              anchorPrice={product.anchorPrice}
+              image={product.image}
+              images={product.images}
+              description={product.description}
+              category={product.category}
+              stock={product.stock}
+              status={product.status}
+              colorHex={product.colorHex}
+              variants={product.variants}
+            />
+          </div>
+        ))}
+      </div>
+
+      <!-- Botón para ver todo el catálogo completo -->
+      <div class="mt-12 text-center">
+        <a 
+          href="/chaquetas"
+          class="inline-flex items-center justify-center gap-3 bg-[#0B0B0C] hover:bg-neutral-800 text-white font-black text-xs sm:text-sm uppercase tracking-widest px-8 py-4.5 rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-[1.02] cursor-pointer border border-white/10 group"
+        >
+          <span>Ver Todo el Catálogo de Ropa (50+ Modelos Disponibles)</span>
+          <svg class="w-4 h-4 text-[#C9A962] group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 5. Showroom & Tienda Física en Pasto (Mapa y Video Cómo Llegar) -->
+  <section class="py-16 sm:py-24 bg-[#FAFBFC] border-t border-[#E5E7EB]" id="tienda-fisica">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
+        <span class="inline-block text-[#C9A962] text-[10px] font-black uppercase tracking-widest mb-2">Visítanos en Pasto</span>
+        <h2 class="text-2xl sm:text-4xl font-title font-black text-text-main uppercase tracking-widest">Tienda Física & Showroom</h2>
+        <p class="text-xs sm:text-sm text-text-muted mt-2 font-light leading-relaxed">
+          Pruébate tus prendas favoritas, conoce nuestras fragancias originales y recibe atención personalizada en nuestro punto físico en Pasto.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-stretch">
         
-        <!-- Story / Brand Identity -->
-        <div class="space-y-6">
-          <span class="inline-block text-text-muted text-[9px] font-black uppercase tracking-widest">Nuestra Filosofía</span>
-          <h2 class="text-2xl sm:text-3xl font-title font-black text-text-main uppercase tracking-widest leading-none">Elegancia con Propósito</h2>
-          <div class="h-0.5 w-12 bg-neutral-200"></div>
-          <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
-            Estilo Nórdico representa una comunidad joven y emprendedora que busca transformar la manera de vestir en Pasto. Nuestra propuesta impulsa una mentalidad sólida: verse bien, sentirse bien y crecer juntos.
-          </p>
-          <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
-            Inspiramos a las personas a vestirse con estilo y actitud, mientras acompañamos su proceso de crecimiento personal y profesional con prendas icónicas y perfumes seleccionados.
-          </p>
+        <!-- Columna 1: Mapa Interactivo de Google Maps -->
+        <div class="bg-white border border-[#E5E7EB] rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <span class="text-[9px] font-black uppercase tracking-widest text-text-muted">Ubicación GPS</span>
+                <h3 class="text-base sm:text-lg font-black uppercase tracking-wider text-text-main font-title">Punto Showroom Pasto</h3>
+              </div>
+              <span class="bg-[#10B981]/10 text-[#10B981] text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-[#10B981] animate-pulse"></span>
+                Abierto Hoy
+              </span>
+            </div>
+
+            <!-- Google Maps Embed -->
+            <div class="relative w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-[#E5E7EB] shadow-inner mb-4">
+              <iframe 
+                src="https://maps.google.com/maps?q=Nueva+Aranda+Pasto+Nari%C3%B1o&t=&z=16&ie=UTF8&iwloc=&output=embed"
+                width="100%" 
+                height="100%" 
+                style="border:0;" 
+                allowfullscreen="" 
+                loading="lazy" 
+                referrerpolicy="no-referrer-when-downgrade"
+                title="Mapa de Ubicación Estilo Nórdico Pasto"
+                class="w-full h-full object-cover"
+              ></iframe>
+            </div>
+
+            <!-- Datos de Localización -->
+            <div class="space-y-2 text-xs text-text-muted">
+              <p class="flex items-start gap-2">
+                <span class="text-base text-neutral-800">📍</span>
+                <span class="font-semibold text-text-main">Manzana G3 Casa 14, Barrio Nueva Aranda, Pasto, Nariño</span>
+              </p>
+              <p class="flex items-center gap-2">
+                <span class="text-base text-neutral-800">🕒</span>
+                <span>Lunes a Sábado: <strong>9:00 AM – 7:00 PM</strong> (Jornada Continua)</span>
+              </p>
+              <p class="flex items-center gap-2">
+                <span class="text-base text-neutral-800">🛵</span>
+                <span>Servicio de domicilio con pago contraentrega en todo Pasto</span>
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-[#F3F4F6] flex flex-col sm:flex-row gap-3">
+            <a 
+              href="https://www.google.com/maps/search/?api=1&query=Nueva+Aranda+Pasto+Nari%C3%B1o"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="flex-1 inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider bg-[#0B0B0C] hover:bg-neutral-800 text-white transition-all shadow-sm"
+            >
+              <span>Abrir en Google Maps / Waze</span>
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+            </a>
+            <a 
+              href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('¡Hola Estilo Nórdico! Deseo visitar su tienda física en Pasto (Nueva Aranda). ¿Me pueden compartir la ubicación exacta en tiempo real?')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-black uppercase tracking-wider border border-[#25D366] text-[#25D366] hover:bg-[#25D366] hover:text-white transition-all"
+            >
+              <span>Pedir Ubicación por WhatsApp</span>
+            </a>
+          </div>
         </div>
 
-        <!-- Location, Schedule and Contact -->
-        <div class="space-y-8 bg-[#F9F9FB] border border-[#E5E7EB] p-8 sm:p-10 rounded-md">
-          <div class="space-y-4">
-            <span class="text-text-muted text-[9px] font-black uppercase tracking-widest block">Ubicación y Entregas</span>
-            <h3 class="text-lg font-title font-black text-text-main uppercase tracking-widest">Showroom / Local</h3>
-            <p class="text-xs sm:text-sm text-text-muted font-light leading-relaxed">
-              📍 Manzana G3 Casa 14, Nueva Aranda, Pasto, Colombia.<br />
-              Horario de atención: Lunes a Sábado | 9:00 AM a 7:00 PM.
-            </p>
-          </div>
+        <!-- Columna 2: Video "¿Cómo llegar a Estilo Nórdico?" -->
+        <div class="bg-gradient-to-br from-[#121214] to-[#0B0B0C] text-white border border-[#262626] rounded-2xl p-6 sm:p-8 shadow-xl flex flex-col justify-between relative overflow-hidden">
           
-          <div class="space-y-2 border-t border-[#E5E7EB] pt-6">
-            <span class="text-text-muted text-[9px] font-black uppercase tracking-widest block mb-2">Canal Directo</span>
-            <p class="text-sm text-text-main font-black tracking-widest">📞 WHATSAPP: +57 321 888 8046</p>
-            <p class="text-[11px] text-text-muted mt-1 font-light leading-relaxed">Escríbenos para programar envíos inmediatos el mismo día en Pasto.</p>
+          <!-- Elemento decorativo de fondo -->
+          <div class="absolute -top-12 -right-12 w-48 h-48 bg-[#C9A962]/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[#C9A962] text-[9px] font-black uppercase tracking-widest border border-[#C9A962]/30 bg-[#C9A962]/10 px-2.5 py-1 rounded-sm">
+                Video Oficial en Facebook
+              </span>
+              <span class="text-[10px] text-neutral-400 font-semibold">Guía Paso a Paso</span>
+            </div>
+
+            <h3 class="text-xl sm:text-2xl font-black uppercase tracking-wider font-title mb-2">
+              ¿Cómo Llegar a Nuestra Tienda?
+            </h3>
+            <p class="text-xs text-neutral-300 font-light leading-relaxed mb-6">
+              Te mostramos el recorrido exacto para llegar fácil y rápido desde los puntos más conocidos de Pasto hasta la puerta de nuestro showroom.
+            </p>
+
+            <!-- Video Preview Card con botón de reproducción -->
+            <a 
+              href="https://www.facebook.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="group block relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 shadow-2xl transition-all duration-300 hover:border-[#C9A962]"
+            >
+              <img 
+                src="/assets/baner.png" 
+                alt="Video Cómo llegar a Estilo Nórdico en Pasto" 
+                class="w-full h-full object-cover brightness-50 group-hover:scale-105 transition-transform duration-500" 
+              />
+              <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent flex items-center justify-center">
+                <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-full bg-[#C9A962] text-black flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
+                  <svg class="w-6 h-6 sm:w-7 sm:h-7 ml-1" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                  </svg>
+                </div>
+              </div>
+              <div class="absolute bottom-3 left-3 right-3 flex items-center justify-between text-[11px] font-bold text-white z-10">
+                <span class="flex items-center gap-1.5 drop-shadow">
+                  <span>🎥</span> Ver ruta en video (Facebook Reel)
+                </span>
+                <span class="text-[#C9A962] drop-shadow group-hover:translate-x-1 transition-transform">Ver ahora →</span>
+              </div>
+            </a>
+
+            <!-- Pasos rápidos de llegada -->
+            <div class="mt-6 space-y-2 text-xs text-neutral-300">
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-white/10 text-[#C9A962] font-black text-[10px] flex items-center justify-center shrink-0">1</span>
+                <span>Toma la ruta hacia <strong>Nueva Aranda</strong> desde la Panamericana o centro de Pasto.</span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-white/10 text-[#C9A962] font-black text-[10px] flex items-center justify-center shrink-0">2</span>
+                <span>Ubica la <strong>Manzana G3 Casa 14</strong> (punto residencial seguro y accesible).</span>
+              </div>
+              <div class="flex items-start gap-2.5">
+                <span class="w-5 h-5 rounded-full bg-white/10 text-[#C9A962] font-black text-[10px] flex items-center justify-center shrink-0">3</span>
+                <span>Avísanos por WhatsApp antes de salir para tener tus prendas listas para probar.</span>
+              </div>
+            </div>
           </div>
+
+          <div class="mt-8 pt-4 border-t border-white/10">
+            <a 
+              href={`https://api.whatsapp.com/send?phone=${STORE_CONFIG.whatsapp.number}&text=${encodeURIComponent('Hola Estilo Nórdico, vi su video de cómo llegar y me gustaría pasar hoy al showroom en Nueva Aranda. ¿Están atendiendo?')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              class="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 rounded-xl text-xs font-black uppercase tracking-wider bg-[#C9A962] hover:bg-[#D4B878] text-black transition-all shadow-md"
+            >
+              <span>Agendar Visita al Showroom por WhatsApp →</span>
+            </a>
+          </div>
+
         </div>
 
       </div>

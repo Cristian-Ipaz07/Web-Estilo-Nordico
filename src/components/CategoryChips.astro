@@ -17,21 +17,19 @@ const activeSubs = new Set((navData.active_subcategories || []).map(s => s.toUpp
 
 // Definición de chips con su correspondiente subcategoría del ERP
 const chipDefinitions = [
-  { id: 'all', label: '🔥 Todo', href: '/', always: true },
-  { id: 'mujer', label: '👗 Mujer', href: '/chaquetas?genero=mujer', always: true },
+  { id: 'all', label: '🔥 Catálogo Ropa', href: '/chaquetas', always: true },
   { id: 'hombre', label: '👔 Hombre', href: '/chaquetas?genero=hombre', always: true },
-  { id: 'chaquetas', code: 'CHAQUETA', label: '🧥 Chaquetas', href: '/chaquetas' },
-  { id: 'conjuntos', code: 'CONJUNTO', label: '🏃 Conjuntos', href: '/chaquetas?tipo=conjunto' },
-  { id: 'busos', code: 'BUSO', label: '🧥 Busos', href: '/chaquetas?tipo=buso' },
-  { id: 'billeteras', code: 'BILLETERA', label: '👛 Billeteras', href: '/chaquetas?tipo=billetera' },
+  { id: 'mujer', label: '👗 Mujer', href: '/chaquetas?genero=mujer', always: true },
   { id: 'camisetas', code: 'CAMISETA', label: '👕 Camisetas', href: '/chaquetas?tipo=camiseta' },
+  { id: 'busos', code: 'BUSO', label: '🥋 Busos', href: '/chaquetas?tipo=buso' },
+  { id: 'chaquetas', code: 'CHAQUETA', label: '🧥 Chaquetas', href: '/chaquetas?tipo=chaqueta' },
+  { id: 'conjuntos', code: 'CONJUNTO', label: '🏃 Conjuntos', href: '/chaquetas?tipo=conjunto' },
   { id: 'jeans', code: 'JEANS', label: '👖 Jeans', href: '/chaquetas?tipo=jeans' },
   { id: 'pantalones', code: 'PANTALON', label: '👖 Pantalones', href: '/chaquetas?tipo=pantalon' },
   { id: 'bermudas', code: 'BERMUDA', label: '🩳 Bermudas', href: '/chaquetas?tipo=bermuda' },
   { id: 'blusas', code: 'BLUSAS', label: '👚 Blusas', href: '/chaquetas?tipo=blusas' },
   { id: 'perfumes', label: '🧴 Perfumes', href: '/perfumes', always: true },
-  { id: 'relojes', label: '⌚ Relojes', href: '/relojes', always: true },
-  { id: 'combos', label: '💥 Combos Look', href: '/#combos', always: true },
+  { id: 'accesorios', label: '⌚ Accesorios', href: '/relojes', always: true },
 ];
 
 // Filtrar únicamente los chips activos

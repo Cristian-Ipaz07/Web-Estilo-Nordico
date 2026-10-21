@@ -100,27 +100,30 @@ if (mujerItems.length > 0) {
   });
 }
 
-// 3. Perfumes & Accesorios
+// 3. Perfumes (Independiente)
 navMenu.push({
-  label: 'Perfumes & Accesorios',
+  label: 'Perfumes',
   href: '/perfumes',
   badge: null,
   items: [
-    { label: 'Perfumes Yanbal (Ohm, Solo, Zentro)', href: '/perfumes' },
-    { label: 'Ésika, Cyzone & L\'Bel', href: '/perfumes' },
-    { label: 'Relojes Nórdicos Curren & Skmei', href: '/relojes' },
+    { label: 'Ver Todos los Perfumes', href: '/perfumes' },
+    { label: 'Yanbal (Ohm, Solo, Zentro)', href: '/perfumes' },
+    { label: 'Ésika (Leyenda, Pulso, Dorsay)', href: '/perfumes' },
+    { label: 'Cyzone & L\'Bel (Nitro, Mithyka)', href: '/perfumes' },
   ]
 });
 
-// 4. Combos y Promociones
+// 4. Accesorios (Independiente: Relojes, Gorras, Billeteras, Cadenas, Correas)
 navMenu.push({
-  label: 'Combos 🔥',
-  href: '/#combos',
-  badge: 'Ahorra 25%',
+  label: 'Accesorios',
+  href: '/relojes',
+  badge: null,
   items: [
-    { label: 'Chaqueta + Camiseta ($130.000)', href: '/#combos' },
-    { label: 'Chaqueta + Perfume ($135.000)', href: '/#combos' },
-    { label: 'Pack Dúo 2 Chaquetas ($160.000)', href: '/chaquetas' },
+    { label: 'Ver Todos los Accesorios', href: '/relojes' },
+    { label: 'Relojes Nórdicos (Curren, Skmei)', href: '/relojes' },
+    { label: 'Gorras Urbanas', href: '/relojes#gorras' },
+    { label: 'Billeteras de Cuero', href: '/relojes#billeteras' },
+    { label: 'Correas y Cadenas', href: '/relojes#accesorios' },
   ]
 });
 ---
