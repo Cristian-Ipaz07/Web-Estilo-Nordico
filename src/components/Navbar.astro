@@ -135,31 +135,29 @@ Object.values(navData.departments || {}).forEach((deptList: any) => {
 
 const accessoryItems: Array<{ label: string; href: string }> = [
   { label: 'Ver Todos los Accesorios', href: '/relojes' },
-  { label: 'Relojes Nórdicos (Curren, Skmei)', href: '/relojes' },
+  { label: 'Relojes', href: '/relojes' },
 ];
 
 if (rawAccessoriesFromERP.length > 0) {
   rawAccessoriesFromERP.forEach(acc => {
     let name = acc.name.trim();
-    if (name.toLowerCase() === 'billetera') name = 'Billeteras de Cuero';
-    else if (name.toLowerCase() === 'gorra') name = 'Gorras Urbanas';
-    else if (!name.endsWith('s') && !name.endsWith('S')) name = `${name}s`;
+    if (!name.endsWith('s') && !name.endsWith('S')) name = `${name}s`;
 
     accessoryItems.push({
-      label: `${name} (${acc.count})`,
+      label: name,
       href: `/relojes#${acc.code.toLowerCase()}`
     });
   });
 } else {
-  accessoryItems.push({ label: 'Gorras Urbanas', href: '/relojes#gorras' });
-  accessoryItems.push({ label: 'Billeteras de Cuero', href: '/relojes#billeteras' });
+  accessoryItems.push({ label: 'Billeteras', href: '/relojes#billeteras' });
+  accessoryItems.push({ label: 'Gorras', href: '/relojes#gorras' });
   accessoryItems.push({ label: 'Correas y Cadenas', href: '/relojes#accesorios' });
 }
 
 navMenu.push({
   label: 'Accesorios',
   href: '/relojes',
-  badge: rawAccessoriesFromERP.length > 0 ? `${rawAccessoriesFromERP.length + 1}` : null,
+  badge: null,
   items: accessoryItems
 });
 ---
