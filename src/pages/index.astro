@@ -289,7 +289,7 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
             </div>
 
             <!-- Google Maps Embed -->
-            <div class="relative w-full h-64 sm:h-72 rounded-xl overflow-hidden border border-[#E5E7EB] shadow-inner mb-4">
+            <div class="relative w-full h-80 sm:h-[460px] rounded-xl overflow-hidden border border-[#E5E7EB] shadow-inner mb-4">
               <iframe 
                 src="https://maps.google.com/maps?q=Nueva+Aranda+Pasto+Nari%C3%B1o&t=&z=16&ie=UTF8&iwloc=&output=embed"
                 width="100%" 
@@ -362,18 +362,19 @@ const hookProduct = jackets.find(j => j.hook) || jackets[0];
               Te mostramos el recorrido exacto para llegar fácil y rápido desde los puntos más conocidos de Pasto hasta la puerta de nuestro showroom.
             </p>
 
-            <!-- Video Player Embebido Real (Facebook Reel) -->
-            <div class="relative w-full aspect-video rounded-xl overflow-hidden border border-white/10 shadow-2xl bg-black">
-              <video 
-                controls 
-                playsinline 
-                preload="metadata" 
-                poster="/assets/baner.png"
-                class="w-full h-full object-cover rounded-xl"
-              >
-                <source src="/assets/como-llegar-tienda.mp4" type="video/mp4" />
-                Tu navegador no soporta la reproducción de video HTML5.
-              </video>
+<!-- Video Player Embebido Real (Formato Vertical Reel 9:16) -->
+            <div class="flex justify-center my-4">
+              <div class="relative w-full max-w-[280px] sm:max-w-[310px] aspect-[9/16] rounded-2xl overflow-hidden border-2 border-white/20 shadow-2xl bg-black">
+                <video 
+                  controls 
+                  playsinline 
+                  preload="metadata" 
+                  class="w-full h-full object-contain bg-black"
+                >
+                  <source src="/assets/como-llegar-tienda.mp4" type="video/mp4" />
+                  Tu navegador no soporta la reproducción de video HTML5.
+                </video>
+              </div>
             </div>
 
             <!-- Botón para ver también el Reel original en Facebook -->
