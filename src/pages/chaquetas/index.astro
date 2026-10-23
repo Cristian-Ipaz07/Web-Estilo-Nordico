@@ -539,6 +539,49 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   const ACTIVE_DEPT_CLASS = 'dept-tab active-dept px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-widest transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5';
   const INACTIVE_DEPT_CLASS = 'dept-tab px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5';
 
+  // Funciones para calcular dinámicamente qué prendas, tallas y referencias existen para el género activo
+  function getAvailableTypesForGender(gender: string): Set<string> {
+    const set = new Set<string>();
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
+      const itemType = (el.dataset.type || '').toUpperCase();
+      if (gender === 'all' || itemGender === gender) {
+        if (itemType) set.add(itemType);
+      }
+    });
+    return set;
+  }
+
+  function getAvailableSizesForContext(gender: string, types: Set<string>): Set<string> {
+    const set = new Set<string>();
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
+      const itemType = (el.dataset.type || '').toUpperCase();
+      const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
+      const matchesGender = (gender === 'all' || itemGender === gender);
+      const matchesType = (types.size === 0 || types.has(itemType));
+      if (matchesGender && matchesType) {
+        sizes.forEach(s => set.add(s));
+      }
+    });
+    return set;
+  }
+
+  function getAvailableRefsForGender(gender: string): Set<string> {
+    const set = new Set<string>();
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
+      const itemRef = (el.dataset.ref || '').toUpperCase();
+      if (gender === 'all' || itemGender === gender) {
+        if (itemRef) set.add(itemRef);
+      }
+    });
+    return set;
+  }
+
   function syncDepartmentUI() {
     const allTab = document.querySelector('.dept-tab[data-dept="all"]');
     const hombreTab = document.querySelector('.dept-tab[data-dept="hombre"]');
@@ -574,12 +617,31 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   function syncTypeChipsUI() {
     const typeChips = document.querySelectorAll('.type-chip');
     const badge = document.getElementById('badge-types-count');
-    const allChip = document.querySelector('.type-chip[data-type="all"]');
+    const allChip = document.querySelector('.type-chip[data-type="all"]') as HTMLElement | null;
+
+    const availableTypes = getAvailableTypesForGender(activeGender);
+
+    // Ocultar chips de prendas que no pertenecen al género activo (ej: ocultar Busos/Camisetas si se filtra Mujer)
+    typeChips.forEach(c => {
+      const chip = c as HTMLElement;
+      const t = (chip.getAttribute('data-type') || '').toUpperCase();
+      if (t === 'ALL') {
+        chip.style.display = '';
+      } else if (availableTypes.has(t)) {
+        chip.style.display = '';
+      } else {
+        chip.style.display = 'none';
+        if (selectedTypes.has(t)) {
+          selectedTypes.delete(t);
+        }
+      }
+    });
 
     if (selectedTypes.size === 0) {
       if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
       if (badge) badge.classList.add('hidden');
-      typeChips.forEach(chip => {
+      typeChips.forEach(c => {
+        const chip = c as HTMLElement;
         if (chip.getAttribute('data-type') !== 'all') {
           chip.className = INACTIVE_CHIP_CLASS;
         }
@@ -590,9 +652,10 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         badge.classList.remove('hidden');
         badge.textContent = `${selectedTypes.size} seleccionada${selectedTypes.size > 1 ? 's' : ''}`;
       }
-      typeChips.forEach(chip => {
-        const t = chip.getAttribute('data-type');
-        if (t && t !== 'all') {
+      typeChips.forEach(c => {
+        const chip = c as HTMLElement;
+        const t = (chip.getAttribute('data-type') || '').toUpperCase();
+        if (t && t !== 'ALL') {
           chip.className = selectedTypes.has(t) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
         }
       });
@@ -602,12 +665,31 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   function syncSizeChipsUI() {
     const sizeChips = document.querySelectorAll('.size-chip');
     const badge = document.getElementById('badge-sizes-count');
-    const allChip = document.querySelector('.size-chip[data-size="all"]');
+    const allChip = document.querySelector('.size-chip[data-size="all"]') as HTMLElement | null;
+
+    const availableSizes = getAvailableSizesForContext(activeGender, selectedTypes);
+
+    // Ocultar tallas que no existan para el género y prendas actualmente activas
+    sizeChips.forEach(c => {
+      const chip = c as HTMLElement;
+      const s = (chip.getAttribute('data-size') || '').toUpperCase();
+      if (s === 'ALL') {
+        chip.style.display = '';
+      } else if (availableSizes.has(s)) {
+        chip.style.display = '';
+      } else {
+        chip.style.display = 'none';
+        if (selectedSizes.has(s)) {
+          selectedSizes.delete(s);
+        }
+      }
+    });
 
     if (selectedSizes.size === 0) {
       if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
       if (badge) badge.classList.add('hidden');
-      sizeChips.forEach(chip => {
+      sizeChips.forEach(c => {
+        const chip = c as HTMLElement;
         if (chip.getAttribute('data-size') !== 'all') {
           chip.className = INACTIVE_CHIP_CLASS;
         }
@@ -618,9 +700,10 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         badge.classList.remove('hidden');
         badge.textContent = `${selectedSizes.size} seleccionada${selectedSizes.size > 1 ? 's' : ''}`;
       }
-      sizeChips.forEach(chip => {
-        const s = chip.getAttribute('data-size');
-        if (s && s !== 'all') {
+      sizeChips.forEach(c => {
+        const chip = c as HTMLElement;
+        const s = (chip.getAttribute('data-size') || '').toUpperCase();
+        if (s && s !== 'ALL') {
           chip.className = selectedSizes.has(s) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
         }
       });
@@ -801,6 +884,9 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         }
       }
       syncDepartmentUI();
+      syncTypeChipsUI();
+      syncSizeChipsUI();
+      syncRefUI();
       updateURL();
       applyFilters();
     });
@@ -822,6 +908,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         }
       }
       syncTypeChipsUI();
+      syncSizeChipsUI();
       updateURL();
       updateHeroAndMeta();
       applyFilters();
@@ -855,6 +942,9 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     if (filterGender.value === 'hombre') selectedGenders.add('hombre');
     else if (filterGender.value === 'mujer') selectedGenders.add('mujer');
     syncDepartmentUI();
+    syncTypeChipsUI();
+    syncSizeChipsUI();
+    syncRefUI();
     updateURL();
     applyFilters();
   });
@@ -881,8 +971,19 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   const refCheckboxes = document.querySelectorAll<HTMLInputElement>('.ref-checkbox');
 
   function syncRefUI() {
+    const availableRefs = getAvailableRefsForGender(activeGender);
+
     refCheckboxes.forEach(cb => {
-      cb.checked = selectedRefs.has(cb.value.toUpperCase());
+      const val = cb.value.toUpperCase();
+      const label = cb.closest('.ref-checkbox-label') as HTMLElement | null;
+      if (availableRefs.has(val)) {
+        if (label) label.style.display = '';
+        cb.checked = selectedRefs.has(val);
+      } else {
+        if (label) label.style.display = 'none';
+        selectedRefs.delete(val);
+        cb.checked = false;
+      }
     });
 
     if (selectedRefs.size === 0) {
