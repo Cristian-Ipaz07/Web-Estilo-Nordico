@@ -359,6 +359,31 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         </div>
       </div>
 
+      <!-- Banner de disponibilidad por género (cuando se elige una prenda que solo existe para hombre) -->
+      <div id="notice-gender-apparel" class="hidden mb-8 p-5 sm:p-6 bg-[#FEF3C7] border border-[#F59E0B]/60 rounded-2xl text-amber-950 shadow-sm transition-all">
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl">🧥</span>
+            <div>
+              <h4 id="notice-gender-title" class="text-xs font-black uppercase tracking-wider text-amber-900 font-title">
+                Prenda Disponible en Colección Hombre
+              </h4>
+              <p id="notice-gender-desc" class="text-xs text-amber-800 mt-0.5 font-light">
+                Actualmente esta categoría está disponible en <strong>Colección Hombre</strong>. Para mujer tenemos Chaquetas Columbia y The North Face en 7 colores disponibles.
+              </p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 justify-center sm:justify-end shrink-0">
+            <button type="button" id="btn-notice-switch-hombre" class="px-4 py-2 bg-[#0B0B0C] hover:bg-neutral-800 text-white text-[11px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow-sm">
+              Ver en Colección Hombre →
+            </button>
+            <button type="button" id="btn-notice-switch-chaquetas" class="px-4 py-2 bg-[#C9A962] hover:bg-[#D4B878] text-black text-[11px] font-black uppercase tracking-wider rounded-lg transition-colors cursor-pointer shadow-sm">
+              Ver Chaquetas de Mujer
+            </button>
+          </div>
+        </div>
+      </div>
+
       <!-- Products Grid -->
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="products-grid">
         {jackets.map((product) => {
@@ -619,21 +644,26 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     const badge = document.getElementById('badge-types-count');
     const allChip = document.querySelector('.type-chip[data-type="all"]') as HTMLElement | null;
 
-    const availableTypes = getAvailableTypesForGender(activeGender);
+    const availableTypesInCurrentDept = getAvailableTypesForGender(activeGender);
 
-    // Ocultar chips de prendas que no pertenecen al género activo (ej: ocultar Busos/Camisetas si se filtra Mujer)
+    // REGLA CRÍTICA: MANTENER SIEMPRE VISIBLES TODOS LOS CHIPS DE PRENDA
+    // Así el usuario puede seleccionar cualquier prenda libremente tanto para hombre como para mujer
     typeChips.forEach(c => {
       const chip = c as HTMLElement;
       const t = (chip.getAttribute('data-type') || '').toUpperCase();
-      if (t === 'ALL') {
-        chip.style.display = '';
-      } else if (availableTypes.has(t)) {
-        chip.style.display = '';
-      } else {
-        chip.style.display = 'none';
-        if (selectedTypes.has(t)) {
-          selectedTypes.delete(t);
+      chip.style.display = '';
+
+      // Indicador informativo si la prenda actualmente solo existe en Hombre (Busos, Camisetas, Conjuntos) y se está en Mujer
+      let badgeHombre = chip.querySelector('.chip-gender-badge') as HTMLElement | null;
+      if (activeGender === 'mujer' && t !== 'ALL' && !availableTypesInCurrentDept.has(t)) {
+        if (!badgeHombre) {
+          badgeHombre = document.createElement('span');
+          badgeHombre.className = 'chip-gender-badge text-[8px] bg-neutral-200 text-neutral-600 px-1 py-0.2 rounded font-black ml-1 select-none';
+          badgeHombre.textContent = 'Hombre';
+          chip.appendChild(badgeHombre);
         }
+      } else {
+        if (badgeHombre) badgeHombre.remove();
       }
     });
 
@@ -754,15 +784,24 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       : singleType ? singleType.toLowerCase()
       : null;
 
+    const typesInMujer = getAvailableTypesForGender('mujer');
+
     if (activeGender === 'mujer') {
-      if (heroTitle) {
-        heroTitle.textContent = cleanLabel || 'Colección Mujer';
+      if (singleType && !typesInMujer.has(singleType)) {
+        // La prenda seleccionada aún no existe para mujer: explicamos que está en Hombre
+        if (heroTitle) heroTitle.textContent = `${cleanLabel} · Colección Hombre`;
+        if (heroSlogan) heroSlogan.textContent = `Actualmente los ${cleanLabel} están disponibles en Colección Hombre. Para mujer disponemos de Chaquetas térmicas e impermeables.`;
+        document.title = `${cleanLabel} | Estilo Nórdico Pasto`;
+      } else {
+        if (heroTitle) {
+          heroTitle.textContent = cleanLabel ? `${cleanLabel} Mujer` : 'Colección Mujer';
+        }
+        if (heroSlogan) heroSlogan.textContent = 'Prendas con diseño, horma y confección exclusiva para mujer. Entrega inmediata en Pasto.';
+        document.title = (cleanLabel ? `${cleanLabel} Mujer` : 'Colección Mujer') + ' | Estilo Nórdico Pasto';
       }
-      if (heroSlogan) heroSlogan.textContent = 'Prendas con diseño, horma y confección exclusiva para mujer. Entrega inmediata en Pasto.';
-      document.title = (cleanLabel ? `${cleanLabel} Mujer` : 'Colección Mujer') + ' | Estilo Nórdico Pasto';
     } else if (activeGender === 'hombre') {
       if (heroTitle) {
-        heroTitle.textContent = cleanLabel || 'Colección Hombre';
+        heroTitle.textContent = cleanLabel ? `${cleanLabel} Hombre` : 'Colección Hombre';
       }
       if (heroSlogan) {
         heroSlogan.textContent = 'Prendas urbanas, confortables y durables con stock real en Pasto y envíos nacionales.';
@@ -786,6 +825,26 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     // Estado predeterminado en 'disponible' si no está definido
     const status = filterStatus ? filterStatus.value : 'disponible';
     let visible = 0;
+
+    // REORGANIZACIÓN / ORDENAMIENTO POR TALLA:
+    // Al filtrar por una o más tallas (ej. M), se organizan primero en el DOM las prendas que tienen disponible esa talla en stock
+    if (selectedSizes.size > 0) {
+      const grid = document.getElementById('products-grid');
+      if (grid) {
+        const sortedItems = Array.from(items).sort((a, b) => {
+          const elA = a as HTMLElement;
+          const elB = b as HTMLElement;
+          const availA = (elA.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
+          const availB = (elB.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
+          const hasA = Array.from(selectedSizes).some(s => availA.includes(s));
+          const hasB = Array.from(selectedSizes).some(s => availB.includes(s));
+          if (hasA && !hasB) return -1;
+          if (!hasA && hasB) return 1;
+          return 0;
+        });
+        sortedItems.forEach(item => grid.appendChild(item));
+      }
+    }
 
     items.forEach((item) => {
       const el = item as HTMLElement;
@@ -822,9 +881,9 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       
       // 4. Filtro grupal por talla (Multiselección: ej. M y L a la vez)
       if (selectedSizes.size > 0) {
-        // Para chaquetas 5080 y 5081 se usan todas las tallas del modelo porque admiten reposición/sobrepedido continuo.
-        // Para prendas normales en modo disponible, se evalúan solo las tallas con stock real (availableSizes).
-        const checkSizes = isEvergreen ? sizes : (status === 'disponible' ? availableSizes : sizes);
+        // En modo 'disponible' (por defecto), evaluamos exclusivamente las tallas con stock real disponible.
+        // Esto evita que chaquetas o prendas agotadas en talla M aparezcan cuando el cliente busca específicamente talla M.
+        const checkSizes = (status === 'disponible') ? availableSizes : sizes;
         const matchesAnySelectedSize = Array.from(selectedSizes).some(sz => checkSizes.includes(sz));
         if (!matchesAnySelectedSize) show = false;
       }
@@ -850,6 +909,26 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       if (show) visible++;
     });
 
+    // Control del aviso de género / prendas disponibles
+    const noticeGender = document.getElementById('notice-gender-apparel');
+    const noticeTitle = document.getElementById('notice-gender-title');
+    const noticeDesc = document.getElementById('notice-gender-desc');
+    const typesInMujer = getAvailableTypesForGender('mujer');
+    const onlyHombreSelected = selectedTypes.size > 0 && Array.from(selectedTypes).every(t => !typesInMujer.has(t));
+
+    if (activeGender === 'mujer' && onlyHombreSelected && visible === 0) {
+      if (noticeGender) {
+        noticeGender.classList.remove('hidden');
+        const typesStr = Array.from(selectedTypes).map(t => {
+          return t === 'BUSO' ? 'Busos' : t === 'CAMISETA' ? 'Camisetas' : t === 'CONJUNTO' ? 'Conjuntos' : t;
+        }).join(', ');
+        if (noticeTitle) noticeTitle.textContent = `Aún no hay ${typesStr} disponibles para Mujer`;
+        if (noticeDesc) noticeDesc.innerHTML = `Actualmente los ${typesStr} están disponibles en <strong>Colección Hombre</strong> (stock para entrega hoy en Pasto). Para mujer disponemos de <strong>Chaquetas térmicas Columbia y The North Face</strong> en 7 colores.`;
+      }
+    } else {
+      if (noticeGender) noticeGender.classList.add('hidden');
+    }
+
     if (filterCount) {
       const genderLabel = selectedGender === 'mujer' ? 'en Colección Mujer' : selectedGender === 'hombre' ? 'en Colección Hombre' : 'en Catálogo';
       const statusLabel = status === 'disponible' ? 'disponibles' : status === 'agotado' ? 'agotados' : 'en total';
@@ -865,7 +944,10 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       }
       filterCount.textContent = countText;
     }
-    if (emptyState) emptyState.classList.toggle('hidden', visible > 0);
+    if (emptyState) {
+      // Si el banner explicativo está visible, ocultamos el empty state genérico
+      emptyState.classList.toggle('hidden', visible > 0 || (activeGender === 'mujer' && onlyHombreSelected));
+    }
   }
 
 
@@ -898,21 +980,59 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     chip.addEventListener('click', () => {
       const t = chip.getAttribute('data-type');
       if (!t) return;
+      const tUpper = t.toUpperCase();
+
       if (t === 'all') {
         selectedTypes.clear();
       } else {
-        if (selectedTypes.has(t)) {
-          selectedTypes.delete(t);
+        // REGLA CLAVE DE USUARIO: Si está en Colección Mujer y selecciona una prenda que solo existe en Hombre (Busos, Camisetas, Conjuntos)
+        // se activa automáticamente Colección Hombre para mostrarle las prendas disponibles de inmediato!
+        const typesInMujer = getAvailableTypesForGender('mujer');
+        if (activeGender === 'mujer' && !typesInMujer.has(tUpper)) {
+          selectedGenders.clear();
+          selectedGenders.add('hombre');
+          activeGender = 'hombre';
+          syncDepartmentUI();
+        }
+
+        if (selectedTypes.has(tUpper)) {
+          selectedTypes.delete(tUpper);
         } else {
-          selectedTypes.add(t);
+          selectedTypes.add(tUpper);
         }
       }
       syncTypeChipsUI();
       syncSizeChipsUI();
+      syncRefUI();
       updateURL();
       updateHeroAndMeta();
       applyFilters();
     });
+  });
+
+  // Listeners para botones del banner explicativo de disponibilidad por género
+  document.getElementById('btn-notice-switch-hombre')?.addEventListener('click', () => {
+    selectedGenders.clear();
+    selectedGenders.add('hombre');
+    activeGender = 'hombre';
+    syncDepartmentUI();
+    syncTypeChipsUI();
+    syncSizeChipsUI();
+    syncRefUI();
+    updateURL();
+    updateHeroAndMeta();
+    applyFilters();
+  });
+
+  document.getElementById('btn-notice-switch-chaquetas')?.addEventListener('click', () => {
+    selectedTypes.clear();
+    selectedTypes.add('CHAQUETA');
+    syncTypeChipsUI();
+    syncSizeChipsUI();
+    syncRefUI();
+    updateURL();
+    updateHeroAndMeta();
+    applyFilters();
   });
 
   // Listener para Chips de Talla (Multiselección)
