@@ -1250,7 +1250,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     try {
       let products = liveProducts;
       if (!products) {
-        const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=250');
+        const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=200');
         if (!res.ok) return;
         products = await res.json();
       }

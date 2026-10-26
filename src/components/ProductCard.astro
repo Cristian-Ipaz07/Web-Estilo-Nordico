@@ -252,7 +252,7 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
   // Sincronización instantánea de precios y stock en vivo con el ERP
   async function syncCardsWithLiveERP() {
     try {
-      const res = await fetch(`${ERP_API_BASE_URL}/api/public/products`);
+      const res = await fetch(`${ERP_API_BASE_URL}/api/public/products?limit=200`);
       if (!res.ok) return;
       const products = await res.json();
       
@@ -285,6 +285,16 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
         const liveItem = variants.find((v: any) => v.price_sale && v.price_sale > 0) || variants[0];
         const livePrice = Number(liveItem?.price_sale);
         const liveAnchor = Number(liveItem?.compare_price) || 120000;
+
+        // Sincronizar foto en vivo si hay imagen actualizada en Supabase / ERP
+        const liveCloudItem = variants.find((v: any) => v.image_url?.startsWith('https://') || (v.images && v.images.some((img: string) => img.startsWith('https://'))));
+        const liveCloudImg = liveCloudItem?.image_url || liveCloudItem?.images?.find((img: string) => img.startsWith('https://'));
+        if (liveCloudImg && !liveCloudImg.includes('localhost')) {
+          const firstImg = card.querySelector('img.card-slide-img, a > img') as HTMLImageElement | null;
+          if (firstImg && firstImg.src !== liveCloudImg) {
+            firstImg.src = liveCloudImg;
+          }
+        }
 
         if (livePrice && !isNaN(livePrice)) {
           const fmtPrice = new Intl.NumberFormat('es-CO', { style: 'decimal', minimumFractionDigits: 0 }).format(livePrice);

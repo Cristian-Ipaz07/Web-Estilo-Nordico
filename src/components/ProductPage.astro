@@ -1253,7 +1253,7 @@ const faqs = [
   // Sincronización en vivo de tallas y stock en página de producto
   async function syncProductPageStock() {
     try {
-      const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=250');
+      const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=200');
       if (!res.ok) return;
       const products = await res.json();
       if (!Array.isArray(products) || products.length === 0) return;
@@ -1280,6 +1280,14 @@ const faqs = [
       }
 
       if (matchingVariants.length > 0) {
+        // Sincronizar imagen principal si en el ERP cambiaron o asignaron fotos nuevas
+        const liveMainImg = matchingVariants.find((v: any) => v.image_url || (v.images && v.images.length > 0));
+        const liveImgUrl = liveMainImg?.image_url || liveMainImg?.images?.[0];
+        if (liveImgUrl && liveImgUrl.startsWith('https://') && !liveImgUrl.includes('localhost') && mainImage) {
+          if (mainImage.src !== liveImgUrl) {
+            mainImage.src = liveImgUrl;
+          }
+        }
         const sizeButtons = document.querySelectorAll('.size-btn');
         sizeButtons.forEach(b => {
           const btn = b as HTMLElement;
