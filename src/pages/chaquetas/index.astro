@@ -425,7 +425,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
               data-colors={product.variants?.map(v => v.color).join(',')}
               data-sizes={product.variants?.map(v => v.talla).join(',')}
               data-status={product.status}
-              data-available-sizes={product.variants?.filter(v => v.status === 'disponible').map(v => v.talla).join(',')}
+              data-available-sizes={product.variants?.filter(v => v.status === 'disponible' && (v.stock || 0) > 0).map(v => v.talla).join(',')}
               data-is-evergreen={isEvergreenJacket ? 'true' : 'false'}
             >
               <ProductCard
@@ -1243,4 +1243,111 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   syncRefUI();
   updateAdvancedBadge();
   applyFilters();
+
+  // ── Sincronización en vivo del stock desde el ERP (Render) ─────────────────────
+  // Garantiza que ventas físicas o domicilios asentados en el POS actualicen la web inmediatamente
+  async function syncLiveStockFromERP(liveProducts?: any[]) {
+    try {
+      let products = liveProducts;
+      if (!products) {
+        const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=250');
+        if (!res.ok) return;
+        products = await res.json();
+      }
+      if (!Array.isArray(products) || products.length === 0) return;
+
+      const productItems = document.querySelectorAll('.product-item');
+      productItems.forEach(item => {
+        const el = item as HTMLElement;
+        const refCode = (el.dataset.ref || '').toUpperCase();
+        const type = (el.dataset.type || '').toUpperCase();
+        const titleEl = el.querySelector('h3');
+        const title = titleEl?.textContent?.trim().toLowerCase() || '';
+
+        // Chaquetas (Ref 5080 Hombre / 5081 Mujer)
+        if (refCode === '5080' || refCode === '5081' || type === 'CHAQUETA') {
+          const cleanColorName = title
+            .replace(/chaqueta impermeable/i, '')
+            .replace(/dama/i, '')
+            .replace(/columbia/i, '')
+            .replace(/the north face/i, '')
+            .trim();
+
+          const variants = products.filter((p: any) => {
+            const pRef = (p.ref || '').toUpperCase();
+            if (!pRef.startsWith(refCode)) return false;
+            if (cleanColorName && p.color && p.color.toLowerCase().trim() === cleanColorName) return true;
+            return false;
+          });
+
+          if (variants.length > 0) {
+            const availSizes = variants
+              .filter((v: any) => (v.stock || 0) > 0 && v.status !== 'agotado')
+              .map((v: any) => (v.size || v.talla || '').trim().toUpperCase())
+              .filter(Boolean);
+
+            el.dataset.availableSizes = availSizes.join(',');
+
+            const totalStock = variants.reduce((sum: number, v: any) => sum + (v.stock || 0), 0);
+            el.dataset.status = totalStock > 0 ? 'disponible' : 'agotado';
+          }
+        } else {
+          // Otras referencias (busos, camisetas, conjuntos, pantalones, etc.)
+          const matching = products.filter((p: any) => {
+            const pRef = (p.ref || '').toUpperCase();
+            const pId = String(p.id || '');
+            return pRef.startsWith(refCode) || pId === el.dataset.id;
+          });
+
+          if (matching.length > 0) {
+            const availSizes = matching
+              .filter((v: any) => (v.stock || 0) > 0 && v.status !== 'agotado')
+              .map((v: any) => (v.size || v.talla || '').trim().toUpperCase())
+              .filter(Boolean);
+
+            if (availSizes.length > 0) {
+              el.dataset.availableSizes = availSizes.join(',');
+            }
+            const totalStock = matching.reduce((sum: number, p: any) => sum + (p.stock || 0), 0);
+            el.dataset.status = totalStock > 0 ? 'disponible' : 'agotado';
+          }
+        }
+      });
+
+      // Recalcular chips de tallas disponibles para el contexto actual
+      syncSizeChipsUI();
+
+      // Re-aplicar filtros: si la prenda está agotada en la talla seleccionada (ej. XL), se oculta de inmediato
+      applyFilters();
+    } catch (e) {
+      console.warn('[Live Sync] Error al actualizar stock en vivo:', e);
+    }
+  }
+
+  // Escuchar evento emitido por ProductCard cuando termine de descargar productos
+  window.addEventListener('erp:stock-synced', (e: any) => {
+    if (e.detail?.products) {
+      syncLiveStockFromERP(e.detail.products);
+    }
+  });
+
+  // Ejecutar al cargar la página
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => syncLiveStockFromERP());
+  } else {
+    syncLiveStockFromERP();
+  }
+
+  // Refrescar automáticamente al reenfocar la ventana o cambiar de pestaña
+  window.addEventListener('focus', () => syncLiveStockFromERP());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncLiveStockFromERP();
+  });
+
+  // Chequeo periódico cada 45 segundos por si ocurren ventas en el POS mientras el cliente navega
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      syncLiveStockFromERP();
+    }
+  }, 45000);
 </script>

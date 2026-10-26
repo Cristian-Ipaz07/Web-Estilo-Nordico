@@ -168,11 +168,25 @@ export async function getProducts(params?: {
       url.searchParams.append('limit', String(pageSize));
       url.searchParams.append('offset', String(currentOffset));
 
-      const res = await fetch(url.toString(), {
-        headers: {
-          'Accept': 'application/json',
-        },
-      });
+      let res: Response | null = null;
+      let attempt = 0;
+      while (attempt < 2) {
+        attempt++;
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 35000);
+          res = await fetch(url.toString(), {
+            headers: { 'Accept': 'application/json' },
+            signal: controller.signal,
+          });
+          clearTimeout(timeoutId);
+          if (res.ok) break;
+        } catch (fetchErr) {
+          if (attempt >= 2) throw fetchErr;
+          await new Promise(r => setTimeout(r, 2000));
+        }
+      }
+      if (!res) throw new Error("No response received from ERP");
 
       if (!res.ok) {
         console.warn(`[ERP API] Fallo al consultar productos: HTTP ${res.status}`);
@@ -865,14 +879,15 @@ export async function fetchNavigationFromERP(): Promise<NavigationResponse> {
 function getFallbackJackets(): Product[] {
   const SIZES = ['M', 'L', 'XL', 'XXL'];
   const baseColors = [
-    { name: 'Negro', slug: 'chaqueta-impermeable-negro', hex: '#1a1a1a', img: '5080-the-north-face-negro.webp', brand: 'The North Face', stockMap: { 'M': { id: '304', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-M' }, 'L': { id: '305', stock: 3, ref: '5080-THE-NORTH-FACE-NEGRO-L' }, 'XL': { id: '306', stock: 2, ref: '5080-THE-NORTH-FACE-NEGRO-XL' }, 'XXL': { id: '307', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-XXL' } } },
-    { name: 'Azul', slug: 'chaqueta-impermeable-azul', hex: '#2b5aa7', img: '5080-the-north-face-azul.webp', brand: 'The North Face', stockMap: { 'M': { id: '308', stock: 2, ref: '5080-THE-NORTH-FACE-AZUL-M' }, 'XL': { id: '309', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-XL' } } },
-    { name: 'Azul Cobalto', slug: 'chaqueta-impermeable-azul-cobalto', hex: '#0047ab', img: '5080-the-north-face-azul-cobalto.webp', brand: 'The North Face', stockMap: { 'XL': { id: '310', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-COBALTO-XL' } } },
-    { name: 'Beige', slug: 'chaqueta-impermeable-beige', hex: '#cbb894', img: '5080-the-north-face-beige.webp', brand: 'The North Face', stockMap: { 'XXL': { id: '311', stock: 1, ref: '5080-THE-NORTH-FACE-BEIGE-XXL' } } },
-    { name: 'Gris Claro', slug: 'chaqueta-impermeable-gris-claro', hex: '#b0b3b8', img: '5080-the-north-face-gris-claro.webp', brand: 'The North Face', stockMap: { 'M': { id: '319', stock: 1, ref: '5080-GRIS-CLARO-M' }, 'XXL': { id: '312', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-CLARO-XXL' } } },
-    { name: 'Gris Raton', slug: 'chaqueta-impermeable-gris-raton', hex: '#6e6e6e', img: '5080-the-north-face-gris-raton.webp', brand: 'The North Face', stockMap: { 'M': { id: '313', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-M' }, 'XXL': { id: '314', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-XXL' } } },
-    { name: 'Rojo', slug: 'chaqueta-impermeable-rojo', hex: '#b3282d', img: '5080-the-north-face-rojo.webp', brand: 'The North Face', stockMap: { 'XXL': { id: '315', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-XXL' } } },
-    { name: 'Rojo Franja', slug: 'chaqueta-impermeable-rojo-franja', hex: '#991b1e', img: '5080-the-north-face-rojo-franja.webp', brand: 'The North Face', stockMap: { 'M': { id: '316', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-FRANJA-M' }, 'L': { id: '318', stock: 1, ref: '5080-COLUMBIA-ROJO-FRANJA-L' }, 'XL': { id: '317', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-FRANJA-XL' } } },
+    { name: 'Negro', slug: 'chaqueta-impermeable-negro', hex: '#1a1a1a', img: '5080-the-north-face-negro.webp', brand: 'The North Face', stockMap: { 'L': { id: '305', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-L' }, 'XL': { id: '306', stock: 2, ref: '5080-THE-NORTH-FACE-NEGRO-XL' }, 'XXL': { id: '307', stock: 1, ref: '5080-THE-NORTH-FACE-NEGRO-XXL' } } },
+    { name: 'Azul', slug: 'chaqueta-impermeable-azul', hex: '#2b5aa7', img: '5080-the-north-face-azul.webp', brand: 'The North Face', stockMap: { 'M': { id: '308', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-M' }, 'XXL': { id: '320', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-XXL' } } },
+    { name: 'Azul Cobalto', slug: 'chaqueta-impermeable-azul-cobalto', hex: '#0047ab', img: '5080-the-north-face-azul-cobalto.webp', brand: 'The North Face', stockMap: { 'L': { id: '310', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-COBALTO-L' }, 'XL': { id: '311', stock: 1, ref: '5080-THE-NORTH-FACE-AZUL-COBALTO-XL' } } },
+    { name: 'Beige', slug: 'chaqueta-impermeable-beige', hex: '#cbb894', img: '5080-the-north-face-beige.webp', brand: 'The North Face', stockMap: { 'M': { id: '312', stock: 1, ref: '5080-THE-NORTH-FACE-BEIGE-M' }, 'XXL': { id: '313', stock: 1, ref: '5080-THE-NORTH-FACE-BEIGE-XXL' } } },
+    { name: 'Gris Claro', slug: 'chaqueta-impermeable-gris-claro', hex: '#b0b3b8', img: '5080-the-north-face-gris-claro.webp', brand: 'The North Face', stockMap: { 'M': { id: '314', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-CLARO-M' }, 'XL': { id: '315', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-CLARO-XL' }, 'XXL': { id: '316', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-CLARO-XXL' } } },
+    { name: 'Gris Raton', slug: 'chaqueta-impermeable-gris-raton', hex: '#6e6e6e', img: '5080-the-north-face-gris-raton.webp', brand: 'The North Face', stockMap: { 'L': { id: '317', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-L' }, 'M': { id: '318', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-M' }, 'XL': { id: '319', stock: 1, ref: '5080-THE-NORTH-FACE-GRIS-RATON-XL' } } },
+    { name: 'Rojo', slug: 'chaqueta-impermeable-rojo', hex: '#b3282d', img: '5080-the-north-face-rojo.webp', brand: 'The North Face', stockMap: { 'XXL': { id: '321', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-XXL' } } },
+    { name: 'Rojo Franja', slug: 'chaqueta-impermeable-rojo-franja', hex: '#991b1e', img: '5080-the-north-face-rojo-franja.webp', brand: 'The North Face', stockMap: { 'L': { id: '322', stock: 1, ref: '5080-THE-NORTH-FACE-ROJO-FRANJA-L' } } },
+    { name: 'Verde', slug: 'chaqueta-impermeable-verde', hex: '#15803d', img: '5080-the-north-face-verde-militar.webp', brand: 'The North Face', stockMap: { 'L': { id: '323', stock: 1, ref: '5080-THE-NORTH-FACE-VERDE-L' }, 'M': { id: '324', stock: 1, ref: '5080-THE-NORTH-FACE-VERDE-M' }, 'XL': { id: '325', stock: 1, ref: '5080-THE-NORTH-FACE-VERDE-XL' }, 'XXL': { id: '326', stock: 1, ref: '5080-THE-NORTH-FACE-VERDE-XXL' } } },
   ];
 
   return baseColors.map(c => {

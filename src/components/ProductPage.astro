@@ -1249,6 +1249,76 @@ const faqs = [
 
   addCartBtn?.addEventListener('click', handleAddToCart);
   mobileCartBtn?.addEventListener('click', handleAddToCart);
+
+  // Sincronización en vivo de tallas y stock en página de producto
+  async function syncProductPageStock() {
+    try {
+      const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=250');
+      if (!res.ok) return;
+      const products = await res.json();
+      if (!Array.isArray(products) || products.length === 0) return;
+
+      const pageTitle = document.querySelector('h1')?.textContent?.trim().toLowerCase() || '';
+      const isJacket = pageTitle.includes('chaqueta');
+      const isWoman = pageTitle.includes('dama') || pageTitle.includes('mujer');
+      const refPrefix = isWoman ? '5081' : '5080';
+
+      let matchingVariants: any[] = [];
+      if (isJacket) {
+        const cleanColor = pageTitle
+          .replace(/chaqueta impermeable/i, '')
+          .replace(/dama/i, '')
+          .replace(/columbia/i, '')
+          .replace(/the north face/i, '')
+          .trim();
+        matchingVariants = products.filter((p: any) => {
+          const pRef = (p.ref || '').toUpperCase();
+          if (!pRef.startsWith(refPrefix)) return false;
+          if (cleanColor && p.color && p.color.toLowerCase().trim() === cleanColor) return true;
+          return false;
+        });
+      }
+
+      if (matchingVariants.length > 0) {
+        const sizeButtons = document.querySelectorAll('.size-btn');
+        sizeButtons.forEach(b => {
+          const btn = b as HTMLElement;
+          const sz = (btn.getAttribute('data-talla') || '').trim().toUpperCase();
+          const match = matchingVariants.find((v: any) => (v.size || v.talla || '').trim().toUpperCase() === sz);
+          if (match) {
+            const stock = Number(match.stock || 0);
+            const isAvail = stock > 0 && match.status !== 'agotado';
+            btn.setAttribute('data-stock', String(stock));
+            btn.setAttribute('data-available', isAvail ? 'true' : 'false');
+            btn.setAttribute('data-status', isAvail ? 'disponible' : 'agotado');
+
+            const badge = btn.querySelector('.size-badge');
+            if (badge) {
+              if (isAvail) {
+                badge.textContent = `${stock} un.`;
+                badge.className = 'size-badge font-black px-1.5 py-0.5 rounded-sm border text-[9px] bg-[#F3F4F6] text-[#6B7280] border-[#E5E7EB]';
+                btn.className = 'size-btn px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-widest border transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer relative border-[#E5E7EB] bg-white text-[#0B0B0C] hover:border-[#0B0B0C]';
+              } else {
+                badge.textContent = 'PEDIR';
+                badge.className = 'size-badge font-black px-1.5 py-0.5 rounded-sm border text-[8px] bg-amber-100 text-amber-800 border-amber-200';
+                btn.className = 'size-btn px-4 py-2.5 rounded-md text-xs font-black uppercase tracking-widest border transition-all duration-200 shadow-sm flex items-center justify-center gap-1.5 cursor-pointer relative border-dashed border-amber-300 bg-amber-50/60 text-[#0B0B0C] hover:border-amber-500';
+              }
+            }
+          }
+        });
+      }
+    } catch (_) {}
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', syncProductPageStock);
+  } else {
+    syncProductPageStock();
+  }
+  window.addEventListener('focus', syncProductPageStock);
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncProductPageStock();
+  });
 </script>
 
 <style>

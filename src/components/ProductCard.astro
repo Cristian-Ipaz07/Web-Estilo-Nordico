@@ -188,7 +188,7 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
               type="button"
               class:list={[
                 "card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-pointer border flex items-center gap-1",
-                v.status === 'disponible'
+                (v.status === 'disponible' && (v.stock ?? 1) > 0)
                   ? (isSingleSizePiece
                       ? "border-[#0B0B0C] bg-[#0B0B0C] text-white hover:bg-neutral-800 shadow-xs"
                       : "border-[#E5E7EB] hover:border-black bg-[#F9F9FB] hover:bg-black hover:text-white text-text-main shadow-xs")
@@ -201,9 +201,11 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
               data-product-image={image}
               data-category={category}
               data-variant-id={v.id}
+              data-variant-ref={v.referencia || ''}
               data-size={v.talla}
-              disabled={v.status !== 'disponible'}
-              title={v.status === 'disponible' ? `Talla ${v.talla} (${v.stock} disp) — Clic para agregar directo` : 'Agotada'}
+              data-stock={v.stock}
+              disabled={v.status !== 'disponible' || (v.stock ?? 1) <= 0}
+              title={(v.status === 'disponible' && (v.stock ?? 1) > 0) ? `Talla ${v.talla} (${v.stock} disp) — Clic para agregar directo` : 'Agotada'}
             >
               <span>{isSingleSizePiece ? `TALLA ${v.talla}` : v.talla}</span>
               {isSingleSizePiece && (
@@ -309,6 +311,29 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
           });
         }
 
+        // Sincronizar botones de talla rápida con stock real individual
+        card.querySelectorAll('.card-quick-size-btn').forEach(b => {
+          const btn = b as HTMLButtonElement;
+          const btnSize = (btn.getAttribute('data-size') || '').trim().toUpperCase();
+          const matchVar = variants.find((v: any) => (v.size || v.talla || '').trim().toUpperCase() === btnSize);
+          if (matchVar) {
+            const stockNum = Number(matchVar.stock || 0);
+            const isAvail = stockNum > 0 && matchVar.status !== 'agotado';
+            btn.setAttribute('data-stock', String(stockNum));
+            if (matchVar.id) btn.setAttribute('data-variant-id', String(matchVar.id));
+            if (matchVar.ref || matchVar.referencia) btn.setAttribute('data-variant-ref', String(matchVar.ref || matchVar.referencia));
+            if (isAvail) {
+              btn.disabled = false;
+              btn.className = 'card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-pointer border flex items-center gap-1 border-[#E5E7EB] hover:border-black bg-[#F9F9FB] hover:bg-black hover:text-white text-text-main shadow-xs';
+              btn.setAttribute('title', `Talla ${btnSize} (${stockNum} disp) — Clic para agregar directo`);
+            } else {
+              btn.disabled = true;
+              btn.className = 'card-quick-size-btn px-2 py-1 rounded text-[9px] font-black transition-all cursor-not-allowed border flex items-center gap-1 border-[#F3F4F6] text-neutral-300 line-through opacity-40';
+              btn.setAttribute('title', 'Agotada');
+            }
+          }
+        });
+
         const stockBadge = card.querySelector('.card-stock-badge');
         if (stockBadge) {
           if (totalStock > 0) {
@@ -320,6 +345,9 @@ const isSingleSizePiece = uniqueVariantsList.length === 1;
           }
         }
       });
+
+      // Notificar a componentes o catálogos que el stock en vivo ha sido sincronizado
+      window.dispatchEvent(new CustomEvent('erp:stock-synced', { detail: { products } }));
     } catch (_) {}
   }
 
