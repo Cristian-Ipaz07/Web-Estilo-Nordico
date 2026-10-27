@@ -42,6 +42,53 @@ for (const t of tshirts) {
   referenceMap.get(refCode)!.count++;
 }
 
+// Subcategorías y estilos de camisetas en el catálogo (directo desde el ERP)
+const subcategoryMap = new Map<string, { code: string; label: string; count: number; icon: string }>();
+
+for (const t of tshirts) {
+  const refCode = (t.reference || t.id.replace(/^erp-/, '').split('-')[0] || '').toUpperCase();
+  const name = (t.name || '').toUpperCase();
+  
+  let code = 'CAMISETA';
+  let label = 'Camiseta Clásica';
+  let icon = '👕';
+
+  if (refCode.includes('1535') || refCode.includes('1536') || name.includes('POLO')) {
+    code = 'POLO';
+    label = 'Polos 1.1 (Cuello Nerú / Clásicas)';
+    icon = '👔';
+  } else if (refCode.includes('8942') || name.includes('OVERSIZE')) {
+    code = 'OVERSIZE';
+    label = 'Camisetas Oversize 260g';
+    icon = '👕';
+  } else if (refCode.includes('6539') || name.includes('FRIA')) {
+    code = 'TELA_FRIA';
+    label = 'Camisetas Tela Fría (Estampadas)';
+    icon = '👕';
+  } else if (refCode.includes('7652') || refCode.includes('7651')) {
+    code = 'MULTIMARCA';
+    label = 'Camisetas Tela Multimarca';
+    icon = '👕';
+  } else if (refCode.includes('7647') || refCode.includes('7650')) {
+    code = 'IMPORTADA';
+    label = 'Camisetas Importadas (Clemont, Karl)';
+    icon = '👕';
+  }
+
+  if (!subcategoryMap.has(code)) {
+    subcategoryMap.set(code, { code, label, count: 0, icon });
+  }
+  subcategoryMap.get(code)!.count++;
+}
+
+const uniqueSubcategories = Array.from(subcategoryMap.values()).sort((a, b) => {
+  const order = ['MULTIMARCA', 'TELA_FRIA', 'OVERSIZE', 'POLO', 'IMPORTADA'];
+  const idxA = order.indexOf(a.code);
+  const idxB = order.indexOf(b.code);
+  if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+  return a.label.localeCompare(b.label);
+});
+
 const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   if (a.code === '7652') return -1;
   if (b.code === '7652') return 1;
@@ -199,7 +246,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
           >
             <div class="flex items-center gap-2">
               <span class="text-sm">⚡</span>
-              <span>Más Filtros (Colección / Referencia, Color, Estado)</span>
+              <span>Más Filtros (Tipo de Prenda, Colección, Color, Estado)</span>
               <span id="badge-advanced-indicator" class="hidden text-[9px] bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full font-bold">Activo</span>
             </div>
             <div class="flex items-center gap-1.5 text-text-muted">
@@ -212,9 +259,53 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
 
           <!-- Panel Desplegable de Filtros Avanzados -->
           <div id="advanced-filters-panel" class="hidden mt-3 pt-3 border-t border-[#E5E7EB]">
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 items-end">
               
               <!-- Reference / Colección Dropdown -->
+                            <!-- Subcategory / Tipo de Prenda Filter Dropdown (IGUAL COMO LAS REFERENCIAS) -->
+              {uniqueSubcategories.length > 0 && (
+                <div class="relative" id="subcat-dropdown-wrapper">
+                  <label class="block text-[9px] font-black text-text-main mb-1.5 uppercase tracking-widest flex items-center justify-between">
+                    <span>Tipo de Prenda / Subcategoría</span>
+                    <span id="subcat-count-badge" class="hidden text-[8px] bg-[#0B0B0C] text-white px-1.5 py-0.5 rounded-full font-bold"></span>
+                  </label>
+                  
+                  <button 
+                    type="button" 
+                    id="subcat-dropdown-btn"
+                    class="w-full px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C] flex items-center justify-between transition-all cursor-pointer text-left shadow-xs"
+                  >
+                    <span id="subcat-dropdown-label" class="truncate pr-2">Todas las prendas</span>
+                    <svg class="w-3.5 h-3.5 text-neutral-500 shrink-0 transition-transform duration-200" id="subcat-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <!-- Menú de Subcategorías -->
+                  <div 
+                    id="subcat-dropdown-menu" 
+                    class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto p-2 space-y-1"
+                  >
+                    <div class="flex items-center justify-between px-2 py-1.5 border-b border-[#F3F4F6] mb-1">
+                      <span class="text-[9px] font-black uppercase tracking-wider text-text-muted">Mostrar / Ocultar</span>
+                      <button type="button" id="subcat-select-all" class="text-[9px] font-bold text-blue-600 hover:underline cursor-pointer">Ver todas</button>
+                    </div>
+                    {uniqueSubcategories.map(subItem => (
+                      <label class="subcat-checkbox-label flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#F9F9FB] cursor-pointer text-xs font-semibold text-text-main select-none transition-colors">
+                        <input 
+                          type="checkbox" 
+                          class="subcat-checkbox rounded border-neutral-300 text-black focus:ring-0 w-3.5 h-3.5 accent-black cursor-pointer" 
+                          value={subItem.code} 
+                        />
+                        <span class="mr-0.5">{subItem.icon}</span>
+                        <span class="flex-1 truncate subcat-name">{subItem.label}</span>
+                        <span class="text-[9px] text-text-muted font-bold shrink-0">({subItem.count})</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {uniqueReferences.length > 0 && (
                 <div class="relative" id="ref-dropdown-wrapper">
                   <label class="block text-[9px] font-black text-text-main mb-1.5 uppercase tracking-widest flex items-center justify-between">
@@ -311,6 +402,20 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         {tshirts.map((product) => {
           const refCode = (product.reference || product.id.replace(/^erp-/, '').split('-')[0] || 'OTRO').toUpperCase();
           const pBrand = (product.brand || '').toUpperCase().trim();
+          const pName = (product.name || '').toUpperCase();
+
+          let subcatCode = 'CAMISETA';
+          if (refCode.includes('1535') || refCode.includes('1536') || pName.includes('POLO')) {
+            subcatCode = 'POLO';
+          } else if (refCode.includes('8942') || pName.includes('OVERSIZE')) {
+            subcatCode = 'OVERSIZE';
+          } else if (refCode.includes('6539') || pName.includes('FRIA')) {
+            subcatCode = 'TELA_FRIA';
+          } else if (refCode.includes('7652') || refCode.includes('7651')) {
+            subcatCode = 'MULTIMARCA';
+          } else if (refCode.includes('7647') || refCode.includes('7650')) {
+            subcatCode = 'IMPORTADA';
+          }
 
           return (
             <div 
@@ -319,7 +424,8 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
               data-ref={refCode}
               data-ref-name={product.referenceName || ''}
               data-brand={pBrand}
-              data-name={(product.name || '').toUpperCase()}
+              data-type={subcatCode}
+              data-name={pName}
               data-colors={product.variants?.map(v => v.color).join(',')}
               data-sizes={product.variants?.map(v => v.talla).join(',')}
               data-status={product.status}
@@ -388,6 +494,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   const items = document.querySelectorAll('.product-item');
 
   // Estado de Filtros Grupales
+  const selectedTypes = new Set<string>();
   const selectedBrands = new Set<string>();
   const selectedSizes = new Set<string>();
   const selectedRefs = new Set<string>();
@@ -397,6 +504,13 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
 
   // Soporte de Parámetros URL (ej: /camisetas?marca=diesel&talla=M&ref=7652)
   const urlParams = new URLSearchParams(window.location.search);
+
+  // Tipos / Subcategorías iniciales (?tipo=polo,oversize)
+  const rawParamTypes = (urlParams.get('tipo') || urlParams.get('subcategoria') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+  rawParamTypes.forEach(t => selectedTypes.add(t));
 
   // Marcas iniciales
   const rawParamBrands = (urlParams.get('marca') || urlParams.get('brand') || '')
@@ -486,6 +600,77 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     }
   }
 
+  // Sincronización del desplegable de Subcategorías / Tipo de Prenda
+  const subcatDropdownWrapper = document.getElementById('subcat-dropdown-wrapper');
+  const subcatDropdownBtn = document.getElementById('subcat-dropdown-btn');
+  const subcatDropdownMenu = document.getElementById('subcat-dropdown-menu');
+  const subcatDropdownArrow = document.getElementById('subcat-dropdown-arrow');
+  const subcatDropdownLabel = document.getElementById('subcat-dropdown-label');
+  const subcatCountBadge = document.getElementById('subcat-count-badge');
+  const subcatSelectAllBtn = document.getElementById('subcat-select-all');
+  const subcatCheckboxes = document.querySelectorAll<HTMLInputElement>('.subcat-checkbox');
+
+  function syncSubcatUI() {
+    subcatCheckboxes.forEach(cb => {
+      const val = cb.value.toUpperCase();
+      cb.checked = selectedTypes.has(val);
+    });
+
+    if (selectedTypes.size === 0) {
+      if (subcatDropdownLabel) subcatDropdownLabel.textContent = 'Todas las prendas';
+      if (subcatCountBadge) subcatCountBadge.classList.add('hidden');
+    } else if (selectedTypes.size === 1) {
+      const activeCode = Array.from(selectedTypes)[0];
+      const activeCb = Array.from(subcatCheckboxes).find(cb => cb.value.toUpperCase() === activeCode);
+      const labelText = activeCb?.closest('label')?.querySelector('.subcat-name')?.textContent || activeCode;
+      if (subcatDropdownLabel) subcatDropdownLabel.textContent = labelText;
+      if (subcatCountBadge) {
+        subcatCountBadge.classList.remove('hidden');
+        subcatCountBadge.textContent = '1';
+      }
+    } else {
+      if (subcatDropdownLabel) subcatDropdownLabel.textContent = `${selectedTypes.size} tipos seleccionados`;
+      if (subcatCountBadge) {
+        subcatCountBadge.classList.remove('hidden');
+        subcatCountBadge.textContent = String(selectedTypes.size);
+      }
+    }
+  }
+
+  subcatDropdownBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = subcatDropdownMenu?.classList.toggle('hidden');
+    subcatDropdownArrow?.classList.toggle('rotate-180', !isHidden);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (subcatDropdownWrapper && !subcatDropdownWrapper.contains(e.target as Node)) {
+      subcatDropdownMenu?.classList.add('hidden');
+      subcatDropdownArrow?.classList.remove('rotate-180');
+    }
+  });
+
+  subcatCheckboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const val = cb.value.toUpperCase();
+      if (cb.checked) {
+        selectedTypes.add(val);
+      } else {
+        selectedTypes.delete(val);
+      }
+      syncSubcatUI();
+      updateURL();
+      applyFilters();
+    });
+  });
+
+  subcatSelectAllBtn?.addEventListener('click', () => {
+    selectedTypes.clear();
+    syncSubcatUI();
+    updateURL();
+    applyFilters();
+  });
+
   // Desplegable de Referencias
   const refDropdownBtn = document.getElementById('ref-dropdown-btn');
   const refDropdownMenu = document.getElementById('ref-dropdown-menu');
@@ -557,6 +742,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
 
   function updateURL() {
     const params = new URLSearchParams();
+    if (selectedTypes.size > 0) params.set('tipo', Array.from(selectedTypes).join(','));
     if (selectedBrands.size > 0) params.set('marca', Array.from(selectedBrands).join(','));
     if (selectedSizes.size > 0) params.set('talla', Array.from(selectedSizes).join(','));
     if (selectedRefs.size > 0) params.set('ref', Array.from(selectedRefs).join(','));
@@ -595,6 +781,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     items.forEach((item) => {
       const el = item as HTMLElement;
       const itemBrand = (el.dataset.brand || '').toUpperCase();
+      const itemType = (el.dataset.type || '').toUpperCase();
       const colors = (el.dataset.colors || '').toUpperCase().split(',').filter(Boolean);
       const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
       const availableSizes = (el.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
@@ -602,6 +789,11 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       const itemRef = (el.dataset.ref || '').toUpperCase();
 
       let show = true;
+
+      // 0. Filtro por tipo de prenda / subcategoría
+      if (selectedTypes.size > 0 && !selectedTypes.has(itemType)) {
+        show = false;
+      }
 
       // 1. Filtro por marca
       if (selectedBrands.size > 0 && !selectedBrands.has(itemBrand)) {
@@ -713,9 +905,11 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   });
 
   filterReset?.addEventListener('click', () => {
+    selectedTypes.clear();
     selectedBrands.clear();
     selectedSizes.clear();
     selectedRefs.clear();
+    syncSubcatUI();
     if (filterColor) filterColor.value = 'all';
     if (filterStatus) filterStatus.value = 'disponible';
     syncBrandChipsUI();
@@ -728,9 +922,11 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   });
 
   emptyResetBtn?.addEventListener('click', () => {
+    selectedTypes.clear();
     selectedBrands.clear();
     selectedSizes.clear();
     selectedRefs.clear();
+    syncSubcatUI();
     if (filterColor) filterColor.value = 'all';
     if (filterStatus) filterStatus.value = 'disponible';
     syncBrandChipsUI();
@@ -757,10 +953,11 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     const hasColor = filterColor && filterColor.value !== 'all';
     const hasStatus = filterStatus && filterStatus.value !== 'disponible';
     const hasRef = selectedRefs.size > 0;
+    const hasType = selectedTypes.size > 0;
     if (badgeAdvIndicator) {
-      if (hasColor || hasStatus || hasRef) {
+      if (hasColor || hasStatus || hasRef || hasType) {
         badgeAdvIndicator.classList.remove('hidden');
-        const count = (hasColor ? 1 : 0) + (hasStatus ? 1 : 0) + selectedRefs.size;
+        const count = (hasColor ? 1 : 0) + (hasStatus ? 1 : 0) + selectedRefs.size + selectedTypes.size;
         badgeAdvIndicator.textContent = `${count} activo${count > 1 ? 's' : ''}`;
       } else {
         badgeAdvIndicator.classList.add('hidden');
@@ -775,6 +972,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     updateAdvancedBadge();
   }
 
+  syncSubcatUI();
   syncBrandChipsUI();
   syncSizeChipsUI();
   syncRefUI();
