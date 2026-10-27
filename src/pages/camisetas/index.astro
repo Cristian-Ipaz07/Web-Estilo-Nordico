@@ -1,0 +1,850 @@
+---
+/**
+ * /camisetas/index.astro — Catálogo Oficial de Camisetas, Polos y Streetwear
+ * Sincronizado en tiempo real con el ERP (Ref. 7652 Tela Multimarca, 6539 Tela Fría, 8942 Oversize, etc.)
+ * Filtros grupales multiselección por Marcas, Tallas, Colecciones y Colores.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProductCard from '../../components/ProductCard.astro';
+import { fetchTShirtsFromERP } from '../../lib/erpApi';
+import { getUniqueColors, getUniqueSizes } from '../../data/products';
+
+const tshirts = await fetchTShirtsFromERP();
+const colors = getUniqueColors(tshirts);
+const sizes = getUniqueSizes(tshirts);
+
+// Marcas únicas presentes en el catálogo
+const brands = Array.from(new Set(tshirts.map(t => (t.brand || '').trim().toUpperCase()))).filter(Boolean).sort();
+
+// Conteo de productos disponibles
+const availableCount = tshirts.filter(t => t.status === 'disponible' && (t.stock || 0) > 0).length;
+
+// Mapeo enriquecido de Colecciones / Referencias
+const referenceMap = new Map<string, { code: string; label: string; count: number }>();
+for (const t of tshirts) {
+  const refCode = (t.reference || t.id.replace(/^erp-/, '').split('-')[0] || 'OTRO').toUpperCase();
+  const refLabel = t.referenceName || (
+    refCode === '7652' ? 'Ref. 7652 · Tela Multimarca (Diesel, Superdry, Chevignon)' :
+    refCode === '6539' ? 'Ref. 6539 · Tela Fría Estampada (Clemont, Nike, Jordan)' :
+    refCode === '8942' ? 'Ref. 8942 · Camisetas Oversize 260g (Ibk)' :
+    refCode === '7647' ? 'Ref. 7647 · Camisetas Importadas' :
+    refCode === '1536' ? 'Ref. 1536 · Polos 1.1 Cuello Nerú' :
+    refCode === '7651' ? 'Ref. 7651 · Multimarca Cuello Redondo' :
+    refCode === '7650' ? 'Ref. 7650 · Clemont Estampada' :
+    refCode === '1535' ? 'Ref. 1535 · Polos 1.1 Clásicas' :
+    refCode === '4978' ? 'Ref. 4978 · Superdry' :
+    `Colección · Ref. ${refCode}`
+  );
+
+  if (!referenceMap.has(refCode)) {
+    referenceMap.set(refCode, { code: refCode, label: refLabel, count: 0 });
+  }
+  referenceMap.get(refCode)!.count++;
+}
+
+const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
+  if (a.code === '7652') return -1;
+  if (b.code === '7652') return 1;
+  if (a.code === '6539') return -1;
+  if (b.code === '6539') return 1;
+  return a.label.localeCompare(b.label);
+});
+---
+
+<BaseLayout 
+  title="Camisetas & Streetwear 2026 | Estilo Nórdico Pasto" 
+  description="Catálogo de camisetas multimarca, oversize 260g, tela fría y polos 1.1 con stock real en Pasto. Entrega inmediata hoy mismo y pago contraentrega."
+>
+  
+  <!-- Hero Banner Streetwear (Dark Mode Premium) -->
+  <section class="relative w-full h-[65vh] sm:h-[75vh] flex items-end overflow-hidden bg-black" id="camisetas-hero">
+    <!-- Image Background -->
+    <div class="absolute inset-0 z-0">
+      <img 
+        src="/assets/baner cha.png" 
+        alt="Camisetas y Streetwear Estilo Nórdico" 
+        class="w-full h-full object-cover brightness-[0.70]"
+        style="object-position: center 30%;"
+        loading="eager"
+      />
+      <!-- Bottom gradient overlay fade -->
+      <div class="absolute inset-0 bg-gradient-to-t from-white via-black/60 to-transparent z-10"></div>
+    </div>
+
+    <!-- Content -->
+    <div class="relative z-20 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pb-14 sm:pb-20">
+      <div class="max-w-2xl text-left">
+        
+        <!-- Tagline -->
+        <span class="inline-block border border-white/20 bg-white/10 backdrop-blur-md text-white text-[9px] font-black px-3.5 py-1.5 rounded-md uppercase tracking-widest mb-3">
+          STREETWEAR 2026 · TELA MULTIMARCA & OVERSIZE
+        </span>
+
+        <!-- Title -->
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-title font-black text-white leading-tight tracking-wider uppercase mb-3" id="hero-title">
+          Camisetas & Polos Urbanas
+        </h1>
+
+        <!-- Slogan -->
+        <p class="text-xs sm:text-sm text-zinc-200 mb-5 font-light leading-relaxed max-w-lg" id="hero-slogan">
+          Siluetas oversize, tacto frío y algodón pima de alto gramaje. Prendas con stock físico en Pasto listas para entrega inmediata en tu puerta.
+        </p>
+
+        <!-- Trust Signals -->
+        <ul class="space-y-1.5 mb-6 text-xs text-white/90 font-semibold tracking-wider uppercase">
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Telas de Alta Durabilidad y Suavidad Extrema
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Entrega Hoy Mismo en Pasto (Prueba y Paga al Recibir)
+          </li>
+          <li class="flex items-center gap-2">
+            <span class="w-1.5 h-1.5 rounded-full bg-gold"></span>
+            Garantía Directa en Punto Físico (Nueva Aranda)
+          </li>
+        </ul>
+
+        <!-- CTA Directo al Catálogo -->
+        <div>
+          <a 
+            href="#products-grid"
+            class="inline-flex items-center justify-center gap-2.5 bg-[#C9A962] hover:bg-[#D4B878] text-[#0B0B0C] border-2 border-[#C9A962] hover:border-[#D4B878] font-black text-[11px] sm:text-xs uppercase tracking-widest px-7 py-3.5 rounded-md transition-all duration-300 cursor-pointer shadow-md group"
+          >
+            <span>Ver Catálogo de Camisetas</span>
+            <svg class="w-4 h-4 text-black group-hover:translate-y-1 transition-transform animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Filtros + Productos -->
+  <section class="py-8 sm:py-12 bg-white">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      
+      <!-- Filter Bar -->
+      <div class="mb-8 p-5 sm:p-6 bg-[#F9F9FB] rounded-xl border border-[#E5E7EB] shadow-sm" id="filter-bar">
+        
+        <!-- Grupo 1: Selector Múltiple de Marcas (Chips) -->
+        {brands.length > 0 && (
+          <div class="mb-5 pb-5 border-b border-[#E5E7EB]">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
+                <span>🏷️</span> Marcas <span class="text-text-muted font-normal lowercase tracking-normal">(filtra por tus marcas favoritas)</span>
+              </span>
+              <span id="badge-brands-count" class="hidden text-[9px] font-black bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+            </div>
+            <div class="flex flex-wrap gap-2" id="brand-chips">
+              <button 
+                type="button" 
+                class="brand-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
+                data-brand="all"
+              >
+                Todas las marcas
+              </button>
+              {brands.map(brand => (
+                <button 
+                  type="button" 
+                  class="brand-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none"
+                  data-brand={brand}
+                >
+                  {brand}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Grupo 2: Selector Múltiple de Tallas (Chips) -->
+        {sizes.length > 0 && (
+          <div class="mb-5 pb-5 border-b border-[#E5E7EB]">
+            <div class="flex items-center justify-between mb-2.5">
+              <span class="text-[10px] font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
+                <span>📏</span> Talla <span class="text-text-muted font-normal lowercase tracking-normal">(multiselección: ej. M y L a la vez)</span>
+              </span>
+              <span id="badge-sizes-count" class="hidden text-[9px] font-black bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+            </div>
+            <div class="flex flex-wrap gap-2" id="size-chips">
+              <button 
+                type="button" 
+                class="size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
+                data-size="all"
+              >
+                Todas las tallas
+              </button>
+              {sizes.map(size => (
+                <button 
+                  type="button" 
+                  class="size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none min-w-[42px] justify-center"
+                  data-size={size}
+                >
+                  {size}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <!-- Toggle Desplegable para Filtros Avanzados (Colección, Color, Estado) -->
+        <div class="pt-2">
+          <button 
+            type="button" 
+            id="toggle-advanced-btn" 
+            class="w-full flex items-center justify-between px-3.5 py-2.5 rounded-lg border border-[#E5E7EB] bg-white hover:bg-[#F3F4F6] text-xs font-black uppercase tracking-wider text-text-main transition-all cursor-pointer select-none shadow-sm"
+          >
+            <div class="flex items-center gap-2">
+              <span class="text-sm">⚡</span>
+              <span>Más Filtros (Colección / Referencia, Color, Estado)</span>
+              <span id="badge-advanced-indicator" class="hidden text-[9px] bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full font-bold">Activo</span>
+            </div>
+            <div class="flex items-center gap-1.5 text-text-muted">
+              <span class="text-[10px] font-bold" id="toggle-advanced-text">Mostrar</span>
+              <svg id="arrow-advanced-icon" class="w-3.5 h-3.5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </div>
+          </button>
+
+          <!-- Panel Desplegable de Filtros Avanzados -->
+          <div id="advanced-filters-panel" class="hidden mt-3 pt-3 border-t border-[#E5E7EB]">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+              
+              <!-- Reference / Colección Dropdown -->
+              {uniqueReferences.length > 0 && (
+                <div class="relative" id="ref-dropdown-wrapper">
+                  <label class="block text-[9px] font-black text-text-main mb-1.5 uppercase tracking-widest flex items-center justify-between">
+                    <span>Colección / Referencia</span>
+                    <span id="ref-count-badge" class="hidden text-[8px] bg-[#0B0B0C] text-white px-1.5 py-0.5 rounded-full font-bold"></span>
+                  </label>
+                  
+                  <button 
+                    type="button" 
+                    id="ref-dropdown-btn"
+                    class="w-full px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C] flex items-center justify-between transition-all cursor-pointer text-left"
+                  >
+                    <span id="ref-dropdown-label" class="truncate pr-2">Todas las colecciones</span>
+                    <svg class="w-3.5 h-3.5 text-neutral-500 shrink-0 transition-transform duration-200" id="ref-dropdown-arrow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+
+                  <!-- Menú de Colecciones -->
+                  <div 
+                    id="ref-dropdown-menu" 
+                    class="hidden absolute top-full left-0 right-0 mt-1.5 bg-white border border-[#E5E7EB] rounded-xl shadow-2xl z-50 max-h-64 overflow-y-auto p-2 space-y-1"
+                  >
+                    <div class="flex items-center justify-between px-2 py-1.5 border-b border-[#F3F4F6] mb-1">
+                      <span class="text-[9px] font-black uppercase tracking-wider text-text-muted">Mostrar / Ocultar</span>
+                      <button type="button" id="ref-select-all" class="text-[9px] font-bold text-blue-600 hover:underline cursor-pointer">Ver todas</button>
+                    </div>
+                    {uniqueReferences.map(refItem => (
+                      <label class="ref-checkbox-label flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg hover:bg-[#F9F9FB] cursor-pointer text-xs font-semibold text-text-main select-none transition-colors">
+                        <input 
+                          type="checkbox" 
+                          class="ref-checkbox rounded border-neutral-300 text-black focus:ring-0 w-3.5 h-3.5 accent-black cursor-pointer" 
+                          value={refItem.code} 
+                        />
+                        <span class="flex-1 truncate">{refItem.label}</span>
+                        <span class="text-[9px] text-text-muted font-bold shrink-0">({refItem.count})</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <!-- Color filter -->
+              <div>
+                <label class="block text-[9px] font-black text-text-main mb-1.5 uppercase tracking-widest">Color</label>
+                <select id="filter-color" class="w-full px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+                  <option value="all">Todos los colores</option>
+                  {colors.map(color => (
+                    <option value={color}>{color}</option>
+                  ))}
+                </select>
+              </div>
+
+              <!-- Status filter (Predeterminado: Disponibles) -->
+              <div>
+                <label class="block text-[9px] font-black text-text-main mb-1.5 uppercase tracking-widest">Estado</label>
+                <select id="filter-status" class="w-full px-3 py-2 rounded-lg border border-[#E5E7EB] bg-white text-xs text-text-main uppercase tracking-wider font-semibold focus:outline-none focus:border-[#0B0B0C]">
+                  <option value="disponible" selected>Disponibles (En Stock)</option>
+                  <option value="all">Ver Todos (Incluye Agotados)</option>
+                  <option value="agotado">Solo Agotados</option>
+                </select>
+              </div>
+
+              <!-- Reset button -->
+              <div>
+                <button id="filter-reset" class="w-full py-2 px-3 rounded-lg text-[10px] font-black uppercase tracking-widest text-text-main border border-[#E5E7EB] bg-white hover:border-[#0B0B0C] hover:bg-[#F3F4F6] transition-all cursor-pointer">
+                  Limpiar Filtros
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-4 pt-3 border-t border-[#E5E7EB] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p class="text-[11px] text-text-muted uppercase tracking-wider font-semibold" id="filter-count">
+            {availableCount} camisetas disponibles
+          </p>
+          <a 
+            href="#products-grid" 
+            id="scroll-to-products" 
+            class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[10px] sm:text-[11px] font-black uppercase tracking-widest bg-[#0B0B0C] hover:bg-neutral-800 text-white transition-all shadow-sm group cursor-pointer"
+          >
+            <span>Ver camisetas abajo</span>
+            <svg class="w-3.5 h-3.5 text-[#C9A962] group-hover:translate-y-1 transition-transform animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </a>
+        </div>
+      </div>
+
+      <!-- Products Grid -->
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6" id="products-grid">
+        {tshirts.map((product) => {
+          const refCode = (product.reference || product.id.replace(/^erp-/, '').split('-')[0] || 'OTRO').toUpperCase();
+          const pBrand = (product.brand || '').toUpperCase().trim();
+
+          return (
+            <div 
+              class="product-item"
+              data-id={product.id}
+              data-ref={refCode}
+              data-ref-name={product.referenceName || ''}
+              data-brand={pBrand}
+              data-name={(product.name || '').toUpperCase()}
+              data-colors={product.variants?.map(v => v.color).join(',')}
+              data-sizes={product.variants?.map(v => v.talla).join(',')}
+              data-status={product.status}
+              data-available-sizes={product.variants?.filter(v => v.status === 'disponible' && (v.stock || 0) > 0).map(v => v.talla).join(',')}
+            >
+              <ProductCard
+                id={product.id}
+                slug={product.slug}
+                name={product.name}
+                brand={product.brand}
+                price={product.price}
+                anchorPrice={product.anchorPrice}
+                image={product.image}
+                images={product.images}
+                description={product.description}
+                category="camisetas"
+                gender={product.gender}
+                stock={product.stock}
+                status={product.status}
+                colorHex={product.colorHex}
+                variants={product.variants}
+              />
+            </div>
+          );
+        })}
+      </div>
+
+      <!-- Empty state -->
+      <div id="empty-state" class="hidden text-center py-16">
+        <span class="text-3xl mb-4 block">🔍</span>
+        <p class="text-sm font-black text-text-main uppercase tracking-widest">No hay camisetas con estos filtros</p>
+        <p class="text-xs text-text-muted mt-1 uppercase tracking-wider">Prueba seleccionando otras tallas o marcas</p>
+        <button id="empty-reset-btn" class="mt-4 inline-block px-5 py-2.5 rounded-lg text-xs font-black uppercase tracking-widest bg-[#0B0B0C] text-white hover:bg-black transition-all cursor-pointer">
+          Ver todas las camisetas disponibles
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Cross-sell Banner -->
+  <section class="py-16 bg-[#121214] border-t border-[#262626] text-white">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+      <h2 class="text-2xl font-title font-black uppercase tracking-widest mb-3">¿Prefieres armar un combo completo?</h2>
+      <p class="text-xs sm:text-sm text-[#A3A3A3] mb-6 max-w-lg mx-auto font-light leading-relaxed">
+        Lleva tu <strong>Camiseta + Chaqueta Impermeable</strong> o súmale un <strong>Perfume Original</strong> con descuento especial y entrega hoy en Pasto.
+      </p>
+      <div class="flex flex-wrap justify-center gap-3">
+        <a href="/chaquetas" class="inline-flex items-center gap-2 bg-[#C9A962] text-[#0B0B0C] font-black text-[10px] sm:text-xs uppercase tracking-widest px-6 py-3 rounded-md hover:bg-[#D4B878] transition-all duration-300">
+          Ver Chaquetas →
+        </a>
+        <a href="/perfumes" class="inline-flex items-center gap-2 border border-white hover:bg-white hover:text-[#0B0B0C] font-black text-[10px] sm:text-xs uppercase tracking-widest px-6 py-3 rounded-md transition-all duration-300">
+          Ver Perfumes →
+        </a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const filterColor = document.getElementById('filter-color') as HTMLSelectElement | null;
+  const filterStatus = document.getElementById('filter-status') as HTMLSelectElement | null;
+  const filterReset = document.getElementById('filter-reset');
+  const emptyResetBtn = document.getElementById('empty-reset-btn');
+  const filterCount = document.getElementById('filter-count');
+  const emptyState = document.getElementById('empty-state');
+  const items = document.querySelectorAll('.product-item');
+
+  // Estado de Filtros Grupales
+  const selectedBrands = new Set<string>();
+  const selectedSizes = new Set<string>();
+  const selectedRefs = new Set<string>();
+
+  const ACTIVE_CHIP_CLASS = 'brand-chip size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none';
+  const INACTIVE_CHIP_CLASS = 'brand-chip size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none';
+
+  // Soporte de Parámetros URL (ej: /camisetas?marca=diesel&talla=M&ref=7652)
+  const urlParams = new URLSearchParams(window.location.search);
+
+  // Marcas iniciales
+  const rawParamBrands = (urlParams.get('marca') || urlParams.get('brand') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+  rawParamBrands.forEach(b => selectedBrands.add(b));
+
+  // Tallas iniciales
+  const rawParamSizes = (urlParams.get('talla') || urlParams.get('size') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+  rawParamSizes.forEach(s => selectedSizes.add(s));
+
+  // Referencias iniciales (?ref=7652)
+  const rawParamRefs = (urlParams.get('ref') || urlParams.get('referencia') || '')
+    .split(',')
+    .map(s => s.trim().toUpperCase())
+    .filter(Boolean);
+  rawParamRefs.forEach(r => selectedRefs.add(r));
+
+  // Colores iniciales
+  const paramColors = (urlParams.get('color') || urlParams.get('colores') || '')
+    .split(',')
+    .map(c => c.trim().toUpperCase())
+    .filter(Boolean);
+
+  if (paramColors.length === 1 && filterColor) {
+    for (let i = 0; i < filterColor.options.length; i++) {
+      if (filterColor.options[i].value.toUpperCase() === paramColors[0]) {
+        filterColor.selectedIndex = i;
+        break;
+      }
+    }
+  }
+
+  // Estado inicial
+  const paramEstado = (urlParams.get('estado') || urlParams.get('status') || 'disponible').toLowerCase();
+  if (filterStatus) {
+    filterStatus.value = (paramEstado === 'all' || paramEstado === 'agotado') ? paramEstado : 'disponible';
+  }
+
+  function syncBrandChipsUI() {
+    const brandChips = document.querySelectorAll('.brand-chip');
+    const badge = document.getElementById('badge-brands-count');
+    
+    brandChips.forEach(chip => {
+      const b = (chip.getAttribute('data-brand') || '').toUpperCase();
+      if (b === 'ALL') {
+        chip.className = selectedBrands.size === 0 ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+      } else {
+        chip.className = selectedBrands.has(b) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+      }
+    });
+
+    if (badge) {
+      if (selectedBrands.size > 0) {
+        badge.classList.remove('hidden');
+        badge.textContent = `${selectedBrands.size} activa${selectedBrands.size > 1 ? 's' : ''}`;
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+  }
+
+  function syncSizeChipsUI() {
+    const sizeChips = document.querySelectorAll('.size-chip');
+    const badge = document.getElementById('badge-sizes-count');
+
+    sizeChips.forEach(chip => {
+      const s = (chip.getAttribute('data-size') || '').toUpperCase();
+      if (s === 'ALL') {
+        chip.className = selectedSizes.size === 0 ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+      } else {
+        chip.className = selectedSizes.has(s) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+      }
+    });
+
+    if (badge) {
+      if (selectedSizes.size > 0) {
+        badge.classList.remove('hidden');
+        badge.textContent = `${selectedSizes.size} seleccionada${selectedSizes.size > 1 ? 's' : ''}`;
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+  }
+
+  // Desplegable de Referencias
+  const refDropdownBtn = document.getElementById('ref-dropdown-btn');
+  const refDropdownMenu = document.getElementById('ref-dropdown-menu');
+  const refDropdownArrow = document.getElementById('ref-dropdown-arrow');
+  const refDropdownLabel = document.getElementById('ref-dropdown-label');
+  const refCountBadge = document.getElementById('ref-count-badge');
+  const refSelectAllBtn = document.getElementById('ref-select-all');
+  const refCheckboxes = document.querySelectorAll<HTMLInputElement>('.ref-checkbox');
+
+  function syncRefUI() {
+    refCheckboxes.forEach(cb => {
+      const val = cb.value.toUpperCase();
+      cb.checked = selectedRefs.has(val);
+    });
+
+    if (selectedRefs.size === 0) {
+      if (refDropdownLabel) refDropdownLabel.textContent = 'Todas las colecciones';
+      if (refCountBadge) refCountBadge.classList.add('hidden');
+    } else if (selectedRefs.size === 1) {
+      const singleRef = Array.from(selectedRefs)[0];
+      const matchLabel = Array.from(refCheckboxes).find(cb => cb.value.toUpperCase() === singleRef)?.closest('.ref-checkbox-label')?.querySelector('span')?.textContent;
+      if (refDropdownLabel) refDropdownLabel.textContent = matchLabel || `Ref. ${singleRef}`;
+      if (refCountBadge) {
+        refCountBadge.classList.remove('hidden');
+        refCountBadge.textContent = '1';
+      }
+    } else {
+      if (refDropdownLabel) refDropdownLabel.textContent = `${selectedRefs.size} colecciones seleccionadas`;
+      if (refCountBadge) {
+        refCountBadge.classList.remove('hidden');
+        refCountBadge.textContent = String(selectedRefs.size);
+      }
+    }
+  }
+
+  refDropdownBtn?.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isHidden = refDropdownMenu?.classList.toggle('hidden');
+    refDropdownArrow?.classList.toggle('rotate-180', !isHidden);
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!refDropdownMenu?.contains(e.target as Node) && e.target !== refDropdownBtn) {
+      refDropdownMenu?.classList.add('hidden');
+      refDropdownArrow?.classList.remove('rotate-180');
+    }
+  });
+
+  refCheckboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      const val = cb.value.toUpperCase();
+      if (cb.checked) {
+        selectedRefs.add(val);
+      } else {
+        selectedRefs.delete(val);
+      }
+      syncRefUI();
+      updateURL();
+      applyFilters();
+    });
+  });
+
+  refSelectAllBtn?.addEventListener('click', () => {
+    selectedRefs.clear();
+    syncRefUI();
+    updateURL();
+    applyFilters();
+  });
+
+  function updateURL() {
+    const params = new URLSearchParams();
+    if (selectedBrands.size > 0) params.set('marca', Array.from(selectedBrands).join(','));
+    if (selectedSizes.size > 0) params.set('talla', Array.from(selectedSizes).join(','));
+    if (selectedRefs.size > 0) params.set('ref', Array.from(selectedRefs).join(','));
+    if (filterColor && filterColor.value !== 'all') params.set('color', filterColor.value);
+    if (filterStatus && filterStatus.value !== 'disponible') params.set('estado', filterStatus.value);
+
+    const newUrl = params.toString() ? `${window.location.pathname}?${params.toString()}` : window.location.pathname;
+    window.history.replaceState({}, '', newUrl);
+  }
+
+  function applyFilters() {
+    const color = filterColor ? filterColor.value : 'all';
+    const status = filterStatus ? filterStatus.value : 'disponible';
+    let visible = 0;
+
+    // REORGANIZACIÓN / ORDENAMIENTO POR TALLA:
+    // Al filtrar por una talla (ej. M), se organizan primero en el DOM las camisetas que tienen disponible esa talla en stock
+    if (selectedSizes.size > 0) {
+      const grid = document.getElementById('products-grid');
+      if (grid) {
+        const sortedItems = Array.from(items).sort((a, b) => {
+          const elA = a as HTMLElement;
+          const elB = b as HTMLElement;
+          const availA = (elA.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
+          const availB = (elB.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
+          const hasA = Array.from(selectedSizes).some(s => availA.includes(s));
+          const hasB = Array.from(selectedSizes).some(s => availB.includes(s));
+          if (hasA && !hasB) return -1;
+          if (!hasA && hasB) return 1;
+          return 0;
+        });
+        sortedItems.forEach(item => grid.appendChild(item));
+      }
+    }
+
+    items.forEach((item) => {
+      const el = item as HTMLElement;
+      const itemBrand = (el.dataset.brand || '').toUpperCase();
+      const colors = (el.dataset.colors || '').toUpperCase().split(',').filter(Boolean);
+      const sizes = (el.dataset.sizes || '').toUpperCase().split(',').filter(Boolean);
+      const availableSizes = (el.dataset.availableSizes || '').toUpperCase().split(',').filter(Boolean);
+      const itemStatus = el.dataset.status || '';
+      const itemRef = (el.dataset.ref || '').toUpperCase();
+
+      let show = true;
+
+      // 1. Filtro por marca
+      if (selectedBrands.size > 0 && !selectedBrands.has(itemBrand)) {
+        show = false;
+      }
+
+      // 2. Filtro por color
+      if (color !== 'all') {
+        if (!colors.includes(color.toUpperCase())) show = false;
+      } else if (paramColors.length > 0) {
+        const matchesAnyColor = paramColors.some(pc => colors.includes(pc));
+        if (!matchesAnyColor) show = false;
+      }
+      
+      // 3. Filtro por talla
+      if (selectedSizes.size > 0) {
+        const checkSizes = (status === 'disponible') ? availableSizes : sizes;
+        const matchesAnySelectedSize = Array.from(selectedSizes).some(sz => checkSizes.includes(sz));
+        if (!matchesAnySelectedSize) show = false;
+      }
+
+      // 4. Filtro por estado
+      if (status === 'disponible') {
+        if (itemStatus !== 'disponible') show = false;
+      } else if (status === 'agotado') {
+        if (itemStatus !== 'agotado') show = false;
+      }
+
+      // 5. Filtro por referencia / colección
+      if (selectedRefs.size > 0 && !selectedRefs.has(itemRef)) {
+        show = false;
+      }
+
+      el.style.display = show ? '' : 'none';
+      if (show) visible++;
+    });
+
+    if (filterCount) {
+      const statusLabel = status === 'disponible' ? 'disponibles' : status === 'agotado' ? 'agotadas' : 'en total';
+      let countText = `${visible} camiseta${visible !== 1 ? 's' : ''} ${statusLabel}`;
+
+      const filterLabels = [];
+      if (selectedBrands.size > 0) filterLabels.push(`Marcas: ${Array.from(selectedBrands).join(', ')}`);
+      if (selectedSizes.size > 0) filterLabels.push(`Tallas: ${Array.from(selectedSizes).join(', ')}`);
+      if (selectedRefs.size > 0) filterLabels.push(`Refs: ${selectedRefs.size}`);
+      if (color !== 'all') filterLabels.push(`Color: ${color}`);
+      if (filterLabels.length > 0) {
+        countText += ` · ${filterLabels.join(' | ')}`;
+      }
+      filterCount.textContent = countText;
+    }
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', visible > 0);
+    }
+  }
+
+  // Brand Chips click listeners
+  const brandChips = document.querySelectorAll('.brand-chip');
+  brandChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const b = chip.getAttribute('data-brand');
+      if (!b) return;
+      const bUpper = b.toUpperCase();
+
+      if (b === 'all') {
+        selectedBrands.clear();
+      } else {
+        if (selectedBrands.has(bUpper)) {
+          selectedBrands.delete(bUpper);
+        } else {
+          selectedBrands.add(bUpper);
+        }
+      }
+      syncBrandChipsUI();
+      updateURL();
+      applyFilters();
+    });
+  });
+
+  // Size Chips click listeners
+  const sizeChips = document.querySelectorAll('.size-chip');
+  sizeChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+      const s = chip.getAttribute('data-size');
+      if (!s) return;
+      if (s === 'all') {
+        selectedSizes.clear();
+      } else {
+        if (selectedSizes.has(s)) {
+          selectedSizes.delete(s);
+        } else {
+          selectedSizes.add(s);
+        }
+      }
+      syncSizeChipsUI();
+      updateURL();
+      applyFilters();
+    });
+  });
+
+  filterColor?.addEventListener('change', () => {
+    updateURL();
+    applyFilters();
+  });
+
+  filterStatus?.addEventListener('change', () => {
+    updateURL();
+    applyFilters();
+  });
+
+  filterReset?.addEventListener('click', () => {
+    selectedBrands.clear();
+    selectedSizes.clear();
+    selectedRefs.clear();
+    if (filterColor) filterColor.value = 'all';
+    if (filterStatus) filterStatus.value = 'disponible';
+    syncBrandChipsUI();
+    syncSizeChipsUI();
+    syncRefUI();
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+    applyFilters();
+  });
+
+  emptyResetBtn?.addEventListener('click', () => {
+    selectedBrands.clear();
+    selectedSizes.clear();
+    selectedRefs.clear();
+    if (filterColor) filterColor.value = 'all';
+    if (filterStatus) filterStatus.value = 'disponible';
+    syncBrandChipsUI();
+    syncSizeChipsUI();
+    syncRefUI();
+    updateURL();
+    applyFilters();
+  });
+
+  // Toggle Advanced Filters
+  const toggleAdvBtn = document.getElementById('toggle-advanced-btn');
+  const advPanel = document.getElementById('advanced-filters-panel');
+  const toggleAdvText = document.getElementById('toggle-advanced-text');
+  const arrowAdvIcon = document.getElementById('arrow-advanced-icon');
+  const badgeAdvIndicator = document.getElementById('badge-advanced-indicator');
+
+  toggleAdvBtn?.addEventListener('click', () => {
+    const isHidden = advPanel?.classList.toggle('hidden');
+    if (toggleAdvText) toggleAdvText.textContent = isHidden ? 'Mostrar' : 'Ocultar';
+    arrowAdvIcon?.classList.toggle('rotate-180', !isHidden);
+  });
+
+  function updateAdvancedBadge() {
+    const hasColor = filterColor && filterColor.value !== 'all';
+    const hasStatus = filterStatus && filterStatus.value !== 'disponible';
+    const hasRef = selectedRefs.size > 0;
+    if (badgeAdvIndicator) {
+      if (hasColor || hasStatus || hasRef) {
+        badgeAdvIndicator.classList.remove('hidden');
+        const count = (hasColor ? 1 : 0) + (hasStatus ? 1 : 0) + selectedRefs.size;
+        badgeAdvIndicator.textContent = `${count} activo${count > 1 ? 's' : ''}`;
+      } else {
+        badgeAdvIndicator.classList.add('hidden');
+      }
+    }
+  }
+
+  if (selectedRefs.size > 0 || (filterColor && filterColor.value !== 'all') || (filterStatus && filterStatus.value !== 'disponible')) {
+    advPanel?.classList.remove('hidden');
+    if (toggleAdvText) toggleAdvText.textContent = 'Ocultar';
+    arrowAdvIcon?.classList.add('rotate-180');
+    updateAdvancedBadge();
+  }
+
+  syncBrandChipsUI();
+  syncSizeChipsUI();
+  syncRefUI();
+  updateAdvancedBadge();
+  applyFilters();
+
+  // Sincronización en vivo del stock desde el ERP (Render)
+  async function syncLiveStockFromERP(liveProducts?: any[]) {
+    try {
+      let products = liveProducts;
+      if (!products) {
+        const res = await fetch('https://estilo-nordico-app.onrender.com/api/public/products?limit=200');
+        if (!res.ok) return;
+        products = await res.json();
+      }
+      if (!Array.isArray(products) || products.length === 0) return;
+
+      const productItems = document.querySelectorAll('.product-item');
+      productItems.forEach(item => {
+        const el = item as HTMLElement;
+        const refCode = (el.dataset.ref || '').toUpperCase();
+        const brand = (el.dataset.brand || '').toUpperCase();
+
+        const matching = products.filter((p: any) => {
+          const pRef = (p.ref || '').toUpperCase();
+          const pBrand = (p.brand || '').toUpperCase();
+          return pRef.startsWith(refCode) && (!brand || pBrand.includes(brand) || brand.includes(pBrand));
+        });
+
+        if (matching.length > 0) {
+          const availSizes = matching
+            .filter((v: any) => (v.stock || 0) > 0 && v.status !== 'agotado')
+            .map((v: any) => (v.size || v.talla || '').trim().toUpperCase())
+            .filter(Boolean);
+
+          if (availSizes.length > 0) {
+            el.dataset.availableSizes = availSizes.join(',');
+          }
+          const totalStock = matching.reduce((sum: number, p: any) => sum + (p.stock || 0), 0);
+          el.dataset.status = totalStock > 0 ? 'disponible' : 'agotado';
+        }
+      });
+
+      syncSizeChipsUI();
+      applyFilters();
+    } catch (e) {
+      console.warn('[Live Sync Camisetas] Error:', e);
+    }
+  }
+
+  window.addEventListener('erp:stock-synced', (e: any) => {
+    if (e.detail?.products) {
+      syncLiveStockFromERP(e.detail.products);
+    }
+  });
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => syncLiveStockFromERP());
+  } else {
+    syncLiveStockFromERP();
+  }
+
+  window.addEventListener('focus', () => syncLiveStockFromERP());
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible') syncLiveStockFromERP();
+  });
+
+  setInterval(() => {
+    if (document.visibilityState === 'visible') {
+      syncLiveStockFromERP();
+    }
+  }, 45000);
+</script>

@@ -21,8 +21,7 @@ export interface Product {
   reference?: string;
   referenceName?: string;
   
-  // Clasificación
-  category: 'chaquetas' | 'perfumes' | 'relojes';
+  category: 'chaquetas' | 'perfumes' | 'relojes' | 'camisetas' | 'ropa' | string;
   subcategory?: string;
   gender?: 'hombre' | 'mujer' | 'unisex';
   tags: string[];

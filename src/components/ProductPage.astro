@@ -449,7 +449,7 @@ const faqs = [
                 const vTalla = fv.variants?.[0]?.talla || '';
                 return (
                   <a
-                    href={`/chaquetas/${fv.slug}`}
+                    href={`/${fv.category || product.category || 'camisetas'}/${fv.slug}`}
                     class:list={[
                       'p-2 rounded-md border text-left transition-all duration-200 flex items-center gap-2.5 relative group',
                       isActive

@@ -18,7 +18,12 @@ function formatSubcategory(code: string, rawName: string, dept: 'hombre' | 'muje
   let label = (rawName || norm).trim();
   const lower = label.toLowerCase();
   if (lower === 'chaqueta') label = 'Chaquetas';
-  else if (lower === 'camiseta') label = 'Camisetas';
+  else if (lower === 'camiseta') {
+    return {
+      label: 'Camisetas',
+      href: '/camisetas'
+    };
+  }
   else if (lower === 'buso') label = 'Busos';
   else if (lower === 'conjunto') label = 'Conjuntos';
   else if (lower === 'bermuda') label = 'Bermudas';
@@ -76,6 +81,21 @@ if (hombreItems.length > 0) {
     ]
   });
 }
+
+// Camisetas & Streetwear (Catálogo dedicado multimarca y polos)
+navMenu.push({
+  label: 'Camisetas',
+  href: '/camisetas',
+  badge: 'Nuevo',
+  items: [
+    { label: 'Ver Todas las Camisetas', href: '/camisetas' },
+    { label: 'Ref. 7652 · Tela Multimarca', href: '/camisetas?ref=7652' },
+    { label: 'Ref. 6539 · Tela Fría Estampada', href: '/camisetas?ref=6539' },
+    { label: 'Ref. 8942 · Camisetas Oversize 260g', href: '/camisetas?ref=8942' },
+    { label: 'Ref. 7647 · Camisetas Importadas', href: '/camisetas?ref=7647' },
+    { label: 'Ref. 1536 · Polos 1.1 Cuello Nerú', href: '/camisetas?ref=1536' },
+  ]
+});
 
 // 2. Departamento Mujer (Sincronizado: solo muestra lo publicado desde la app)
 if (mujerItems.length > 0) {

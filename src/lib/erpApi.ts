@@ -573,6 +573,195 @@ export async function fetchJacketsFromERP(subcategoryFilter?: string): Promise<P
 }
 
 /**
+ * Consulta y procesa todas las camisetas y prendas de streetwear publicadas en el ERP.
+ * Agrupa las referencias por modelo/diseño manteniendo disponibles las fotos WebP de Supabase
+ * y las variantes de talla con su stock real.
+ */
+export async function fetchTShirtsFromERP(): Promise<Product[]> {
+  try {
+    const rawProducts = await getProducts({ limit: 200 });
+    const tshirtItems = rawProducts.filter(p => {
+      const sub = (p.subcategory || '').toUpperCase().trim();
+      const ref = (p.ref || '').toUpperCase().trim();
+      const ptype = (p.product_type || '').toUpperCase().trim();
+      const name = (p.name || '').toUpperCase().trim();
+      if (ref.startsWith('5080') || ref.startsWith('5081')) return false;
+      if (sub === 'CHAQUETA' || ptype === 'CHAQUETA' || sub === 'BILLETERA') return false;
+      return sub === 'CAMISETA' || name.includes('CAMISETA') || name.includes('POLO') || 
+        ref.startsWith('7652') || ref.startsWith('6539') || ref.startsWith('7651') || 
+        ref.startsWith('7647') || ref.startsWith('8942') || ref.startsWith('1536') || 
+        ref.startsWith('1535') || ref.startsWith('4978') || ref.startsWith('9362');
+    });
+
+    if (tshirtItems.length > 0) {
+      return groupERPTShirts(tshirtItems);
+    }
+    return getFallbackTShirts();
+  } catch (error) {
+    console.error('❌ Error conectando al ERP para camisetas, usando fallback local:', error);
+    return getFallbackTShirts();
+  }
+}
+
+/**
+ * Agrupa las camisetas del ERP por referencia base + marca + color/diseño.
+ * Mapea las variantes de talla reales (S, M, L, XL, XXL) para tarjetas de alta conversión.
+ */
+export function groupERPTShirts(items: ERPProductPublic[]): Product[] {
+  const groups = new Map<string, { refBase: string; brand: string; color: string; items: ERPProductPublic[] }>();
+  const parentMap = new Map<string, ERPProductPublic>();
+
+  for (const p of items) {
+    const ref = (p.ref || '').trim();
+    const refBase = ref.split('-')[0].trim().toUpperCase();
+    if (ref.toUpperCase() === refBase) {
+      parentMap.set(refBase, p);
+      continue;
+    }
+
+    let brand = (p.brand || '').trim();
+    let color = (p.color || '').trim();
+    const parts = ref.split('-');
+    if ((!brand || brand.toUpperCase() === 'ESTILO NÓRDICO' || brand.toUpperCase() === 'ESTILO NORDICO') && parts.length >= 2) {
+      brand = parts[1];
+    }
+    if (!color && parts.length >= 3) {
+      color = parts[2];
+    }
+
+    brand = brand || 'Estilo Nórdico';
+    color = color || 'Unicolor';
+
+    const key = `${refBase}_${brand.toUpperCase()}_${color.toUpperCase()}`;
+    const g = groups.get(key) || { refBase, brand, color, items: [] };
+    g.items.push(p);
+    groups.set(key, g);
+  }
+
+  const products: Product[] = [];
+  const slugsSeen = new Set<string>();
+
+  for (const [, g] of groups) {
+    const { refBase, brand, color, items: groupItems } = g;
+    const parent = parentMap.get(refBase);
+
+    // Recolectar todas las imágenes WebP disponibles
+    const allImages: string[] = [];
+    groupItems.forEach(item => {
+      if (Array.isArray(item.images)) {
+        item.images.forEach(img => {
+          if (img && typeof img === 'string' && !allImages.includes(img.trim())) {
+            allImages.push(img.trim());
+          }
+        });
+      }
+    });
+
+    if (allImages.length === 0 && parent && Array.isArray(parent.images)) {
+      parent.images.forEach(img => {
+        if (img && typeof img === 'string' && !allImages.includes(img.trim())) {
+          allImages.push(img.trim());
+        }
+      });
+    }
+
+    const primaryImg = allImages[0] || '/assets/logo-nordico.png';
+
+    const price = groupItems[0].price_sale || parent?.price_sale || 55000;
+    const anchorPrice = groupItems[0].compare_price || parent?.compare_price || Math.round(price * 1.4);
+
+    const parentName = parent?.name?.trim() || '';
+    const isPolo = refBase.includes('1535') || refBase.includes('1536') || (parentName && parentName.toUpperCase().includes('POLO')) || (groupItems[0].name || '').toUpperCase().includes('POLO');
+    const isOversize = refBase.includes('8942') || (parentName && parentName.toUpperCase().includes('OVERSIZE')) || brand.toUpperCase().includes('OVERSIZE');
+
+    const prefix = isPolo ? 'Camiseta Polo' : (isOversize ? 'Camiseta Oversize' : 'Camiseta');
+    const cleanBrand = capitalizeWords(brand);
+    const cleanColor = capitalizeWords(color);
+    const name = `${prefix} · ${cleanBrand} ${cleanColor}`;
+
+    let slug = `camiseta-${refBase.toLowerCase()}-${slugify(brand)}-${slugify(color)}`;
+    if (slugsSeen.has(slug)) {
+      slug = `${slug}-${groupItems[0].id}`;
+    }
+    slugsSeen.add(slug);
+
+    const totalStock = groupItems.reduce((sum, i) => sum + (i.stock || 0), 0);
+    const hasAvailable = groupItems.some(i => (i.stock || 0) > 0);
+
+    const productVariants: ProductVariant[] = groupItems.map(i => {
+      const sz = (i.size || '').trim().toUpperCase() || 'ÚNICA';
+      const stk = i.stock || 0;
+      return {
+        id: String(i.id),
+        talla: sz,
+        color: cleanColor,
+        stock: stk,
+        status: stk > 0 ? 'disponible' : 'agotado',
+        referencia: i.ref,
+        image: (Array.isArray(i.images) && i.images[0]) || primaryImg,
+        brand: cleanBrand,
+      };
+    });
+
+    const sizeOrder = ['S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
+    productVariants.sort((a, b) => {
+      const idxA = sizeOrder.indexOf(a.talla);
+      const idxB = sizeOrder.indexOf(b.talla);
+      if (idxA !== -1 && idxB !== -1) return idxA - idxB;
+      return a.talla.localeCompare(b.talla);
+    });
+
+    const collectionTitle = parentName ? capitalizeWords(parentName) : `Ref. ${refBase}`;
+    const refDisplayName = `Camiseta · ${collectionTitle} (${refBase})`;
+
+    products.push({
+      id: `erp-camiseta-${refBase.toLowerCase()}-${slugify(brand)}-${slugify(color)}`,
+      slug,
+      name,
+      brand: cleanBrand,
+      reference: refBase,
+      referenceName: refDisplayName,
+      category: 'camisetas',
+      subcategory: 'CAMISETA',
+      gender: 'hombre',
+      tags: ['camiseta', 'streetwear', 'moda urbana', cleanBrand.toLowerCase(), cleanColor.toLowerCase(), refBase.toLowerCase()],
+      price,
+      anchorPrice,
+      image: primaryImg,
+      images: allImages.length > 0 ? allImages : [primaryImg],
+      description: `Camiseta urbana streetwear de confección premium. Modelo exclusivo ${cleanBrand} color ${cleanColor}. Tela fresca, suave al tacto y de alta resistencia con calce moderno ideal para el clima de Pasto y uso diario. Garantía directa en punto físico Pasto y envíos nacionales.`,
+      features: [
+        `Diseño y confección: ${cleanBrand}`,
+        `Color y modelo: ${cleanColor}`,
+        `Colección: ${collectionTitle} (${refBase})`,
+        'Tela de alta durabilidad, suavidad y tacto frío',
+        'Garantía directa en punto físico Pasto (Manzana G3 Casa 14, Nueva Aranda)',
+        'Entrega inmediata en Pasto con opción de pago contraentrega'
+      ],
+      variants: productVariants,
+      stock: totalStock,
+      status: hasAvailable ? 'disponible' : 'agotado',
+      featured: refBase === '7652' || refBase === '6539' || refBase === '7647',
+      source: 'erp',
+      colorHex: COLOR_HEX_MAP[normalizeColorKey(color)] || '#333333',
+    });
+  }
+
+  // Ordenar: primero colecciones destacadas (7652, 6539), luego disponibles, luego alfabético
+  products.sort((a, b) => {
+    const isNewA = a.reference === '7652' || a.reference === '6539';
+    const isNewB = b.reference === '7652' || b.reference === '6539';
+    if (isNewA && !isNewB) return -1;
+    if (!isNewA && isNewB) return 1;
+
+    if (a.status !== b.status) return a.status === 'disponible' ? -1 : 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  return products;
+}
+
+/**
  * Agrupa las variantes de chaquetas de HOMBRE (Ref 5080) por color.
  * Mantiene compatibilidad total con los slugs existentes.
  */
@@ -945,4 +1134,65 @@ function getFallbackJackets(): Product[] {
       colorHex: c.hex,
     };
   });
+}
+
+function getFallbackTShirts(): Product[] {
+  const fallbackItems: ERPProductPublic[] = [
+    {
+      id: 446,
+      ref: '7652',
+      name: 'TELA MULTIMARCA',
+      brand: 'Estilo Nórdico',
+      category: 'Hombre',
+      subcategory: 'CAMISETA',
+      price_sale: 55000,
+      compare_price: 77000,
+      stock: 7,
+      is_published: true,
+      images: [
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_amco_blanco_2dbcfb.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_chevignon_blanco_22e3c2.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_azul_38be1a.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_blanco_23a90f.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_cafe_8b5fbe.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_superdry_blanco_106e8d.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_superdry_cafe_8d4ba0.webp',
+      ],
+    },
+    { id: 452, ref: '7652-AMERICANINO-BLANCO-HUESO-M', name: 'TELA MULTIMARCA AMERICANINO BLANCO HUESO M', brand: 'AMERICANINO', color: 'BLANCO HUESO', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_amco_blanco_2dbcfb.webp'] },
+    { id: 451, ref: '7652-CHEVIGNON-BLANCO-HUESO-M', name: 'TELA MULTIMARCA CHEVIGNON BLANCO HUESO M', brand: 'CHEVIGNON', color: 'BLANCO HUESO', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_chevignon_blanco_22e3c2.webp'] },
+    { id: 453, ref: '7652-DIESEL-AZUL-CELESTE-M', name: 'TELA MULTIMARCA DIESEL AZUL CELESTE M', brand: 'DIESEL', color: 'AZUL CELESTE', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_azul_38be1a.webp'] },
+    { id: 447, ref: '7652-DIESEL-BLANCO-HUESO-XL', name: 'TELA MULTIMARCA DIESEL BLANCO HUESO XL', brand: 'DIESEL', color: 'BLANCO HUESO', size: 'XL', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_blanco_23a90f.webp'] },
+    { id: 449, ref: '7652-DIESEL-CAFE-L', name: 'TELA MULTIMARCA DIESEL CAFE L', brand: 'DIESEL', color: 'CAFE', size: 'L', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_cafe_8b5fbe.webp'] },
+    { id: 454, ref: '7652-DIESEL-CAFE-M', name: 'TELA MULTIMARCA DIESEL CAFE M', brand: 'DIESEL', color: 'CAFE', size: 'M', stock: 0, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_diesel_cafe_8b5fbe.webp'] },
+    { id: 448, ref: '7652-SUPERDRY-BLANCO-HUESO-L', name: 'TELA MULTIMARCA SUPERDRY BLANCO HUESO L', brand: 'SUPERDRY', color: 'BLANCO HUESO', size: 'L', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_superdry_blanco_106e8d.webp'] },
+    { id: 450, ref: '7652-SUPERDRY-CAFE-L', name: 'TELA MULTIMARCA SUPERDRY CAFE L', brand: 'SUPERDRY', color: 'CAFE', size: 'L', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/7652_superdry_cafe_8d4ba0.webp'] },
+    {
+      id: 439,
+      ref: '6539',
+      name: 'TELA FRIA ESTAMPADA',
+      brand: 'Estilo Nórdico',
+      category: 'Hombre',
+      subcategory: 'CAMISETA',
+      price_sale: 55000,
+      compare_price: 77000,
+      stock: 6,
+      is_published: true,
+      images: [
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_clemont_angeles_ad_2d556d.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_clemont_negro_ad_ae1866.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_nike_ad_2bbc96.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_jordan_ad_fa47f9.webp',
+        'https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_undergold_ad_6e0b43.webp',
+      ],
+    },
+    { id: 441, ref: '6539-CLEMONT-ANGELES-NEGRO-M', name: 'TELA FRIA ESTAMPADA CLEMONT ANGELES NEGRO M', brand: 'CLEMONT', color: 'NEGRO', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_clemont_angeles_ad_2d556d.webp'] },
+    { id: 442, ref: '6539-CLEMONT-CM-NEGRO-L', name: 'TELA FRIA ESTAMPADA CLEMONT CM NEGRO L', brand: 'CLEMONT', color: 'NEGRO', size: 'L', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_clemont_negro_ad_ae1866.webp'] },
+    { id: 443, ref: '6539-CLEMONT-CM-NEGRO-XL', name: 'TELA FRIA ESTAMPADA CLEMONT CM NEGRO XL', brand: 'CLEMONT', color: 'NEGRO', size: 'XL', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_clemont_negro_ad_ae1866.webp'] },
+    { id: 444, ref: '6539-NIKE-AIR-CREMA-M', name: 'TELA FRIA ESTAMPADA NIKE AIR CREMA M', brand: 'NIKE', color: 'CREMA', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_nike_ad_2bbc96.webp'] },
+    { id: 445, ref: '6539-NIKE-JORDAN-CREMA-L', name: 'TELA FRIA ESTAMPADA NIKE JORDAN CREMA L', brand: 'NIKE', color: 'CREMA', size: 'L', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_jordan_ad_fa47f9.webp'] },
+    { id: 440, ref: '6539-UNDERGOLD-VENDA-NEGRO-M', name: 'TELA FRIA ESTAMPADA UNDERGOLD VENDA NEGRO M', brand: 'UNDERGOLD', color: 'NEGRO', size: 'M', stock: 1, price_sale: 55000, is_published: true, images: ['https://rnlvzrelpvqjamcfvoga.supabase.co/storage/v1/object/public/products/6539_undergold_ad_6e0b43.webp'] },
+  ];
+
+  return groupERPTShirts(fallbackItems);
 }
