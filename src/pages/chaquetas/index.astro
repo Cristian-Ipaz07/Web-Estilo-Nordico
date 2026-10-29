@@ -403,7 +403,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
                           value={refItem.code} 
                         />
                         <span class="flex-1 truncate">{refItem.label}</span>
-                        <span class="text-[9px] text-text-muted font-bold shrink-0">({refItem.count})</span>
+                        <span class="ref-count text-[9px] text-text-muted font-bold shrink-0">({refItem.count})</span>
                       </label>
                     ))}
                   </div>
@@ -697,14 +697,33 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     return set;
   }
 
-  function getAvailableRefsForGender(gender: string): Set<string> {
+  function getRefCountsForContext(gender: string, types: Set<string>): Map<string, number> {
+    const counts = new Map<string, number>();
+    items.forEach(item => {
+      const el = item as HTMLElement;
+      const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
+      const itemType = (el.dataset.type || '').toUpperCase();
+      const itemRef = (el.dataset.ref || '').toUpperCase();
+      const matchesGender = (gender === 'all' || itemGender === gender);
+      const matchesType = (types.size === 0 || types.has(itemType));
+      if (matchesGender && matchesType && itemRef) {
+        counts.set(itemRef, (counts.get(itemRef) || 0) + 1);
+      }
+    });
+    return counts;
+  }
+
+  function getAvailableColorsForContext(gender: string, types: Set<string>): Set<string> {
     const set = new Set<string>();
     items.forEach(item => {
       const el = item as HTMLElement;
       const itemGender = (el.dataset.gender || 'hombre').toLowerCase();
-      const itemRef = (el.dataset.ref || '').toUpperCase();
-      if (gender === 'all' || itemGender === gender) {
-        if (itemRef) set.add(itemRef);
+      const itemType = (el.dataset.type || '').toUpperCase();
+      const colors = (el.dataset.colors || '').toUpperCase().split(',').map(c => c.trim()).filter(Boolean);
+      const matchesGender = (gender === 'all' || itemGender === gender);
+      const matchesType = (types.size === 0 || types.has(itemType));
+      if (matchesGender && matchesType) {
+        colors.forEach(c => set.add(c));
       }
     });
     return set;
@@ -1073,6 +1092,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       syncSubcatUI();
       syncSizeChipsUI();
       syncRefUI();
+      syncColorUI();
       updateURL();
       applyFilters();
     });
@@ -1109,6 +1129,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       syncSubcatUI();
       syncSizeChipsUI();
       syncRefUI();
+      syncColorUI();
       updateURL();
       updateHeroAndMeta();
       applyFilters();
@@ -1125,6 +1146,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     syncSubcatUI();
     syncSizeChipsUI();
     syncRefUI();
+    syncColorUI();
     updateURL();
     updateHeroAndMeta();
     applyFilters();
@@ -1137,6 +1159,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     syncSubcatUI();
     syncSizeChipsUI();
     syncRefUI();
+    syncColorUI();
     updateURL();
     updateHeroAndMeta();
     applyFilters();
@@ -1173,6 +1196,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     syncSubcatUI();
     syncSizeChipsUI();
     syncRefUI();
+    syncColorUI();
     updateURL();
     applyFilters();
   });
@@ -1180,11 +1204,13 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   // Listeners para select de Color y Estado
   filterColor?.addEventListener('change', () => {
     updateURL();
+    updateAdvancedBadge();
     applyFilters();
   });
 
   filterStatus?.addEventListener('change', () => {
     updateURL();
+    updateAdvancedBadge();
     applyFilters();
   });
 
@@ -1265,6 +1291,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       syncSubcatUI();
       syncSizeChipsUI();
       syncRefUI();
+      syncColorUI();
       updateURL();
       updateHeroAndMeta();
       applyFilters();
@@ -1277,6 +1304,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     syncSubcatUI();
     syncSizeChipsUI();
     syncRefUI();
+    syncColorUI();
     updateURL();
     updateHeroAndMeta();
     applyFilters();
@@ -1293,13 +1321,17 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   const refCheckboxes = document.querySelectorAll<HTMLInputElement>('.ref-checkbox');
 
   function syncRefUI() {
-    const availableRefs = getAvailableRefsForGender(activeGender);
+    const refCounts = getRefCountsForContext(activeGender, selectedTypes);
 
     refCheckboxes.forEach(cb => {
       const val = cb.value.toUpperCase();
       const label = cb.closest('.ref-checkbox-label') as HTMLElement | null;
-      if (availableRefs.has(val)) {
+      const countEl = label?.querySelector('.ref-count') as HTMLElement | null;
+      const count = refCounts.get(val) || 0;
+
+      if (count > 0) {
         if (label) label.style.display = '';
+        if (countEl) countEl.textContent = `(${count})`;
         cb.checked = selectedRefs.has(val);
       } else {
         if (label) label.style.display = 'none';
@@ -1327,6 +1359,34 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         refCountBadge.textContent = String(selectedRefs.size);
       }
     }
+    updateAdvancedBadge();
+  }
+
+  function syncColorUI() {
+    if (!filterColor) return;
+    const availableColors = getAvailableColorsForContext(activeGender, selectedTypes);
+    const currentValue = filterColor.value.toUpperCase();
+    let currentStillAvailable = false;
+
+    for (let i = 1; i < filterColor.options.length; i++) {
+      const opt = filterColor.options[i];
+      const optVal = opt.value.toUpperCase();
+      if (availableColors.has(optVal)) {
+        opt.hidden = false;
+        opt.disabled = false;
+        opt.style.display = '';
+        if (optVal === currentValue) currentStillAvailable = true;
+      } else {
+        opt.hidden = true;
+        opt.disabled = true;
+        opt.style.display = 'none';
+      }
+    }
+
+    if (currentValue !== 'ALL' && !currentStillAvailable) {
+      filterColor.value = 'all';
+    }
+    updateAdvancedBadge();
   }
 
   // Toggle desplegable
@@ -1383,6 +1443,8 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     syncTypeChipsUI();
     syncSubcatUI();
     syncSizeChipsUI();
+    syncRefUI();
+    syncColorUI();
     
     if (window.location.search) {
       window.history.replaceState({}, '', window.location.pathname);
@@ -1394,12 +1456,15 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   emptyResetBtn?.addEventListener('click', () => {
     selectedTypes.clear();
     selectedSizes.clear();
+    selectedRefs.clear();
     if (filterColor) filterColor.value = 'all';
     if (filterStatus) filterStatus.value = 'disponible';
     
     syncTypeChipsUI();
     syncSubcatUI();
     syncSizeChipsUI();
+    syncRefUI();
+    syncColorUI();
     updateURL();
     applyFilters();
   });
@@ -1409,6 +1474,8 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   syncTypeChipsUI();
   syncSubcatUI();
   syncSizeChipsUI();
+  syncRefUI();
+  syncColorUI();
   // Listener de Toggle Filtros Avanzados
   const toggleAdvBtn = document.getElementById('toggle-advanced-btn');
   const advPanel = document.getElementById('advanced-filters-panel');
