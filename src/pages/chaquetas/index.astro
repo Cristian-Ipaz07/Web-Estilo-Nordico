@@ -76,19 +76,19 @@ for (const j of jackets) {
 
   if (sub.includes('CHAQUETA') || j.id.includes('5080') || j.id.includes('5081')) {
     code = 'CHAQUETA';
-    label = 'Chaquetas Impermeables';
+    label = 'Chaquetas';
     icon = '🧥';
   } else if (sub.includes('CAMISETA') || name.includes('CAMISETA') || name.includes('POLO')) {
     code = 'CAMISETA';
-    label = 'Camisetas & Polos';
+    label = 'Camisetas';
     icon = '👕';
   } else if (sub.includes('BUSO') || name.includes('BUSO') || name.includes('CAPUCHA')) {
     code = 'BUSO';
-    label = 'Busos & Hoodies';
+    label = 'Busos';
     icon = '🥋';
   } else if (sub.includes('CONJUNTO') || name.includes('CONJUNTO')) {
     code = 'CONJUNTO';
-    label = 'Conjuntos Deportivos';
+    label = 'Conjuntos';
     icon = '🏃‍♂️';
   } else if (sub.includes('BERMUDA')) {
     code = 'BERMUDA';
@@ -237,42 +237,34 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       <!-- Filter Bar (Light Theme con Filtros Grupales) -->
       <div class="mb-8 p-5 sm:p-6 bg-[#F9F9FB] rounded-xl border border-[#E5E7EB] shadow-sm" id="filter-bar">
         
-        <!-- Grupo 1: Selector Múltiple de Prendas (Chips) -->
-        {apparelTypes.length > 1 && (
+        <!-- Grupo 1: Selector Múltiple de Prendas (Botones Grandes) -->
+        {uniqueSubcategories.length > 0 && (
           <div class="mb-5 pb-5 border-b border-[#E5E7EB]">
-            <div class="flex items-center justify-between mb-2.5">
-              <span class="text-[10px] font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
-                <span>👕</span> Prenda <span class="text-text-muted font-normal lowercase tracking-normal">(multiselección: ej. Camisetas y Busos)</span>
+            <div class="flex items-center justify-between mb-3">
+              <span class="text-xs font-black text-text-main uppercase tracking-widest flex items-center gap-1.5">
+                <span>👕</span> Tipo de Prenda <span class="text-text-muted font-normal lowercase tracking-normal">(selecciona una o varias: ej. Camisetas y Busos)</span>
               </span>
-              <span id="badge-types-count" class="hidden text-[9px] font-black bg-[#0B0B0C] text-white px-2 py-0.5 rounded-full uppercase tracking-wider"></span>
+              <span id="badge-types-count" class="hidden text-[10px] font-black bg-[#0B0B0C] text-white px-2.5 py-0.5 rounded-full uppercase tracking-wider"></span>
             </div>
-            <div class="flex flex-wrap gap-2" id="type-chips">
+            <div class="flex flex-wrap items-center gap-2 sm:gap-2.5" id="type-chips">
               <button 
                 type="button" 
-                class="type-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
+                class="type-chip active-chip px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none"
                 data-type="all"
               >
-                Todas las prendas
+                <span>🔥</span> Todas las prendas
               </button>
-              {apparelTypes.map(t => {
-                const label = t === 'CHAQUETA' ? '🧥 Chaquetas'
-                  : t === 'CONJUNTO' ? '🏃‍♂️ Conjuntos'
-                  : t === 'BUSO' ? '🥋 Busos'
-                  : t === 'CAMISETA' ? '👕 Camisetas'
-                  : t === 'BERMUDA' ? '🩳 Bermudas'
-                  : t === 'JEANS' ? '👖 Jeans'
-                  : t === 'PANTALON' ? '👖 Pantalones'
-                                    : t;
-                return (
-                  <button 
-                    type="button" 
-                    class="type-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none"
-                    data-type={t}
-                  >
-                    {label}
-                  </button>
-                );
-              })}
+              {uniqueSubcategories.map(subItem => (
+                <button 
+                  type="button" 
+                  class="type-chip px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5 select-none shadow-xs"
+                  data-type={subItem.code}
+                >
+                  <span>{subItem.icon}</span>
+                  <span>{subItem.label}</span>
+                  <span class="text-[10px] text-text-muted font-normal">({subItem.count})</span>
+                </button>
+              ))}
             </div>
           </div>
         )}
@@ -601,8 +593,11 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
   const selectedSizes = new Set<string>();
   const selectedRefs = new Set<string>();
 
-  const ACTIVE_CHIP_CLASS = 'type-chip size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none';
-  const INACTIVE_CHIP_CLASS = 'type-chip size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none';
+  const ACTIVE_TYPE_CLASS = 'type-chip active-chip px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none';
+  const INACTIVE_TYPE_CLASS = 'type-chip px-5 py-2.5 rounded-full text-[11px] sm:text-xs font-bold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F9F9FB] flex items-center gap-1.5 select-none shadow-xs';
+
+  const ACTIVE_SIZE_CLASS = 'size-chip active-chip px-3.5 py-1.5 rounded-lg text-xs font-black uppercase tracking-wider transition-all cursor-pointer border border-[#0B0B0C] bg-[#0B0B0C] text-white shadow-sm flex items-center gap-1.5 select-none';
+  const INACTIVE_SIZE_CLASS = 'size-chip px-3.5 py-1.5 rounded-lg text-xs font-semibold uppercase tracking-wider transition-all cursor-pointer border border-[#E5E7EB] bg-white text-text-main hover:border-[#0B0B0C] hover:bg-[#F3F4F6] flex items-center gap-1.5 select-none min-w-[42px] justify-center';
 
   // Soporte de Parámetros URL (ej: /chaquetas?genero=hombre&tipo=camiseta,buso&talla=M,L&estado=disponible)
   const urlParams = new URLSearchParams(window.location.search);
@@ -776,16 +771,16 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     });
 
     if (selectedTypes.size === 0) {
-      if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
+      if (allChip) allChip.className = ACTIVE_TYPE_CLASS;
       if (badge) badge.classList.add('hidden');
       typeChips.forEach(c => {
         const chip = c as HTMLElement;
         if (chip.getAttribute('data-type') !== 'all') {
-          chip.className = INACTIVE_CHIP_CLASS;
+          chip.className = INACTIVE_TYPE_CLASS;
         }
       });
     } else {
-      if (allChip) allChip.className = INACTIVE_CHIP_CLASS;
+      if (allChip) allChip.className = INACTIVE_TYPE_CLASS;
       if (badge) {
         badge.classList.remove('hidden');
         badge.textContent = `${selectedTypes.size} seleccionada${selectedTypes.size > 1 ? 's' : ''}`;
@@ -794,7 +789,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         const chip = c as HTMLElement;
         const t = (chip.getAttribute('data-type') || '').toUpperCase();
         if (t && t !== 'ALL') {
-          chip.className = selectedTypes.has(t) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+          chip.className = selectedTypes.has(t) ? ACTIVE_TYPE_CLASS : INACTIVE_TYPE_CLASS;
         }
       });
     }
@@ -824,16 +819,16 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     });
 
     if (selectedSizes.size === 0) {
-      if (allChip) allChip.className = ACTIVE_CHIP_CLASS;
+      if (allChip) allChip.className = ACTIVE_SIZE_CLASS;
       if (badge) badge.classList.add('hidden');
       sizeChips.forEach(c => {
         const chip = c as HTMLElement;
         if (chip.getAttribute('data-size') !== 'all') {
-          chip.className = INACTIVE_CHIP_CLASS;
+          chip.className = INACTIVE_SIZE_CLASS;
         }
       });
     } else {
-      if (allChip) allChip.className = INACTIVE_CHIP_CLASS;
+      if (allChip) allChip.className = INACTIVE_SIZE_CLASS;
       if (badge) {
         badge.classList.remove('hidden');
         badge.textContent = `${selectedSizes.size} seleccionada${selectedSizes.size > 1 ? 's' : ''}`;
@@ -842,7 +837,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         const chip = c as HTMLElement;
         const s = (chip.getAttribute('data-size') || '').toUpperCase();
         if (s && s !== 'ALL') {
-          chip.className = selectedSizes.has(s) ? ACTIVE_CHIP_CLASS : INACTIVE_CHIP_CLASS;
+          chip.className = selectedSizes.has(s) ? ACTIVE_SIZE_CLASS : INACTIVE_SIZE_CLASS;
         }
       });
     }
@@ -1075,6 +1070,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
       }
       syncDepartmentUI();
       syncTypeChipsUI();
+      syncSubcatUI();
       syncSizeChipsUI();
       syncRefUI();
       updateURL();
@@ -1110,6 +1106,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
         }
       }
       syncTypeChipsUI();
+      syncSubcatUI();
       syncSizeChipsUI();
       syncRefUI();
       updateURL();
@@ -1384,6 +1381,7 @@ const uniqueReferences = Array.from(referenceMap.values()).sort((a, b) => {
     
     syncDepartmentUI();
     syncTypeChipsUI();
+    syncSubcatUI();
     syncSizeChipsUI();
     
     if (window.location.search) {
